@@ -46,7 +46,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static net.zylesh.dystellarcore.commands.UnpunishCommand.createInventory;
 import static net.zylesh.dystellarcore.commands.UnpunishCommand.invs;
 
 public final class DystellarCore extends JavaPlugin implements PluginMessageListener, Listener {
