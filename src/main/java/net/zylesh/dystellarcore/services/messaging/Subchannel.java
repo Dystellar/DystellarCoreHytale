@@ -9,7 +9,7 @@ import net.zylesh.dystellarcore.commands.InboxCommand;
 public enum Subchannel {
 
 	/**
-	* WARNING! Plugin messaging system relies on enum ordinals for identiying types, DO NOT CHANGE the order of these or protocols will break.
+	* WARNING! The plugin messaging protocol relies on enum ordinals for identiying types, DO NOT CHANGE the order of these or protocols will break.
 	* If you need to register additional types, append them at the end.
 	*/
 
@@ -21,10 +21,10 @@ public enum Subchannel {
     DEMAND_IS_PLAYER_ONLINE_WITHIN_NETWORK((p, in) -> Handler.handleDemIsPlayerWithinNetwork(p, in)),
     DEMAND_FIND_PLAYER((p, in) -> Handler.handleDemFindPlayerRes(p, in)),
     DEMAND_FIND_PLAYER_NOT_ONLINE((p, in) -> Handler.handleDemPlayerNotOnline(p, in)),
-    INBOX_SEND(),
-    REMOVE_PUNISHMENT_BY_ID(),
-    PUNISHMENT_ADD_PROXY(),
-    PUNISHMENT_ADD_SERVER();
+    INBOX_SEND((p, in) -> Handler.handleInboxSend(p, in)),
+    REMOVE_PUNISHMENT_BY_ID((p, in) -> Handler.handleRemovePunishmentById(p, in)),
+    PUNISHMENT_ADD_PROXY(null),
+    PUNISHMENT_ADD_SERVER((p, in) -> Handler.handlePunishmentAddServer(p, in));
 
 	public final Optional<PluginMessageCallback> callback;
 

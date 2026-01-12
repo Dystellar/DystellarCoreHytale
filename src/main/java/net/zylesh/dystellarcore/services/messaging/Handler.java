@@ -1,5 +1,6 @@
 package net.zylesh.dystellarcore.services.messaging;
 
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +15,9 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 
 import net.zylesh.dystellarcore.core.User;
+import net.zylesh.dystellarcore.core.inbox.Sendable;
 import net.zylesh.dystellarcore.core.punishments.Punishment;
+import net.zylesh.dystellarcore.serialization.InboxSerialization;
 import net.zylesh.dystellarcore.serialization.Punishments;
 import net.zylesh.dystellarcore.utils.Utils;
 import net.zylesh.dystellarcore.utils.factory.InventoryBuilder;
@@ -149,11 +152,59 @@ public class Handler {
 
 	public static void handleFriendReqReject() {}
 
-	public static void handleInboxSend() {}
+	public static void handleInboxSend(Player p, ByteArrayDataInput in) {
+		String unsafe = in.readUTF();
+		Player player = Bukkit.getPlayer(unsafe);
+		if (player == null || !player.isOnline()) {
+			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
+			return;
+		}
+		User user = User.get(player);
+		Sendable sender = InboxSerialization.stringToSender(in.readUTF(), user.getInbox());
+		user.getInbox().addSender(sender);
+	}
 
 	public static void handleShouldSendPackRes() {}
 
-	public static void handlePunishmentAddClientbound() {}
+	public static void handlePunishmentAddServer(Player p, ByteArrayDataInput in) {
+		String unsafe = in.readUTF();
+		Player player = Bukkit.getPlayer(unsafe);
+		if (player == null || !player.isOnline()) {
+			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
+			return;
+		}
+		String serialized = in.readUTF();
+		Punishment punishment = Punishments.deserialize(serialized);
+		User user = User.get(player);
+		user.punish(punishment);
+	}
 
-	public static void handleRemovePunishmentById() {}
+	public static void handleRemovePunishmentById(Player p, ByteArrayDataInput in) {
+		String unsafe = in.readUTF();
+		int pId = in.readInt();
+		Player player = Bukkit.getPlayer(unsafe);
+		if (player == null || !player.isOnline()) return;
+		User user = User.get(player);
+		Punishment punishmentToRemove = null;
+		for (Punishment pun : user.getPunishments()) {
+			if (pun.hashCode() == pId) {
+				punishmentToRemove = pun;
+				break;
+			}
+		}
+
+		if (punishmentToRemove == null || !user.getPunishments().remove(punishmentToRemove)) return;
+
+		player.sendMessage(ChatColor.GREEN + "The punishment with ID " + pId + " was removed from your punishments list!");
+		String[] details = new String[] {
+			ChatColor.DARK_GREEN + "Punishment details:",
+			"===============================",
+			ChatColor.DARK_AQUA + "Type" + ChatColor.WHITE + ": " + ChatColor.GRAY + p.getClass().getSimpleName(),
+			ChatColor.DARK_AQUA + "Creation Date" + ChatColor.WHITE + ": " + ChatColor.GRAY + punishmentToRemove.getCreationDate().format(DateTimeFormatter.ISO_DATE_TIME),
+			ChatColor.DARK_AQUA + "Expiration Date" + ChatColor.WHITE + ": " + ChatColor.GRAY + (punishmentToRemove.getExpirationDate() == null ? "Never" : punishmentToRemove.getExpirationDate().format(DateTimeFormatter.ISO_DATE_TIME)),
+			ChatColor.DARK_AQUA + "Reason" + ChatColor.WHITE + ": " + ChatColor.GRAY + punishmentToRemove.getReason(),
+			"==============================="
+		};
+		player.sendMessage(details);
+	}
 }

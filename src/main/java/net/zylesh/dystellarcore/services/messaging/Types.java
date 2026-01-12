@@ -150,18 +150,6 @@ public class Types {
                 FriendCommand.requestRejected(player, unsafe);
                 break;
             }
-            case INBOX_SEND: {
-                String unsafe = in.readUTF();
-                Player player = Bukkit.getPlayer(unsafe);
-                if (player == null || !player.isOnline()) {
-                    getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
-                    return;
-                }
-                User user = User.get(player);
-                Sendable sender = InboxSerialization.stringToSender(in.readUTF(), user.getInbox());
-                user.getInbox().addSender(sender);
-                break;
-            }
             case SHOULD_SEND_PACK_RESPONSE: {
                 String unsafe = in.readUTF();
                 Player player = Bukkit.getPlayer(unsafe);
@@ -179,45 +167,7 @@ public class Types {
                 break;
             }
             case PUNISHMENT_ADD_CLIENTBOUND: {
-                String unsafe = in.readUTF();
-                Player player = Bukkit.getPlayer(unsafe);
-                if (player == null || !player.isOnline()) {
-                    getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
-                    return;
-                }
-                String serialized = in.readUTF();
-                Punishment punishment = Punishments.deserialize(serialized);
-                User user = User.get(player);
-                user.punish(punishment);
-                break;
-            }
-            case REMOVE_PUNISHMENT_BY_ID: {
-                String unsafe = in.readUTF();
-                int pId = in.readInt();
-                Player player = Bukkit.getPlayer(unsafe);
-                if (player == null || !player.isOnline()) return;
-                User user = User.get(player);
-                Punishment punishmentToRemove = null;
-                for (Punishment pun : user.getPunishments()) {
-                    if (pun.hashCode() == pId) {
-                        punishmentToRemove = pun;
-                        break;
-                    }
-                }
-
-                if (punishmentToRemove == null || !user.getPunishments().remove(punishmentToRemove)) return;
-                player.sendMessage(ChatColor.GREEN + "The punishment with ID " + pId + " was removed from your punishments list!");
-                String[] details = new String[] {
-                        ChatColor.DARK_GREEN + "Punishment details:",
-                        "===============================",
-                        ChatColor.DARK_AQUA + "Type" + ChatColor.WHITE + ": " + ChatColor.GRAY + p.getClass().getSimpleName(),
-                        ChatColor.DARK_AQUA + "Creation Date" + ChatColor.WHITE + ": " + ChatColor.GRAY + punishmentToRemove.getCreationDate().format(DateTimeFormatter.ISO_DATE_TIME),
-                        ChatColor.DARK_AQUA + "Expiration Date" + ChatColor.WHITE + ": " + ChatColor.GRAY + (punishmentToRemove.getExpirationDate() == null ? "Never" : punishmentToRemove.getExpirationDate().format(DateTimeFormatter.ISO_DATE_TIME)),
-                        ChatColor.DARK_AQUA + "Reason" + ChatColor.WHITE + ": " + ChatColor.GRAY + punishmentToRemove.getReason(),
-                        "==============================="
-                };
-                player.sendMessage(details);
-                break;
+                
             }
         }
 	}
