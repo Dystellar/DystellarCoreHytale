@@ -33,7 +33,7 @@ public interface Sendable extends Comparable<Sendable> {
     Sendable clone(Inbox inbox);
 
 	/**
-	 * Encode the sender to make it ready tobe sent to a player through plugin messages.
+	 * Encode the sender to make it ready to be sent to a player through plugin messages.
 	 * @param target The player who will receive this sendable.
 	 */
 	Object[] encode(UUID target);

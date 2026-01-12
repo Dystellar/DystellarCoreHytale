@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class CoinsReward extends Reward {
 
-    public static final byte ID = 2;
+    public static final byte ID = 1;
 
     private final int coins;
 

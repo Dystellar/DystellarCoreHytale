@@ -30,8 +30,10 @@ public class OfflineRegion {
         int yMax = (int) (vector.getBlockY() + center[1]);
         int zMax = (int) (vector.getBlockZ() + center[2]);
         Operation operation = new Operation(this, realPositionX, realPositionY, realPotitionZ);
+
         Scheduler.splitTridimensionalArrayIteration(blockData, (object, isFinished) -> {
             if (isFinished.get()) return;
+
             object.paste(world, realPositionX.get(), realPositionY.get(), realPotitionZ.get());
             realPotitionZ.getAndIncrement();
             if (!(realPotitionZ.get() < zMax)) {
