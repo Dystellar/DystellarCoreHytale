@@ -6,10 +6,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 
 import net.zylesh.dystellarcore.core.User;
 import net.zylesh.dystellarcore.core.punishments.Punishment;
@@ -18,8 +20,14 @@ import net.zylesh.dystellarcore.utils.Utils;
 import net.zylesh.dystellarcore.utils.factory.InventoryBuilder;
 
 public class Handler {
+	public static void handle(Player p, byte[] data) {
+		ByteArrayDataInput in = ByteStreams.newDataInput(data);
+        byte id = in.readByte();
 
-	public static void handlePunData(ByteArrayDataInput in) {
+		Subchannel.values()[id].callback.ifPresent(f -> f.handle(p, in));
+	}
+
+	public static void handlePunData(Player p, ByteArrayDataInput in) {
 		String string = in.readUTF();
 		Player player = Bukkit.getPlayer(string);
 
@@ -42,7 +50,7 @@ public class Handler {
 		p.openInventory(inv);
 	}
 
-	public static void handleRegRes(ByteArrayDataInput in) {
+	public static void handleRegRes(Player p, ByteArrayDataInput in) {
 		String unsafe = in.readUTF();
 		Player player = Bukkit.getPlayer(unsafe);
 		if (player == null || !player.isOnline()) {
@@ -52,7 +60,39 @@ public class Handler {
 		awaitingPlayers.remove(player.getUniqueId());
 	}
 
-	public static void handleInboxUpdate() {}
+	public static void handleInboxUpdate(Player p, ByteArrayDataInput in) {
+		UUID uuid = UUID.fromString(in.readUTF());
+		if (!User.getUsers().containsKey(uuid)) return;
+		User user = User.get(uuid);
+		byte type = in.readByte();
+		switch (type) {
+			case COINS_REWARD: {
+				int iid = in.readInt();
+				LocalDateTime submission = LocalDateTime.parse(in.readUTF(), DateTimeFormatter.ISO_DATE_TIME);
+				int coins = in.readInt();
+				String title = in.readUTF();
+				String[] message = in.readUTF().split(":;");
+				String from = in.readUTF();
+				boolean claimed = in.readBoolean();
+				boolean deleted = in.readBoolean();
+				CoinsReward reward = new CoinsReward(user.getInbox(), iid, from, message, submission, deleted, title, claimed, coins);
+				reward.initializeIcons();
+				user.getInbox().addSender(reward);
+				break;
+			}
+			case MESSAGE: {
+				int iid = in.readInt();
+				LocalDateTime submission = LocalDateTime.parse(in.readUTF(), DateTimeFormatter.ISO_DATE_TIME);
+				String[] message = in.readUTF().split(":;");
+				String from = in.readUTF();
+				boolean deleted = in.readBoolean();
+				Message reward = new Message(user.getInbox(), iid, from, message, submission, deleted);
+				reward.initializeIcons();
+				user.getInbox().addSender(reward);
+				break;
+			}
+		}
+	}
 
 	public static void handleInboxManagerUpdate() {}
 
@@ -66,13 +106,44 @@ public class Handler {
 
 	public static void handleDemIsPlayerAcceptingReqs() {}
 
-	public static void handleDemIsPlayerWithinNetwork() {}
+	public static void handleDemIsPlayerWithinNetwork(Player p, ByteArrayDataInput in) {
+		String pe = in.readUTF();
+		if (runnables.containsKey(pe)) {
+			if (in.readBoolean())
+			runnables.get(pe).getKey().run();
+			else
+			runnables.get(pe).getValue().run();
+		}
+	}
 
 	public static void handleFriendRemove() {}
 
-	public static void handleDemFindPlayerRes() {}
+	public static void handleDemFindPlayerRes(Player p, ByteArrayDataInput in) {
+		String unsafe = in.readUTF();
+		Player player = Bukkit.getPlayer(unsafe);
+		if (player == null || !player.isOnline()) {
+			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
+			return;
+		}
+		String pla = in.readUTF();
+		String srv = in.readUTF();
+		if (srv.equals("null")) {
+			player.sendMessage(ChatColor.DARK_AQUA + "This player is joining the server right now!" + ChatColor.GRAY + " (Login screen)");
+		} else {
+			player.sendMessage(ChatColor.DARK_AQUA + pla + ChatColor.WHITE + " is currently playing at " + ChatColor.YELLOW + srv + ChatColor.WHITE + ".");
+		}
+	}
 
-	public static void handleDemPlayerNotOnline() {}
+	public static void handleDemPlayerNotOnline(Player p, ByteArrayDataInput in) {
+		String unsafe = in.readUTF();
+		Player player = Bukkit.getPlayer(unsafe);
+		if (player == null || !player.isOnline()) {
+			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
+			return;
+		}
+
+		player.sendMessage(ChatColor.RED + "This player is not online.");
+	}
 
 	public static void handleFriendReqAccept() {}
 

@@ -4,7 +4,8 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.practice.PUser;
+import net.zylesh.dystellarcore.core.Subchannel;
+
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
@@ -26,77 +27,6 @@ public class Utils {
 
 	public static void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
 		player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
-    }
-
-    public static <T> boolean contains(T[] array, T item) {
-        for (T t : array) {
-            if (Objects.equals(t, item)) return true;
-        }
-        return false;
-    }
-
-    public static <T> boolean replaceFirstNull(T[] array, T item) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] == null) {
-                array[i] = item;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static <T> boolean remove(T[] array, T item) {
-        for (int i = 0; i < array.length; i++) {
-            if (Objects.equals(array[i], item)) {
-                array[i] = null;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static <T> boolean nullExists(T[] array) {
-        for (T t : array) {
-            if (t == null) return true;
-        }
-        return false;
-    }
-
-    /**
-     * Expects arrays length to be the same!
-     * prioritizes array1, if it has null values then replace them with values in array2
-     * @param array1 first array
-     * @param array2 second array
-     * @param <T> whatever object type
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T[] mergeArraysCopy(Class<T> clazz, T[] array1, T[] array2) {
-        T[] arrayCopy = (T[]) Array.newInstance(clazz, array1.length);
-        System.arraycopy(array1, 0, arrayCopy, 0, array1.length);
-        for (int i = 0; i < arrayCopy.length; i++) {
-            if (arrayCopy[i] == null) arrayCopy[i] = array2[i];
-        }
-        return arrayCopy;
-    }
-
-    public static <T> boolean switchArrayPos(T[] array1, T[] array2, T item) {
-        for (int i = 0; i < array1.length; i++) {
-            if (Objects.equals(array1[i], item)) {
-                array1[i] = null;
-                array2[i] = item;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static <T> void returnItemsToArray1(T[] array1, T[] array2) {
-        for (int i = 0; i < array1.length; i++) {
-            if (array1[i] == null) {
-                array1[i] = array2[i];
-                array2[i] = null;
-            }
-        }
     }
 
     public static void resetEffects(Player p) {
@@ -136,13 +66,9 @@ public class Utils {
         return data;
     }
 
-    public static boolean arePlayersInSameGame(PUser user, PUser user1) {
-        return user.getLastGame() != null && user.getLastGame().equals(user1.getLastGame()) && !user.getLastGame().isEnded();
-    }
-
-	public static void sendPluginMessage(Player player, byte typeId, Object...extraData) {
+	public static void sendPluginMessage(Player player, Subchannel subchannel, Object...extraData) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeByte(typeId); // Subchannel
+        out.writeByte(subchannel.id); // Subchannel
         if (extraData != null) {
             for (Object o : extraData) {
                 if (o instanceof String) out.writeUTF((String) o);

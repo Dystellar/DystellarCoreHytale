@@ -55,7 +55,7 @@ public class InboxCommand implements CommandExecutor, Listener {
 
     private static InboxCommand INSTANCE;
 
-    public static InboxCommand g() {
+    public static InboxCommand get() {
         return INSTANCE;
     }
 

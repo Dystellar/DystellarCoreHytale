@@ -66,10 +66,11 @@ public class User {
     private boolean globalTabComplete = false;
     private boolean scoreboardEnabled = true;
     public int coins;
+
+	public final List<UUID> friends = new ArrayList<>();
+    public final List<UUID> ignoreList = new ArrayList<>();
     private int version;
-    public final Set<UUID> friends = new HashSet<>();
     public byte[] tipsSent;
-    private final Set<UUID> ignoreList = Collections.synchronizedSet(new HashSet<>());
     public byte[] extraOptions;
 
     public User(UUID id, String ip, String name) {
@@ -81,24 +82,6 @@ public class User {
     public void punish(Punishment punishment) {
         this.punishments.add(punishment);
         punishment.onPunishment(this);
-    }
-
-    /**
-     * Warning! Only 1 call per instance.
-     */
-    public void assignInbox(Inbox inbox) {
-        if (this.inbox != null) throw new UnsupportedOperationException("An instance already exists.");
-        this.inbox = inbox;
-    }
-
-    public void assignTips(byte[] tips) {
-        if (this.tipsSent != null) throw new UnsupportedOperationException("An instance already exists.");
-        this.tipsSent = tips;
-    }
-
-    public void assignExtraOptions(byte[] tips) {
-        if (this.extraOptions != null) throw new UnsupportedOperationException("An instance already exists.");
-        this.extraOptions = tips;
     }
 
     private Inventory configManager;
@@ -113,7 +96,7 @@ public class User {
 
         this.globalChatItem = new ItemStack(Material.PAPER);
         this.pmsItem = new ItemStack(Material.BOOK);
-        this.globalTabCompleteItem = new ItemStack(Material.COMMAND);
+        this.globalTabCompleteItem = new ItemStack(Material.COMMAND_BLOCK);
         this.scoreboardEnabledItem = new ItemStack(Material.CLAY);
 
         updateGlobalChatItem();
@@ -140,10 +123,6 @@ public class User {
     public void toggleScoreboard() {
         setScoreboardEnabled(!scoreboardEnabled);
         updateScoreboardItem();
-    }
-
-    public Set<UUID> getIgnoreList() {
-        return ignoreList;
     }
 
     private void updateGlobalTabCompleteItem() {

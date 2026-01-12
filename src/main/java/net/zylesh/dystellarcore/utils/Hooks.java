@@ -19,7 +19,7 @@ public class Hooks {
     }
 
     public static void registerHooks() {
-        if (Bukkit.getPluginManager().getPlugin("SkyWars-Core")!=null) registerSkywarsHook();
-        if (Bukkit.getPluginManager().getPlugin("Practice-Core")!=null) registerPracticeHook();
+        if (Bukkit.getPluginManager().getPlugin("SkyWars-Core") != null) registerSkywarsHook();
+        if (Bukkit.getPluginManager().getPlugin("Practice-Core") != null) registerPracticeHook();
     }
 }
