@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.serialization;
+package gg.dystellar.core.serialization;
 
 import org.bukkit.ChatColor;
 

@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.commands;
+package gg.dystellar.core.commands;
 
 import net.zylesh.dystellarcore.core.Msgs;
 import net.zylesh.dystellarcore.core.User;

@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.utils;
+package gg.dystellar.core.utils;
 
 import net.zylesh.dystellarcore.arenasapi.OfflineRegion;
 

@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.perms;
+package gg.dystellar.core.perms;
 
 import com.google.common.io.ByteArrayDataInput;
 

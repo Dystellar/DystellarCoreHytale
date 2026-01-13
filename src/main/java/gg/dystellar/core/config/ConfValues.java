@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.config;
+package gg.dystellar.core.config;
 
 import net.zylesh.dystellarcore.DystellarCore;
 import net.zylesh.dystellarcore.serialization.LocationSerialization;

@@ -1,6 +1,4 @@
-package net.zylesh.dystellarcore.services.messaging;
-
-import org.bukkit.entity.Player;
+package gg.dystellar.core.services.messaging;
 
 import com.google.common.io.ByteArrayDataInput;
 

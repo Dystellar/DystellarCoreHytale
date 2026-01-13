@@ -1,7 +1,7 @@
-package net.zylesh.dystellarcore.arenasapi;
+package gg.dystellar.core.arenasapi;
 
-import net.zylesh.dystellarcore.utils.Operation;
-import net.zylesh.dystellarcore.utils.Scheduler;
+import gg.dystellar.core.utils.Operation;
+import gg.dystellar.core.utils.Scheduler;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 

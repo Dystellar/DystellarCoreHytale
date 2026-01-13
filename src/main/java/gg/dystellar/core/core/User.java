@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.core;
+package gg.dystellar.core.core;
 
 import net.zylesh.dystellarcore.DystellarCore;
 import net.zylesh.dystellarcore.core.inbox.Inbox;

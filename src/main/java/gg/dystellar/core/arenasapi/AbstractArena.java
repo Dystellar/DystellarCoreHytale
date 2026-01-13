@@ -1,9 +1,4 @@
-package net.zylesh.dystellarcore.arenasapi;
-
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+package gg.dystellar.core.arenasapi;
 
 import java.util.List;
 

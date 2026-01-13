@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.arenasapi;
+package gg.dystellar.core.arenasapi;
 
 import net.zylesh.dystellarcore.serialization.InventorySerialization;
 import org.bukkit.Bukkit;

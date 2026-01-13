@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.core;
+package gg.dystellar.core.core;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.PacketListenerPlayIn;

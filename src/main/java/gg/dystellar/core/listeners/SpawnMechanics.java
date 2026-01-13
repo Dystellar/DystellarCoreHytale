@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.listeners;
+package gg.dystellar.core.listeners;
 
 import net.zylesh.dystellarcore.DystellarCore;
 import org.bukkit.Bukkit;

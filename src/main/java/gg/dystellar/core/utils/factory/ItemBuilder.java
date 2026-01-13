@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.utils.factory;
+package gg.dystellar.core.utils.factory;
 
 import java.util.List;
 

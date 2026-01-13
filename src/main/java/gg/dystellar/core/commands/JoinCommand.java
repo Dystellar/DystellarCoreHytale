@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.commands;
+package gg.dystellar.core.commands;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;

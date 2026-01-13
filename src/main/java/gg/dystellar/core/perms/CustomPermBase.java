@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.perms;
+package gg.dystellar.core.perms;
 
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.PermissibleBase;

@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.services;
+package gg.dystellar.core.services;
 
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;

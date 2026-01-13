@@ -1,6 +1,6 @@
-package net.zylesh.dystellarcore.serialization;
+package gg.dystellar.core.serialization;
 
-import net.zylesh.dystellarcore.core.punishments.*;
+import gg.dystellar.core.core.punishments.*;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;

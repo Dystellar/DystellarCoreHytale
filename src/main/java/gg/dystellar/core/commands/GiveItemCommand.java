@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.commands;
+package gg.dystellar.core.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

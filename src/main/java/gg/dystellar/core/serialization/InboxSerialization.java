@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.serialization;
+package gg.dystellar.core.serialization;
 
 import net.zylesh.dystellarcore.core.User;
 import net.zylesh.dystellarcore.core.inbox.Inbox;

@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.listeners;
+package gg.dystellar.core.listeners;
 
 import fr.mrmicky.fastboard.FastBoard;
 import net.luckperms.api.LuckPermsProvider;

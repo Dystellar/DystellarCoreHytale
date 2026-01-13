@@ -1,6 +1,6 @@
-package net.zylesh.dystellarcore.serialization;
+package gg.dystellar.core.serialization;
 
-import net.zylesh.dystellarcore.DystellarCore;
+import gg.dystellar.core.DystellarCore;
 import net.zylesh.dystellarcore.core.inbox.Inbox;
 import net.zylesh.dystellarcore.core.Suffix;
 import net.zylesh.dystellarcore.core.User;

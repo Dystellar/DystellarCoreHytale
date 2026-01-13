@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore;
+package gg.dystellar.core;
 
 import net.zylesh.dystellarcore.arenasapi.AbstractArena;
 import net.zylesh.dystellarcore.commands.*;

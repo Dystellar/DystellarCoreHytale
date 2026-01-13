@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.commands;
+package gg.dystellar.core.commands;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.zylesh.dystellarcore.DystellarCore;

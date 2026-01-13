@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.core.inbox;
+package gg.dystellar.core.core.inbox;
 
 public final class SenderTypes {
 

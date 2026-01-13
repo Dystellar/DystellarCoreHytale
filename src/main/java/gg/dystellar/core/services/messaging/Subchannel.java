@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.services.messaging;
+package gg.dystellar.core.services.messaging;
 
 import java.util.Optional;
 

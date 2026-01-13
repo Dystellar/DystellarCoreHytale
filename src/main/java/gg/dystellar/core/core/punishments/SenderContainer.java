@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.core.punishments;
+package gg.dystellar.core.core.punishments;
 
 import net.zylesh.dystellarcore.core.inbox.Sendable;
 import org.bukkit.ChatColor;

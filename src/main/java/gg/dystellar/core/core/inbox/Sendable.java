@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.core.inbox;
+package gg.dystellar.core.core.inbox;
 
 import org.bukkit.inventory.ItemStack;
 

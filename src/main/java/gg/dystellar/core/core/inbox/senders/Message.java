@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.core.inbox.senders;
+package gg.dystellar.core.core.inbox.senders;
 
 import net.zylesh.dystellarcore.core.inbox.Inbox;
 import net.zylesh.dystellarcore.core.inbox.Sendable;

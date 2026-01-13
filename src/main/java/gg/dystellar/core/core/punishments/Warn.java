@@ -1,4 +1,4 @@
-package net.zylesh.dystellarcore.core.punishments;
+package gg.dystellar.core.core.punishments;
 
 import net.zylesh.dystellarcore.commands.Punish;
 import net.zylesh.dystellarcore.core.User;
