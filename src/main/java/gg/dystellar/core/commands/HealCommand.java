@@ -12,6 +12,9 @@ import org.bukkit.entity.Player;
 
 import gg.zylesh.skywars.SkywarsAPI;
 
+/**
+ * Command that restores all your health and hunger, you can apply this to other players if you're an admin.
+ */
 public class HealCommand implements CommandExecutor {
 
     public HealCommand() {

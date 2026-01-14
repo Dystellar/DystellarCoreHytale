@@ -14,6 +14,10 @@ import gg.zylesh.skywars.SkywarsAPI;
 
 import java.util.Arrays;
 
+/**
+ * Command that lets you create an item and assign a custom display name and description with ease,
+ * If hytale's give command is actually good this may not be needed, the /give command is minecraft was too limited.
+ */
 public final class GiveItemCommand implements CommandExecutor {
 
     public GiveItemCommand() {

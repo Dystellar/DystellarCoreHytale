@@ -16,8 +16,13 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Class to serialize and deserialize region files.
+ * Capable of storing block states and data (such as signs text which is a common bug in worldedit), beds, containers like chests and its items, etc
+ */
 public class BlockGeometrySchemaUtilRepresentation {
 
+    // Simple protocols to identify type of blocks in the region, registered as extensions for the block
     static final byte BED = 0;
     static final byte DIRECTIONAL = 1;
     static final byte ATTACHABLE = 2;
@@ -42,17 +47,24 @@ public class BlockGeometrySchemaUtilRepresentation {
     static final byte TREE = 24;
     static final byte WOODEN_STEP = 25;
 
-    private Vector posVector1;
+    private Vector posVector1; //
     private Vector posVector2;
     private World world;
-    private Block[][][] blockData;
-    private double[] center;
+    private Block[][][] blockData; // 3 dimensional array that contains the entire region
+    private double[] center; // 'center' of the region, it will be stored the position relative to this
 
-    // Cache for saving safely
+    // Internal caches for saving safely (don't remember)
     private int x;
     private int y;
     private int z;
 
+    /**
+     * Creates a real representation of a region, providing a region selection that starts from posVector1 and ends on posVector2,
+     * Provides utilities to save the region and load one from storage
+     * @param world The world in which the region is in
+     * @param posVector1 position1
+     * @param posVector2 position2
+     */
     public BlockGeometrySchemaUtilRepresentation(World world, Vector posVector1, Vector posVector2) {
         this.posVector1 = posVector1;
         this.posVector2 = posVector2;

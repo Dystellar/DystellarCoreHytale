@@ -15,6 +15,9 @@ import static net.zylesh.dystellarcore.core.User.*;
 import static net.zylesh.practice.PUser.ENABLED;
 import static net.zylesh.practice.PUser.ENABLED_PMS_ONLY;
 
+/**
+ * Command to send a private message to another person. Should definitely be implemented in the proxy, not here.
+ */
 public class MSGCommand implements CommandExecutor {
 
     public MSGCommand() {

@@ -9,6 +9,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
+/**
+ * Simple command that shows your connection's latency between the server and the client in milliseconds.
+ */
 public class PingCommand implements CommandExecutor {
 
     public PingCommand() {

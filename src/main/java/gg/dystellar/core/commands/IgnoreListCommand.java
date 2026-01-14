@@ -15,6 +15,9 @@ import org.bukkit.entity.Player;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * This command lets you manage your ignored players list.
+ */
 public class IgnoreListCommand implements CommandExecutor {
 
     private static final String[] help = {

@@ -16,6 +16,10 @@ import org.bukkit.entity.Player;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Command that lets you see your or other people's punishments.
+ * Should probably be refactored.
+ */
 public class PunishmentsCommand implements CommandExecutor {
 
     public PunishmentsCommand() {

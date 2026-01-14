@@ -2,6 +2,10 @@ package gg.dystellar.core.serialization;
 
 import org.bukkit.ChatColor;
 
+/**
+ * Used for some weird byte level storage in the database,
+ * it's extremely poor design and something else should be implemented..
+ */
 public class Consts {
 
     public static final byte BYTE_FALSE = 0;

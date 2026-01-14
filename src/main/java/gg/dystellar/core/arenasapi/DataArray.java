@@ -3,6 +3,13 @@ package gg.dystellar.core.arenasapi;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Whatever I was thinking back in the day, this is bad and should be changed.
+ * It's just a list of objects that stores any data, this is obviously over-engineered and something more reasonable should be designed/used instead of this.
+ *
+ * This is used to store 'extensions' of a block, like the inventory if its a chest, the direction if its a bed, or the text if its a sign,
+ * but there are clearly better ways to design this.
+ */
 public class DataArray {
 
     int pos = 0;

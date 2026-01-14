@@ -3,6 +3,9 @@ package gg.dystellar.core.serialization;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
+/**
+ * Simple location serialization, efficient, simple and the serialized form follows this format: world;x;y;z;yaw;pitch.
+ */
 public class LocationSerialization {
 
     public static String locationToString(Location loc) {

@@ -7,6 +7,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+/**
+ * With this command you can send a message that all the people in the server will see, like a public announcement.
+ * This probably should be implemented in the proxy or redirecter if hytale has one instead of here.
+ */
 public class BroadcastCommand implements CommandExecutor {
 
     public BroadcastCommand() {

@@ -1,24 +1,30 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.core.punishments.Ban;
-import net.zylesh.dystellarcore.serialization.Mapping;
-import net.zylesh.dystellarcore.serialization.MariaDB;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import java.time.LocalDateTime;
 
-public class BanCommand implements CommandExecutor {
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.permissions.provider.HytalePermissionsProvider;
 
-    public BanCommand() {
-        Bukkit.getPluginCommand("ban").setExecutor(this);
+/**
+ * Custom ban command, generally the same as the builtin ban command but this also notifies the backend and updates the player's profile.
+ * Porting this to hytale's API
+ */
+public class BanCommand extends CommandBase {
+
+    public BanCommand(String name, String description) {
+		super(name, description);
     }
+
+	@Override
+	protected void executeSync(CommandContext ctx) {
+	    final var sender = ctx.sender();
+		if (!sender.hasPermission("dystellar.punish")) {
+			ctx.sendMessage(Message.raw("§4No permission"));
+			return;
+		}
+	}
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {

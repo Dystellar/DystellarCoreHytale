@@ -37,6 +37,10 @@ import java.util.concurrent.TimeUnit;
 import static net.zylesh.practice.PUser.ENABLED;
 import static net.zylesh.practice.PUser.ENABLED_CHAT_ONLY;
 
+/**
+ * Inventory based interface for punishments, it's here only for standardisation, so staff doesn't punish a player wrongly.
+ * Should definitely be refactored, what an insane humanitarian catastrophe this is...
+ */
 public class Punish implements CommandExecutor, Listener {
 
     // Blacklists

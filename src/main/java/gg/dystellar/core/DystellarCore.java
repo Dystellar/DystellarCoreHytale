@@ -1,22 +1,5 @@
 package gg.dystellar.core;
 
-import net.zylesh.dystellarcore.arenasapi.AbstractArena;
-import net.zylesh.dystellarcore.commands.*;
-import net.zylesh.dystellarcore.config.ConfValues;
-import net.zylesh.dystellarcore.core.*;
-import net.zylesh.dystellarcore.core.PacketListener;
-import net.zylesh.dystellarcore.core.inbox.Inbox;
-import net.zylesh.dystellarcore.core.inbox.Sendable;
-import net.zylesh.dystellarcore.listeners.GeneralListeners;
-import net.zylesh.dystellarcore.listeners.ResourceListener;
-import net.zylesh.dystellarcore.listeners.Scoreboards;
-import net.zylesh.dystellarcore.listeners.SpawnMechanics;
-import net.zylesh.dystellarcore.serialization.*;
-import net.zylesh.dystellarcore.services.Services;
-import net.zylesh.dystellarcore.services.messaging.Types;
-import net.zylesh.dystellarcore.utils.Hooks;
-import net.zylesh.dystellarcore.utils.Utils;
-
 import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,6 +9,17 @@ import java.util.stream.Collectors;
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import com.hypixel.hytale.server.core.util.Config;
+
+import gg.dystellar.core.config.ConfValues;
+import gg.dystellar.core.services.Services;
+import gg.dystellar.core.utils.Hooks;
+import gg.dystellar.core.common.PacketListener;
+import gg.dystellar.core.common.User;
+import gg.dystellar.core.common.inbox.Inbox;
+import gg.dystellar.core.listeners.*;
+import gg.dystellar.core.arenasapi.AbstractArena;
+import gg.dystellar.core.commands.*;
 
 public final class DystellarCore extends JavaPlugin {
 
@@ -63,7 +57,7 @@ public final class DystellarCore extends JavaPlugin {
         new SetSpawnCommand(); new GameModeCommand(); new HealCommand();
         new FlyCommand(); new FreezeCommand(); new BroadcastCommand();
         new JoinCommand(); new MSGCommand(); new ReplyCommand();
-        new BanCommand(); new BlacklistCommand(); new MuteCommand();
+        new BlacklistCommand(); new MuteCommand();
         new NoteCommand(); new PunishmentsCommand(); new NotesCommand();
         new GiveItemCommand(); new ItemMetaCommand(); new PingCommand();
         new ToggleChatCommand(); new TogglePrivateMessagesCommand();
@@ -75,6 +69,11 @@ public final class DystellarCore extends JavaPlugin {
         AbstractArena.init();
 	}
 
+	@Override
+	protected void setup() {
+		this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
+	}
+
     public static final String CHANNEL = "dyst:ellar";
 
     public final File conf = new File(getDataFolder(), "config.yml");
@@ -82,7 +81,7 @@ public final class DystellarCore extends JavaPlugin {
     public final File am = new File(getDataFolder(), "automated-messages.txt");
     public final File m = new File(getDataFolder(), "lang-en.yml");
 
-    private final YamlConfiguration lang = YamlConfiguration.loadConfiguration(m);
+    private final Config<> lang = new Config<>(path, name, codec);
     private final YamlConfiguration config = YamlConfiguration.loadConfiguration(conf);
     private final YamlConfiguration spawnitems = YamlConfiguration.loadConfiguration(si);
     @Override

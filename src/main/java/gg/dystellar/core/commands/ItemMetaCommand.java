@@ -13,6 +13,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Lets you change display name and description of an item you are holding in your hand.
+ */
 public final class ItemMetaCommand implements CommandExecutor {
 
     public ItemMetaCommand() {

@@ -32,6 +32,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Command to manage the region API, they are bugged.
+ */
 public class WandCommand implements CommandExecutor, Listener {
 
     private final ItemStack WAND = new ItemStack(Material.BLAZE_ROD);

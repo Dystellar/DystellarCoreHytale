@@ -13,6 +13,10 @@ import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Serializes an entire inbox with mails.
+ * This should probably be reimplemented.
+ */
 public class InboxSerialization {
 
     private static final String SEPARATOR_FIELDS = "-%;%+";

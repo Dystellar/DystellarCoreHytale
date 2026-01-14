@@ -1,6 +1,6 @@
 package gg.dystellar.core.serialization;
 
-import gg.dystellar.core.core.punishments.*;
+import gg.dystellar.core.common.punishments.*;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;

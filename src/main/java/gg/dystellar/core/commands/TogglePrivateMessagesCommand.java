@@ -11,6 +11,9 @@ import org.bukkit.entity.Player;
 
 import static net.zylesh.dystellarcore.core.User.*;
 
+/**
+ * This lets you toggle private messages mode.
+ */
 public class TogglePrivateMessagesCommand implements CommandExecutor {
 
     public TogglePrivateMessagesCommand() {

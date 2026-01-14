@@ -7,6 +7,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Map;
 
+/**
+ * Efficient inventory serialization, works like a charm, should be ported to hytale.
+ */
 public class InventorySerialization {
 
     public static String inventoryToString(ItemStack[] invInventory) {

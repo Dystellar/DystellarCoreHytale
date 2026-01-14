@@ -19,6 +19,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Friends command, lets any player manage their list of friends.
+ * Should definitely be implemented in the proxy or redirecter if hytale has one, because otherwise it needs a bunch of protocols and packets and there is no need.
+ */
 public class FriendCommand implements CommandExecutor, Listener {
 
     public static final Map<UUID, UUID> messagesCache = new HashMap<>();

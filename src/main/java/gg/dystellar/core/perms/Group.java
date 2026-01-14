@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Group of permissions, you may understand better if you refer to it as ranks.
+ */
 public class Group {
 
     public static Group DEFAULT_GROUP;

@@ -20,6 +20,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Handles scoreboards, probably shouldn't be in this plugin, and who knows if hytale has scoreboards anyways.
+ */
 public class Scoreboards implements Listener {
 
     // TODO handle skywars disabling or enabling scoreboard.

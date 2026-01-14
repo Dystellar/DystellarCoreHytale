@@ -15,6 +15,9 @@ import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
 
+/**
+ * Moderator command to mute a player
+ */
 public class MuteCommand implements CommandExecutor {
 
     public MuteCommand() {

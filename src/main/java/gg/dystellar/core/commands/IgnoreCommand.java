@@ -9,6 +9,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * This lets you block a player from messaging you, useful for obnoxious and toxic people.
+ */
 public class IgnoreCommand implements CommandExecutor {
 
     public IgnoreCommand() {

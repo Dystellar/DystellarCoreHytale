@@ -10,6 +10,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * Useless command, confusing to understand for users and not useful. should be removed.
+ */
 public class ToggleGlobalTabComplete implements CommandExecutor {
 
     public ToggleGlobalTabComplete() {

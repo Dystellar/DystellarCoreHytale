@@ -10,6 +10,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Spigot's main permission logic, this basically reimplements part of the logic to be injected inside spigot systems using reflection.
+ * Should be ported to hytale's permissions system.
+ */
 public class CustomPermBase extends PermissibleBase {
 
     private static final String OP_PERM = "minecraft.command.op";

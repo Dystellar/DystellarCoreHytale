@@ -11,6 +11,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * Blacklist command, more severe than ban, and only used for special cases,
+ * like for problematic people that you really don't want them connecting to the server ever again.
+ */
 public class BlacklistCommand implements CommandExecutor {
 
     public BlacklistCommand() {

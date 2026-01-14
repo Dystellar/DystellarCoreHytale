@@ -12,6 +12,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * This command on itself doesn't do anything, it just lets you annotate something useful about a player,
+ * like an explanation or an observation, only the staff and the affected player will see them.
+ */
 public class NoteCommand implements CommandExecutor {
 
     public NoteCommand() {

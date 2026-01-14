@@ -9,6 +9,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * This command lets you enable/disable the global chat.
+ */
 public class ToggleChatCommand implements CommandExecutor {
 
     public ToggleChatCommand() {

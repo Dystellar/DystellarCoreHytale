@@ -1,0 +1,18 @@
+{
+  "Group": "gg.dystellar",
+  "Name": "Core",
+  "Version": "1.0.0",
+  "Description": "Core plugin for Dystellar",
+  "Authors": [
+    {
+      "Name": "Algorhythmic",
+      "Email": "intivioli@gmail.com",
+      "Url": "https://dystellar.gg"
+    }
+  ],
+  "Website": "https://dystellar.gg",
+  "ServerVersion": "*",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false
+}

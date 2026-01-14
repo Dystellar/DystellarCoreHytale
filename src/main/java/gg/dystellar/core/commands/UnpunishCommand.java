@@ -26,6 +26,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * This command lets admins remove punishments from a player.
+ */
 public class UnpunishCommand implements Listener, CommandExecutor {
 
     public static final ConcurrentMap<UUID, Map.Entry<UUID, Punishment[]>> invs = new ConcurrentHashMap<>();

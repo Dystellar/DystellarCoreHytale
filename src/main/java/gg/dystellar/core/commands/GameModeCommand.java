@@ -27,6 +27,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Lets you change your game mode. Initially it was made to support spectator mode in 1.7 players, not sure if it will be useful on hytale, probably not
+ */
 public class GameModeCommand implements CommandExecutor, Listener {
 
     public GameModeCommand() {

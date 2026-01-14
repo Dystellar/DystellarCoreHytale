@@ -3,18 +3,18 @@ package gg.dystellar.core.perms;
 public class Permission {
 
     private final String perm;
-    private boolean negate;
+    private boolean value;
 
-    public Permission(String perm, boolean negate) {
+    public Permission(String perm, boolean value) {
         this.perm = perm;
-        this.negate = negate;
+        this.value = value;
     }
 
     public String getPerm() {
         return perm;
     }
 
-    public boolean isNegate() {
+    public boolean get() {
         return negate;
     }
 }

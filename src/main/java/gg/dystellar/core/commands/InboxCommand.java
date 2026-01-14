@@ -32,6 +32,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Arrays;
 import java.util.UUID;
 
+/**
+ * Command to allow admins to use the custom mailing system, its a little bit bugged and should probably be reworked.
+ */
 public class InboxCommand implements CommandExecutor, Listener {
 
     private static final ItemStack SEND = new ItemStack(Material.WOOL, 1, (short) 5);

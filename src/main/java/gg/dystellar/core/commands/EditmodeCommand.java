@@ -22,6 +22,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * This command enables edit mode, allowing admins to bypass spawn protections and other stuff
+ */
 public class EditmodeCommand implements CommandExecutor, Listener {
 
     private static final Set<UUID> playersOnEditmode = new HashSet<>();

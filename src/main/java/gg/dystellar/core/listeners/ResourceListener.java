@@ -22,6 +22,9 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This is a resourcepack prompt that players receive, should probably be reimplemented because it's shit and doesn't work
+ */
 public class ResourceListener implements Listener {
 
     private final ItemStack CONFIRM = ItemBuilder.packConfirm();

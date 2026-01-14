@@ -9,6 +9,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * Sets the spawn location. This is part of lobby functionality and should probably be separated into another plugin.
+ */
 public class SetSpawnCommand implements CommandExecutor {
 
     public SetSpawnCommand() {

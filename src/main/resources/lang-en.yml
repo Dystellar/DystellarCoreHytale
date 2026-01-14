@@ -3,54 +3,18 @@ config-version: 1.1
 #
 # <player> placeholder: will be replaced with the affected player when applicable.
 # <seconds> placeholder: will be replaced with an integer value representing seconds when applicable.
-#
-# ===============================================================================
-# Private messages modes messages.
-# ===============================================================================
-#
-pms-enabled: "§aYou are now accepting all private messages."
-pms-enabled-with-black-list: "§eYou are now blocking messages from players in your blocked players list."
-pms-enabled-friends-only: "§6You are now only accepting messages from friends."
-pms-disabled: "§cYou are now blocking all messages."
-#
-# ===============================================================================
-# General messages.
-# ===============================================================================
-#
-command-deny-ingame: "§cYou're not allowed to use this command in-game."
-no-permission: "§cYou don't have permission to perform this action."
-error-player-not-online: "§cThis player is not online."
-error-player-no-longer-online: "§cThis player is no longer online."
-error-player-does-not-exist: "§cThis player does not exist or is not online."
-on-cooldown-message: "§cYou are on cooldown, wait <seconds> seconds before performing this action again."
-error-player-not-found: "§cThis player does not exist in our database."
-error-input-not-number: "§cInput must be a number, try again."
-error-not-a-player: "§cYou must be a player to perform this action."
-server-connection-error: "§cError trying to connect to server."
-prefix-not-owned: "§cYou don't have this prefix."
-global-chat-enabled: "§aYou've enabled global chat."
-global-chat-disabled: "§3You've disabled global chat."
-global-tab-completion-enabled: "§aYou've enabled global tab completion."
-global-tab-completion-disabled: "§3You've disabled global tab completion."
-#
-# ===============================================================================
-# Fly command messages.
-# ===============================================================================
-#
-fly-need-plus-rank: "§cYou need §aplus §crank or higher to enable fly mode."
-fly-mode-enabled: "§aYou have enabled the fly mode."
-fly-mode-disabled: "§eYou have disabled the fly mode."
-fly-mode-enabled-by-admin: "§aAn admin has enabled flight for you."
-fly-mode-disabled-by-admin: "§cAn admin has disabled flight for you."
-admin-fly-mode-enabled-other: "§aYou have enabled the fly mode for §3<player>§a."
-admin-fly-mode-disabled-other: "§eYou have disabled the fly mode for §3<player>§e."
+
 #
 # ===============================================================================
 # SS/freeze command messages.
 # ===============================================================================
 #
+freeze-message:
+  - 
+unfreeze-message: "&aYou have been unfreezed. Sorry and thanks for your time!"
 staff-message-freeze: "§e<player> is now frozen."
 staff-message-unfreeze: "§a<player> is now free to go."
+
 #
 # ===============================================================================
 # Friend command messages.
@@ -67,6 +31,7 @@ find-same-server-as-sender: "§3<player> §ais in your same server!"
 friend-request-expired: "§cYou don't have any pending friend requests. (Or it has expired)"
 friend-requests-enabled: "§3You are able to receive friend requests."
 friend-requests-disabled: "§cYou are no longer able to receive friend requests."
+
 #
 # ===============================================================================
 # Block/Ignore command messages.
@@ -78,6 +43,7 @@ blacklist-empty: "§3Your blocked players list is empty. You have no enemies §e
 blacklist-player-removed: "§aYou've removed §3<player> §afrom your blocked players list."
 error-player-not-on-blacklist: "§cThis player is not in your blocked players list."
 blocking-pointless-hint: "§cWarning: §3You are blocking someone while not blocking ANY message! You may want to change that using §e/pms§3."
+
 #
 # ===============================================================================
 # MSG/Reply command messages.

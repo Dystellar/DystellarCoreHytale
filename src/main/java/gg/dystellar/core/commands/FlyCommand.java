@@ -13,6 +13,10 @@ import org.bukkit.entity.Player;
 
 import gg.zylesh.skywars.SkywarsAPI;
 
+/**
+ * This command is for premium people, so they can fly in the lobbys, so they can explore the buildings with ease.
+ * It shouldn't have any effect on actual games.
+ */
 public class FlyCommand implements CommandExecutor {
 
     public FlyCommand() {

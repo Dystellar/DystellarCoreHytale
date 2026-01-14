@@ -20,6 +20,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * This command lets you manage your suffixes. Suffixes will be seen in the chat.
+ * These are intended to be sold as cosmetics, for supporters.
+ */
 public class SuffixCommand implements CommandExecutor, Listener {
 
     public SuffixCommand() {

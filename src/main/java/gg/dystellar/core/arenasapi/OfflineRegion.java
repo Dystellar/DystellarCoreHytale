@@ -7,18 +7,21 @@ import org.bukkit.util.Vector;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Representation of a region of blocks, containing only offline blocks and relative positions
+ */
 public class OfflineRegion {
 
-    private final OfflineBlock[][][] blockData;
-    private final double[] center;
+    private final OfflineBlock[][][] blockData; // 3 dimensional array containing blocks
+    private final double[] center; // Don't really remember how center works, probably get a location of reference as the location of the region is not real
 
     public OfflineRegion(OfflineBlock[][][] data, int xLenght, int yLenght, int zLenght) {
         this.blockData = data;
-        this.center = new double[] {(double) xLenght / 2.0, (double) yLenght / 2.0, (double) zLenght / 2.0};
+        this.center = new double[] {(double) xLenght / 2.0, (double) yLenght / 2.0, (double) zLenght / 2.0}; // Don't remember why I divide / 2
     }
 
     /**
-     * Recommended to do this asynchronously.
+     * Recommended to do this asynchronously. This computes the real location and pastes the region in the map
      * @param world The world
      * @param vector Location vector (this location will be assumed as center)
      */

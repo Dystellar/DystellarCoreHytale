@@ -7,8 +7,18 @@ import java.nio.file.FileAlreadyExistsException;
 
 import static net.zylesh.dystellarcore.arenasapi.BlockGeometrySchemaUtilRepresentation.*;
 
+/**
+ * Static utility functions for region operations
+ */
 public class BlocksSchemes {
 
+    /**
+     * Saves a real physical region into a file.
+     * This should be changed, because getAsyncManager is unnecessary and hytale's async manager should be used instead.
+     * @param schema Physical region
+     * @param file File where the region will be saved
+     * @throws IOException
+     */
     public static void save(BlockGeometrySchemaUtilRepresentation schema, File file) throws IOException {
         if (file.createNewFile()) {
             DystellarCore.getAsyncManager().submit(() -> {
@@ -23,13 +33,23 @@ public class BlocksSchemes {
         }
     }
 
-
-
+    /**
+     * Loads an offline region from any input stream, usually a file.
+     * @param in where to read from
+     * @return The offline region saved in the file
+     * @throws IOException
+     */
     private static OfflineRegion load(DataInputStream in) throws IOException {
         BlockGeometrySchemaUtilRepresentation schema = new BlockGeometrySchemaUtilRepresentation();
         return schema.loadFromFile(in, true);
     }
 
+    /**
+     * Helper to handle extensions, like signs, chests filled with items, etc.
+     * @param in Where to read from
+     * @return The data in a DataArray, this should probably be changed as DataArray is just a list of objects that behaves like a stream but it's not.
+     * @throws IOException
+     */
     public static DataArray decodeExtensions(DataInputStream in) throws IOException {
         byte extensions = in.readByte();
         DataArray array = new DataArray();

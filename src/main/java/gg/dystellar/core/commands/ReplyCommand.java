@@ -11,6 +11,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * Command to reply to the latest player that sent you a message.
+ * Should be implemented in the proxy the same as msg command, not here.
+ */
 public class ReplyCommand implements CommandExecutor {
 
     public ReplyCommand() {

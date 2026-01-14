@@ -11,11 +11,15 @@ import org.bukkit.material.*;
 
 import static net.zylesh.dystellarcore.arenasapi.BlockGeometrySchemaUtilRepresentation.*;
 
+/**
+ * Its called offline block because it doesn't represent a world block, so it doesn't have a location
+ * It's only the data of the block that needs to be serialized, like the type of block, the biome, and extensions
+ */
 public class OfflineBlock {
 
-    private final Material material;
-    private final Biome biome;
-    private final DataArray data;
+    private final Material material; // Type of block
+    private final Biome biome; // Biome data of the block
+    private final DataArray data; // Change this to something more dedicated
 
     public OfflineBlock(Material mat, Biome biome, DataArray data) {
         this.material = mat;
@@ -35,6 +39,13 @@ public class OfflineBlock {
         return material;
     }
 
+    /**
+     * This pastes the block in a specified location
+     * @param world World where the block will be pasted
+     * @param x x pos
+     * @param y y pos
+     * @param z z pos
+     */
     public void paste(World world, int x, int y, int z) {
         Block block = world.getBlockAt(x, y, z);
         block.setType(material);
@@ -42,6 +53,11 @@ public class OfflineBlock {
         applyData(block, data);
     }
 
+    /**
+     * Helper function that applies extensions to a physical block if possible
+     * @param block
+     * @param data
+     */
     @SuppressWarnings("deprecation")
     public static void applyData(Block block, DataArray data) {
         byte extensions = data.readByte();

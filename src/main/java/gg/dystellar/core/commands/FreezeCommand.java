@@ -20,6 +20,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Moderator command that lets you freeze a player to prevent them from moving.
+ * This is useful for moderators that want to redirect the player somewhere and ask them a few questions.
+ * It interrups whatever game the player was in, as it's usually used for cheaters.
+ */
 public class FreezeCommand implements CommandExecutor, Listener {
 
     public FreezeCommand() {

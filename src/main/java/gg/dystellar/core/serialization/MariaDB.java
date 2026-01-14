@@ -22,6 +22,9 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 
+/**
+ * Database storage, should use the backend instead.
+ */
 public class MariaDB {
 
     private MariaDB() {}

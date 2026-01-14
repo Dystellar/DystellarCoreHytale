@@ -11,6 +11,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * This command lets you switch between servers, it tries to send a plugin message and the proxy handles the rest.
+ * Useful because with this you can join players in an automatized way, as /server can't be used from the servers.
+ */
 public class JoinCommand implements CommandExecutor {
 
     public JoinCommand() {
