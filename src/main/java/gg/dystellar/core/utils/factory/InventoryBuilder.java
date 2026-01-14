@@ -22,6 +22,10 @@ public class InventoryBuilder {
 		return inv;
 	}
 
+	/**
+	 * Builds an interface that displays a player's punishments.
+	 * @return
+	 */
 	public static Inventory punishmentsInv(Player p, Set<Punishment> punishments) {
 		Inventory inv = Bukkit.createInventory(null, 27, ChatColor.RED + "Punishments");
 		int i = 0;

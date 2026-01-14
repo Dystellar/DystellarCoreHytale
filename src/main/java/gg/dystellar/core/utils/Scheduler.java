@@ -9,8 +9,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Scheduler utils for computing expensive tasks, allowing to perform them safely without destroying the performance
+ */
 public class Scheduler {
-
+    /**
+     * Perform a heavy task to an iterable (or collection).
+     * This code will split the tasks and will slowly execute them in the main thread.
+     * It's useful for operations that are required to run on the main thread, like world manipulation and stuff.
+     * What it does, instead of running all the tasks in one go, as that would lag the server until the tasks are finished,
+     * it splits the tasks into various ticks, basically not blocking the thread and synchronously run them,
+     * while leaving enough computer power to process the remaining internal stuff that needs to run in a tick.
+     *
+     * Could be better designed, but I didn't know better at the time.
+     */
     public static <T> void splitIteration(Iterable<T> collection, GenericRunnable<T> task, int maxIterationsPerTick) {
         Iterator<T> iterator = collection.iterator();
         AtomicReference<BukkitTask> task1 = new AtomicReference<>();
@@ -22,12 +34,18 @@ public class Scheduler {
         }, 0L, 1L));
     }
 
+    /**
+     * Painful
+     */
     private static void cancelTask(BukkitTask task) {
         if (task == null)
             return;
         task.cancel();
     }
 
+    /**
+     * Helper function
+     */
     private static <T> void next(Iterator<T> iterator, GenericRunnable<T> task, int maxIterationsPerTick) {
         int index = 0;
         while (iterator.hasNext() && index < maxIterationsPerTick) {

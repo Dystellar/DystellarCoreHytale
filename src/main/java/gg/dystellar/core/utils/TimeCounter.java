@@ -5,6 +5,10 @@ import net.zylesh.dystellarcore.DystellarCore;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Why....
+ * Overengineered counter, there really is no need for all this async stuff, it looks cool though.
+ */
 public class TimeCounter {
 
     private volatile int value = 0;

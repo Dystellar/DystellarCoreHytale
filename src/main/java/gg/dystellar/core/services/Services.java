@@ -14,6 +14,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Services {
+
+    /**
+     * This basically sends a message to all the server every few time, the messages it sends can be defined in the config.
+     * Mostly announcements and stuff.
+     */
     public static void startAutomatedMessagesService() {
         if (!AUTOMATED_MESSAGES.isEmpty()) {
             asyncManager.scheduleAtFixedRate(() -> {

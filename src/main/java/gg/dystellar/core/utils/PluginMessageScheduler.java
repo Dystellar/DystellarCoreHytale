@@ -11,6 +11,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * This was important for minecraft.
+ * The server would send a plugin message to the proxy through a player's connection.
+ * But the problem is, when there is no player online, the message just gets lost.
+ * So what this API does is cache the plugin messages if no player is online,
+ * and send them all when a player joins.
+ *
+ * Not sure why I don't use a GenericRunner here instead of this Task interface.
+ */
 public class PluginMessageScheduler {
 
     private static final Set<PluginMessageScheduler.Task> tasks = Collections.synchronizedSet(new HashSet<>());
@@ -26,9 +35,7 @@ public class PluginMessageScheduler {
     }
 
     public static void playerJoined(Player p) {
-        if (!tasks.isEmpty()) {
-            tasks.forEach(task -> task.run(p));
-        }
+        tasks.forEach(task -> task.run(p));
     }
 
     public interface Task {

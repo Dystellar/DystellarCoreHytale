@@ -4,6 +4,9 @@ import net.zylesh.dystellarcore.arenasapi.OfflineRegion;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A helper utility that computes stuff related to ArenasAPI? Don't really remember.
+ */
 public class Operation {
 
     private final AtomicInteger xPos;

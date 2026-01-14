@@ -7,7 +7,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class Global {
 
-    public static final ItemStack NULL_GLASS = new ItemStack(Material.GRAY_STAINED_GLASS_PANE, 1);
+    public static final ItemStack NULL_GLASS = new ItemStack(Material.GRAY_STAINED_GLASS_PANE, 1); // Filler glass
 
     static {
         ItemMeta meta = NULL_GLASS.getItemMeta();

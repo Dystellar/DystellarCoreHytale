@@ -1,5 +1,8 @@
 package gg.dystellar.core.utils;
 
+/**
+ * TODO: Remove this
+ */
 public final class Sc {
 	public static String msg(String lang, String entry) {
 		

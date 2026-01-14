@@ -6,6 +6,9 @@ import javax.annotation.Nullable;
 
 import net.zylesh.dystellarcore.commands.InboxCommand;
 
+/**
+ * Subchannel protocol, already implemented callbacks for each type of message
+ */
 public enum Subchannel {
 
 	/**

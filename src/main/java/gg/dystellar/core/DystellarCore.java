@@ -29,6 +29,9 @@ public final class DystellarCore extends JavaPlugin {
         return INSTANCE;
     }
 
+    /**
+     * Initialize plugin
+     */
 	public DystellarCore(JavaPluginInit init) {
 		super(init);
 		INSTANCE = this;
@@ -69,6 +72,9 @@ public final class DystellarCore extends JavaPlugin {
         AbstractArena.init();
 	}
 
+    /**
+     * Setup commands
+     */
 	@Override
 	protected void setup() {
 		this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));

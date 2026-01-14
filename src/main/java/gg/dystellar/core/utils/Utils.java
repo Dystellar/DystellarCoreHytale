@@ -16,8 +16,12 @@ import java.util.Objects;
 
 public class Utils {
 
+    /**
+     * Formats the time from an expiration date.
+     */
     public static String getTimeFormat(LocalDateTime expirationDate) {
         if (expirationDate == null) return "Never";
+
         LocalDateTime now = LocalDateTime.now();
         long between = Duration.between(now, expirationDate).toDays();
         long betweenHours = Duration.between(now, expirationDate).toHours() - (between * 24);
@@ -46,6 +50,9 @@ public class Utils {
         p.getInventory().setBoots(null);
     }
 
+    /**
+     * TODO: Use null-terminates instead of this.
+     */
     public static String bytesToString(byte[] bytes) {
         StringBuilder builder = new StringBuilder();
         builder.append(bytes.length).append(":;:");
