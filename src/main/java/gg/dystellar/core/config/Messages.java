@@ -1,14 +1,77 @@
 package gg.dystellar.core.config;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Optional;
+
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+
+import gg.dystellar.core.DystellarCore;
+
+import static gg.dystellar.core.DystellarCore.*;
+
 /**
- * Plugin messages, these are just values because after investigating the hytale API,
- * I think what it does is load a json file into a java object, and uses reflection
- * to forcefully modify a class's attributes, so the json config in theory would be dumped
- * into this values.
- *
- * This should be tested though, as it's just my conclusion after reading the source code, and it's pure speculation.
+ * Plugin messages, these are just values because gson will dump values from json on these.
  */
 public class Messages {
+	public static Messages fallback = new Messages();
+	public static Optional<Messages> lang_en = Optional.empty();
+	public static Optional<Messages> lang_es = Optional.empty();
+	public static Optional<Messages> lang_fr = Optional.empty();
+	public static Optional<Messages> lang_de = Optional.empty();
+
+	private static void createDefaultIfNotPresent(final File file) throws IOException {
+		if (!file.exists()) {
+			String output = getGson().toJson(new Messages());
+			FileWriter wt = new FileWriter(file);
+
+			wt.write(output);
+			wt.close();
+		}
+	}
+
+	public static void initConfigs(DystellarCore plugin) throws JsonSyntaxException, JsonIOException, IOException {
+		final var en = new File(plugin.getDataDirectory().toFile(), "lang_en.json");
+		final var es = new File(plugin.getDataDirectory().toFile(), "lang_es.json");
+		final var fr = new File(plugin.getDataDirectory().toFile(), "lang_fr.json");
+		final var de = new File(plugin.getDataDirectory().toFile(), "lang_de.json");
+
+		createDefaultIfNotPresent(en);
+		createDefaultIfNotPresent(es);
+		createDefaultIfNotPresent(fr);
+		createDefaultIfNotPresent(de);
+
+		try (final var rEn = new FileReader(new File(plugin.getDataDirectory().toFile(), "lang_en.json"));
+				final var rEs = new FileReader(new File(plugin.getDataDirectory().toFile(), "lang_en.json"));
+				final var rFr = new FileReader(new File(plugin.getDataDirectory().toFile(), "lang_en.json"));
+				final var rDe = new FileReader(new File(plugin.getDataDirectory().toFile(), "lang_en.json"))) {
+			lang_en = Optional.of(getGson().fromJson(rEn, Messages.class));
+			lang_en = Optional.of(getGson().fromJson(rEs, Messages.class));
+			lang_en = Optional.of(getGson().fromJson(rFr, Messages.class));
+			lang_en = Optional.of(getGson().fromJson(rDe, Messages.class));
+		}
+	}
+
+	/**
+	 * @param lang a country code such as "en", or "es". A default fallback is returned if not found
+	 */
+	public static Messages get(String lang) {
+		try {
+			final var langfile = Messages.class.getField("lang_" + lang);
+
+			if (langfile.get(null) instanceof Optional<?> opt && opt.isPresent())
+				return (Messages) opt.get();
+		} catch (Exception e) {
+			getLog().atSevere().log(e.getMessage());
+			getLog().atSevere().log("Failed to find field lang_" + lang + ", using fallback instance");
+		}
+
+		return fallback;
+	}
+
 	public final double config_version = 0;
 
 	public final String pms_enabled = "§aYou are now accepting all private messages.";
@@ -69,28 +132,7 @@ public class Messages {
 		"&cYou have been frozen!",
 		"--------------------------------",
 	};
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
-	public final String _ = ;
+	public final String unfreeze_message = "§aYou have been unfreezed. Sorry and thanks for your time!";
+	public final String staff_message_freeze = "§e<player> is now frozen.";
+	public final String staff_message_unfreeze = "§a<player> is now free to go.";
 }

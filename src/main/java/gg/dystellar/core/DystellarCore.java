@@ -7,11 +7,12 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
 
-import gg.dystellar.core.config.ConfValues;
 import gg.dystellar.core.services.Services;
 import gg.dystellar.core.utils.Hooks;
 import gg.dystellar.core.common.PacketListener;
@@ -23,11 +24,14 @@ import gg.dystellar.core.commands.*;
 
 public final class DystellarCore extends JavaPlugin {
 
+	private static final Gson GSON = new Gson();
     private static DystellarCore INSTANCE;
 
-    public static DystellarCore getInstance() {
-        return INSTANCE;
-    }
+	public static Gson getGson() { return GSON; }
+    public static DystellarCore getInstance() { return INSTANCE; }
+	public static HytaleLogger getLog() { return getInstance().LOGGER; }
+
+	private final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     /**
      * Initialize plugin
@@ -76,8 +80,8 @@ public final class DystellarCore extends JavaPlugin {
      * Setup commands
      */
 	@Override
-	protected void setup() {
-		this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
+protected void setup() {
+	this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
 	}
 
     public static final String CHANNEL = "dyst:ellar";

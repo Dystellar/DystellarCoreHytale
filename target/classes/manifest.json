@@ -10,6 +10,7 @@
       "Url": "https://dystellar.gg"
     }
   ],
+  "Main": "gg.dystellar.core.DystellarCore",
   "Website": "https://dystellar.gg",
   "ServerVersion": "*",
   "Dependencies": {},

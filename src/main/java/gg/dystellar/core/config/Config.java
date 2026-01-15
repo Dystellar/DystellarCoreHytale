@@ -8,7 +8,8 @@ package gg.dystellar.core.config;
  *
  * This should be tested though, as it's just my conclusion after reading the source code, and it's pure speculation.
  */
-public class DystConfig {
+public class Config {
+
 	public final boolean debug_mode = false;
 	public final boolean scoreboard = false;
 	public final boolean allow_banned_players = false;

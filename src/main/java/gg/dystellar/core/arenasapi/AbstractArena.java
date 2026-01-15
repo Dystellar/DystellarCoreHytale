@@ -19,9 +19,6 @@ public abstract class AbstractArena {
 
     public static final ItemStack WAND = new ItemStack(Material.BLAZE_ROD);
 
-	/**
-	 * 
-	 */
     public static void init() {
         ItemMeta meta = WAND.getItemMeta();
         meta.setDisplayName(ChatColor.YELLOW + "Utility Wand");

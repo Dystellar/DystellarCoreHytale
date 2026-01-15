@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 
 import net.zylesh.dystellarcore.core.User;
 import net.zylesh.dystellarcore.core.inbox.Sendable;

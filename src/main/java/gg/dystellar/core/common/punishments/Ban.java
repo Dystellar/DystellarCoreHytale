@@ -1,12 +1,5 @@
 package gg.dystellar.core.common.punishments;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.utils.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-
 import java.time.LocalDateTime;
 
 public class Ban extends Punishment {
@@ -16,7 +9,7 @@ public class Ban extends Punishment {
     private boolean isAlsoIP = false;
 
     public Ban(LocalDateTime expirationDate, String reason) {
-        super(expirationDate, reason);
+        super(expirationDate, reason, false, false, false, false);
     }
 
     public Ban(int id, LocalDateTime creationDate, LocalDateTime expirationDate, String reason, boolean isAlsoIP) {
@@ -41,16 +34,6 @@ public class Ban extends Punishment {
         }
     }
 
-    @Override
-    public boolean allowChat() {
-        return false;
-    }
-
-    @Override
-    public boolean allowRanked() {
-        return false;
-    }
-
     public boolean isAlsoIP() {
         return isAlsoIP;
     }
@@ -60,18 +43,8 @@ public class Ban extends Punishment {
     }
 
     @Override
-    public boolean allowUnranked() {
-        return false;
-    }
-
-    @Override
     public byte getSerializedId() {
         return SERIALIZATION_ID;
-    }
-
-    @Override
-    public boolean allowJoinMinigames() {
-        return false;
     }
 
     @Override

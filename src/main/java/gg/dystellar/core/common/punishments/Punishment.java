@@ -1,9 +1,5 @@
 package gg.dystellar.core.common.punishments;
 
-import net.zylesh.dystellarcore.core.PlayerPunishedEvent;
-import net.zylesh.dystellarcore.core.User;
-import org.bukkit.Bukkit;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -12,35 +8,44 @@ public abstract class Punishment implements Comparable<Punishment> {
     private final LocalDateTime creationDate;
     private final LocalDateTime expirationDate;
     private final String reason;
-    protected final int id;
+    protected int id = -1;
+	private final boolean allowChat;
+	private final boolean allowRanked;
+	private final boolean allowUnranked;
+	private final boolean allowJoinMinigames;
 
-    protected Punishment(LocalDateTime expirationDate, String reason) {
+    protected Punishment(final LocalDateTime expirationDate, final String reason, boolean allowChat, boolean allowRanked, boolean allowUnranked, boolean allowJoinMinigames) {
         this.creationDate = LocalDateTime.now();
         this.expirationDate = expirationDate;
         this.reason = reason;
-        this.id = (int) (Math.random() * (double) 31 * (double) 1000000 / (double) 3);
+
+		this.allowChat = allowChat;
+		this.allowRanked = allowRanked;
+		this.allowUnranked = allowUnranked;
+		this.allowJoinMinigames = allowJoinMinigames;
     }
 
-    protected Punishment(int id, LocalDateTime creationDate, LocalDateTime expirationDate, String reason) {
+    protected Punishment(int id, LocalDateTime creationDate, LocalDateTime expirationDate, String reason, boolean allowChat, boolean allowRanked, boolean allowUnranked, boolean allowJoinMinigames) {
         this.id = id;
         this.creationDate = creationDate;
         this.expirationDate = expirationDate;
         this.reason = reason;
+
+		this.allowChat = allowChat;
+		this.allowRanked = allowRanked;
+		this.allowUnranked = allowUnranked;
+		this.allowJoinMinigames = allowJoinMinigames;
     }
 
     public abstract byte getSerializedId();
 
-    public void onPunishment(User user) {
-        Bukkit.getPluginManager().callEvent(new PlayerPunishedEvent(user, this));
-    }
+    public final boolean allowChat() { return this.allowChat; }
 
-    public abstract boolean allowChat();
+    public final boolean allowRanked() { return this.allowRanked; }
 
-    public abstract boolean allowRanked();
+    public final boolean allowUnranked() { return this.allowUnranked; }
 
-    public abstract boolean allowUnranked();
-
-    public abstract boolean allowJoinMinigames();
+    public final boolean allowJoinMinigames() { return this.allowJoinMinigames; }
 
     public abstract String getMessage();
 
@@ -78,10 +83,5 @@ public abstract class Punishment implements Comparable<Punishment> {
             return 1;
         }
         return 0;
-    }
-
-    @Override
-    public int hashCode() {
-        return id;
     }
 }
