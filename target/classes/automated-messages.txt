@@ -1,7 +1,0 @@
-# For various lines, use "-%+" separator. example: line-one-text-%+line-two-text
--=<some-minecraft-json-text>
--=<some-minecraft-json-text>
--=<some-minecraft-json-text>
--=<some-minecraft-json-text>
--=<some-minecraft-json-text>
--=<some-minecraft-json-text>
