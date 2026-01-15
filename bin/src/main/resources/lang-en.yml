@@ -1,0 +1,44 @@
+# Config version. Do not modify this field!
+config-version: 1.1
+#
+# <player> placeholder: will be replaced with the affected player when applicable.
+# <seconds> placeholder: will be replaced with an integer value representing seconds when applicable.
+
+#
+# ===============================================================================
+# Friend command messages.
+# ===============================================================================
+#
+friend-request-accepted-sender: "§3<player> §ahas accepted your friend request!"
+friend-request-rejected-sender: "§3<player> §chas rejected your friend request."
+friend-request-accepted-receiver: "§aFriend request accepted!"
+friend-request-rejected-receiver: "§cFriend request rejected."
+player-not-on-friends-list: "§cThis player is not in your friends list."
+friend-removed-sender: "§c<player> has been removed from your friends list."
+friend-removed-receiver: "§c<player> has removed you from their friends list. (He removed you)"
+find-same-server-as-sender: "§3<player> §ais in your same server!"
+friend-request-expired: "§cYou don't have any pending friend requests. (Or it has expired)"
+friend-requests-enabled: "§3You are able to receive friend requests."
+friend-requests-disabled: "§cYou are no longer able to receive friend requests."
+
+#
+# ===============================================================================
+# Block/Ignore command messages.
+# ===============================================================================
+#
+player-blocked: "§3You blocked §f<player>§3."
+error-player-already-blocked: "§cThis player is already in your blocked players list."
+blacklist-empty: "§3Your blocked players list is empty. You have no enemies §e😎"
+blacklist-player-removed: "§aYou've removed §3<player> §afrom your blocked players list."
+error-player-not-on-blacklist: "§cThis player is not in your blocked players list."
+blocking-pointless-hint: "§cWarning: §3You are blocking someone while not blocking ANY message! You may want to change that using §e/pms§3."
+
+#
+# ===============================================================================
+# MSG/Reply command messages.
+# ===============================================================================
+#
+cant-send-pms-disabled: "§cYou can't send messages while blocking all private messages. Enable them with §e/pms§c."
+player-in-dnd-mode: "§c<player> is playing ranked and thus not receiving private messages due to Do Not Disturb mode."
+error-you-are-blocked: "§cThis player has blocked you."
+error-no-reply-cache: "§cYou don't have anyone to reply to."

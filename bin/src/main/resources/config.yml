@@ -1,0 +1,29 @@
+debug-mode: false
+teleport-on-join: false
+teleport-on-void: false
+scoreboard-enabled: false
+allow-banned-players: false
+handle-spawn-protection: false
+handle-spawn-mechanics: false
+send-texturepack: false
+texturepack-link: https://example.com/
+sha1sum-texturepack: 4f4257210bd4019cf085338fbc90d9d3128960a5
+
+# Title has a limit of 16 characters, while every line has a limit of 32 characters.
+####################################################################################
+# Placeholders:
+# <player_name>
+# <ping>
+####################################################################################
+scoreboard:
+  title: "&3Dystellar"
+  lines:
+    - "some text"
+    - "some text"
+    - "some text"
+    - "some text"
+  refresh-rate: 500 # in milliseconds. 1000 millis = 1 second.
+
+automated-messages-enabled: true
+automated-messages-rate: 360 # in seconds.
+prevent-weather-changing: true
