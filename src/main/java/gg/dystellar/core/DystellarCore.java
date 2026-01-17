@@ -1,33 +1,31 @@
 package gg.dystellar.core;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
-import com.hypixel.hytale.server.core.util.Config;
 
 import gg.dystellar.core.services.Services;
 import gg.dystellar.core.utils.Hooks;
 import gg.dystellar.core.common.PacketListener;
 import gg.dystellar.core.common.User;
 import gg.dystellar.core.common.inbox.Inbox;
+import gg.dystellar.core.config.Config;
+import gg.dystellar.core.config.Messages;
+import gg.dystellar.core.config.Setup;
 import gg.dystellar.core.listeners.*;
 import gg.dystellar.core.arenasapi.AbstractArena;
 import gg.dystellar.core.commands.*;
 
 public final class DystellarCore extends JavaPlugin {
 
-	private static final Gson GSON = new Gson();
     private static DystellarCore INSTANCE;
 
-	public static Gson getGson() { return GSON; }
     public static DystellarCore getInstance() { return INSTANCE; }
 	public static HytaleLogger getLog() { return getInstance().LOGGER; }
 
@@ -80,8 +78,8 @@ public final class DystellarCore extends JavaPlugin {
      * Setup commands
      */
 	@Override
-protected void setup() {
-	this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
+	protected void setup() {
+		this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
 	}
 
     public static final String CHANNEL = "dyst:ellar";
@@ -89,16 +87,10 @@ protected void setup() {
     public final File conf = new File(getDataFolder(), "config.yml");
     public final File si = new File(getDataFolder(), "spawnitems.yml");
     public final File am = new File(getDataFolder(), "automated-messages.txt");
-    public final File m = new File(getDataFolder(), "lang-en.yml");
 
-    private final Config<> lang = new Config<>(path, name, codec);
-    private final YamlConfiguration config = YamlConfiguration.loadConfiguration(conf);
+	private final Config<Setup> config = new Config<>("setup.json", Setup.class);
+	private final Config<Messages> lang_en = new Config<>("lang_en.json", Messages.class);
     private final YamlConfiguration spawnitems = YamlConfiguration.loadConfiguration(si);
-    @Override
-    public void onEnable() {
-        INSTANCE = this;
-
-    }
 
     @Override
     public void onDisable() {
@@ -109,6 +101,7 @@ protected void setup() {
     }
 
     private void loadConfig() {
+
         try {
             Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[Dystellar] Loading configuration...");
             saveResource("config.yml", false);

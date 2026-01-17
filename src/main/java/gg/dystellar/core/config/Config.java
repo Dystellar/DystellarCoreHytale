@@ -1,24 +1,86 @@
 package gg.dystellar.core.config;
 
-/**
- * Plugin configuration, these are just values because after investigating the hytale API,
- * I think what it does is load a json file into a java object, and uses reflection
- * to forcefully modify a class's attributes, so the json config in theory would be dumped
- * into this values.
- *
- * This should be tested though, as it's just my conclusion after reading the source code, and it's pure speculation.
- */
-public class Config {
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.Supplier;
 
-	public final boolean debug_mode = false;
-	public final boolean scoreboard = false;
-	public final boolean allow_banned_players = false;
-	public final boolean resourcepack = false;
-	public final String resourcepack_url = "https://example.com";
-	public final String resourcepack_sha1 = "4f4257210bd4019cf085338fbc90d9d3128960a5";
-	public final boolean automated_messages = false;
-	public final int automated_messages_rate = 240; // In seconds
-	public final boolean prevent_weather = true;
-	public final String api = "http://localhost"; // Backend url
-	public final String api_key = "secretkey"; // Provided by the backend
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.hypixel.hytale.server.core.plugin.JavaPlugin;
+
+/**
+ * Common configuration utils.
+ *
+ * The contents of the underlying T instance can be freely modified,
+ * when Config#save() is used it will update accordingly.
+ */
+public final class Config<T> implements Supplier<T> {
+
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	
+	public static Gson getGson() { return GSON; }
+
+	private T value;
+
+	private final Class<T> clazz;
+	public final File file;
+
+	/**
+	 * Create a managed configuration instance.
+	 * The file must be a json file.
+	 *
+	 * @param plugin The plugin where this configuration is from
+	 * @param filename Name of the file, only name, no path
+	 * @param type configuration type class e.g. MyAwesomeConfig.class
+	 */
+	public Config(JavaPlugin plugin, String filename, Class<T> type) {
+		this.file = new File(plugin.getDataDirectory().toFile(), filename);
+		this.clazz = type;
+	}
+
+	/**
+	 * Loads the configuration from the file.
+	 * If the file doesn't exist, it tries to create a new file,
+	 * and will be filled with the defaults.
+	 *
+	 * To get the defaults, it will try to instantiate a constructor of T with no parameters,
+	 * and will fail if there is no such constructor.
+	 */
+	public void load() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException, IOException {
+		if (!this.file.exists()) {
+			file.mkdirs();
+			this.value = this.clazz.getConstructor().newInstance();
+
+			this.save();
+		} else {
+			FileReader r = new FileReader(this.file);
+
+			this.value = GSON.fromJson(r, this.clazz);
+			r.close();
+		}
+
+	}
+
+	/**
+	 * Save the contents of T value into the file as json
+	 */
+	public void save() throws IOException {
+		if (this.value != null) {
+			FileWriter w = new FileWriter(this.file);
+
+			w.write(GSON.toJson(this.value));
+			w.close();
+		}
+	}
+
+	/**
+	 * WARNING! If Config#load() is not called, this will return null.
+	 */
+	@Override
+	public T get() {
+	    return this.value;
+	}
 }
