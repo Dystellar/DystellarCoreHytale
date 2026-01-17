@@ -1,11 +1,5 @@
 package gg.dystellar.core.perms;
 
-import org.bukkit.permissions.Permissible;
-import org.bukkit.permissions.PermissibleBase;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-
-import net.zylesh.dystellarcore.core.User;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;

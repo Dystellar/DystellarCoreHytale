@@ -60,7 +60,7 @@
 		<artifactId>server</artifactId>
 		<version>latest</version>
 		<scope>system</scope>
-		<systemPath>/home/inti/IdeaProjects/hytaletest/Server/HytaleServer.jar</systemPath>
+		<systemPath>${basedir}/libs/HytaleServer.jar</systemPath>
 	</dependency>
 </dependencies>
 </project>
