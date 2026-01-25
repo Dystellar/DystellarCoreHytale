@@ -84,12 +84,8 @@ public final class DystellarCore extends JavaPlugin {
 
     public static final String CHANNEL = "dyst:ellar";
 
-    public final File conf = new File(getDataFolder(), "config.yml");
-    public final File si = new File(getDataFolder(), "spawnitems.yml");
-    public final File am = new File(getDataFolder(), "automated-messages.txt");
-
-	private final Config<Setup> config = new Config<>("setup.json", Setup.class);
-	private final Config<Messages> lang_en = new Config<>("lang_en.json", Messages.class);
+	private final Config<Setup> config = new Config<>(this, "setup.json", Setup.class);
+	private final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
     private final YamlConfiguration spawnitems = YamlConfiguration.loadConfiguration(si);
 
     @Override

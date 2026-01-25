@@ -48,9 +48,8 @@ public class User {
     }
 
     public static final byte PMS_ENABLED = 0;
-    public static final byte PMS_ENABLED_WITH_IGNORELIST = 1;
-    public static final byte PMS_ENABLED_FRIENDS_ONLY = 2;
-    public static final byte PMS_DISABLED = 3;
+    public static final byte PMS_ENABLED_FRIENDS_ONLY = 1;
+    public static final byte PMS_DISABLED = 2;
 
     private final UUID id;
     private boolean globalChatEnabled = true;

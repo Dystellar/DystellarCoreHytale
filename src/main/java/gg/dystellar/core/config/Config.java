@@ -9,6 +9,9 @@ import java.util.function.Supplier;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 
 /**
@@ -19,7 +22,20 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
  */
 public final class Config<T> implements Supplier<T> {
 
-	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	private static final Gson GSON = new GsonBuilder()
+		.setPrettyPrinting()
+		.registerTypeAdapter(Boolean.class, new TypeAdapter<Boolean>() {
+			@Override
+			public Boolean read(JsonReader arg0) throws IOException { return arg0.nextBoolean(); }
+
+			@Override
+			public void write(JsonWriter arg0, Boolean arg1) throws IOException {
+				if (Boolean.TRUE.equals(arg1))
+					arg0.value(true);
+				else arg0.nullValue();
+			}
+		})
+		.create();
 	
 	public static Gson getGson() { return GSON; }
 

@@ -1,29 +1,43 @@
 package gg.dystellar.core.commands;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.Argument;
+import com.hypixel.hytale.server.core.command.system.arguments.system.FlagArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.permissions.provider.HytalePermissionsProvider;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 /**
  * Custom ban command, generally the same as the builtin ban command but this also notifies the backend and updates the player's profile.
  * Porting this to hytale's API
  */
-public class BanCommand extends CommandBase {
+public class BanCommand extends AbstractAsyncCommand {
+
+	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF);
+	private final RequiredArg<String> reasonArg = this.withRequiredArg("reason", "Why punishing this player", ArgTypes.STRING);
+	private final OptionalArg<String> timeArg = this.withOptionalArg("time", "Duration of the punishment e.g. 30m, 30d, 2y", ArgTypes.STRING);
+	private final FlagArg ipbanArg = this.withFlagArg("ipban", "If the punishment also applies to the player's IP address");
 
     public BanCommand(String name, String description) {
 		super(name, description);
+		this.requirePermission("dystellar.punish");
     }
 
 	@Override
-	protected void executeSync(CommandContext ctx) {
-	    final var sender = ctx.sender();
-		if (!sender.hasPermission("dystellar.punish")) {
-			ctx.sendMessage(Message.raw("§4No permission"));
-			return;
-		}
+	protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
+		final var sender = ctx.sender();
+
+		final var player = ctx.get(playerArg);
+		return CompletableFuture.completedFuture(null);
 	}
 
     @Override

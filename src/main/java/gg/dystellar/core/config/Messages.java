@@ -1,70 +1,250 @@
 package gg.dystellar.core.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import com.hypixel.hytale.server.core.Message;
+
+import gg.dystellar.core.utils.Utils;
+
 /**
- * Plugin messages, these are just values because gson will dump values from json on these.
+ * Plugin messages, these are just values because gson will dump values from json.
  */
 public class Messages {
-	public double config_version = 0;
-
-	public String pms_enabled = "§aYou are now accepting all private messages.";
-	public String pms_enabled_blocking = "§eYou are now blocking messages from unwanted players.";
-	public String pms_enabled_friends_only = "§6You are now only accepting messages from friends.";
-	public String pms_disabled = "§cYou are now blocking all messages.";
-	public String player_msg_disabled = "§c<player> has disabled private messages.";
-	public String msg_send_format = "§7(§dTo <receiver>§7) §b<message>";
-	public String msg_receive_format = "§7(§dFrom <sender>§7) §b<message>";
-	public String command_deny_ingame = "§cYou're not allowed to use this command in-game.";
-	public String no_permission = "§cYou don't have permission to perform this action.";
-	public String error_player_not_online = "§cThis player is not online.";
-	public String error_player_no_longer_online = "§cThis player is no longer online.";
-	public String error_player_does_not_exist = "§cThis player does not exist or is not online.";
-	public String error_player_not_found = "§cThis player does not exist in our database.";
-	public String error_input_not_number = "§cInput must be a number, try again.";
-	public String error_not_a_player = "§cYou must be a player to perform this action.";
-	public String server_connection_error = "§cError trying to connect to server.";
-	public String cooldown = "§cYou are on cooldown, wait <seconds> seconds before performing this action again.";
-	public String prefix_not_owned = "§cYou don't have this prefix.";
-	public String global_chat_enabled = "§aYou've enabled global chat.";
-	public String global_chat_disabled = "§3You've disabled global chat.";
-	public String broadcast_format = "[§cBroadcast§f] §e<message>";
-	public String mute_message = "§cYou are muted. Expires in <time>";
-	public String ranked_ban_message = "§cYou are banned from playing ranked. Contact staff for more information.";
-	public String kick_message = "§cYou have been kicked from the server. Reason: §f<reason>";
-	public String[] ban_message = {
-		"§4§lYou are banned",
-		"Reason: <reason>",
-		"Expires: <time>",
-		"You may purchase an unban at https://dystellar.gg/"
+	private ColorDeclaration[] color_declarations = {
+		new ColorDeclaration("Black", "#000000"),
+		new ColorDeclaration("DarkBlue", "#0000AA"),
+		new ColorDeclaration("DarkGreen", "#00AA00"),
+		new ColorDeclaration("DarkAqua", "#00AAAA"),
+		new ColorDeclaration("DarkRed", "#AA0000"),
+		new ColorDeclaration("Gold", "#FFAA00"),
+		new ColorDeclaration("Gray", "#AAAAAA"),
+		new ColorDeclaration("DarkGray", "#555555"),
+		new ColorDeclaration("Blue", "#5555FF"),
+		new ColorDeclaration("Green", "#55FF55"),
+		new ColorDeclaration("Aqua", "#55FFFF"),
+		new ColorDeclaration("Red", "#FF5555"),
+		new ColorDeclaration("Orange", "#EB7114"),
+		new ColorDeclaration("Yellow", "#FFFF55"),
+		new ColorDeclaration("White", "#FFFFFF"),
+		new ColorDeclaration("LightPurple", "#FF55FF"),
+		new ColorDeclaration("MaterialGold", "#DEB12D"),
+		new ColorDeclaration("MaterialQuartz", "#E3D4D1"),
+		new ColorDeclaration("MaterialIron", "#CECACA"),
+		new ColorDeclaration("MaterialCopper", "#B4684D"),
+		new ColorDeclaration("MaterialEmerald", "#47A036"),
+		new ColorDeclaration("DarkerRed", "#971607"),
+		new ColorDeclaration("Danger", "#AA0000", true, false, false, false),
 	};
-	public String[] blacklist_message = {
-		"§4§lYou are blacklisted",
-		"Reason: <reason>",
-		"Expires: Never",
+
+	private String pms_enabled = "<Green>You are now accepting all private messages.";
+	private String pms_enabled_blocking = "<Yellow>You are now blocking messages from unwanted players.";
+	private String pms_enabled_friends_only = "<Gold>You are now only accepting messages from friends.";
+	private String pms_disabled = "<Red>You are now blocking all messages.";
+	private String player_msg_disabled = "<Red>{player} has disabled private messages.";
+	private String msg_send_format = "<Gray>(To <LightPurple>{receiver}<Gray>) <Aqua>{message}";
+	private String msg_receive_format = "<Gray>(From <LightPurple>{sender}<Gray>) <Aqua>{message}";
+	private String command_deny_ingame = "<Red>You're not allowed to use this command in-game.";
+	private String no_permission = "<Red>You don't have permission to perform this action.";
+	private String error_player_not_online = "<Red>This player is not online.";
+	private String error_player_no_longer_online = "<Red>This player is no longer online.";
+	private String error_player_does_not_exist = "<Red>This player does not exist or is not online.";
+	private String error_player_not_found = "<Red>This player does not exist in our database.";
+	private String error_input_not_number = "<Red>Input must be a number, try again.";
+	private String error_not_a_player = "<Red>You must be a player to perform this action.";
+	private String server_connection_error = "<Red>Error trying to connect to server.";
+	private String cooldown = "<Red>You are on cooldown, wait {seconds} seconds before performing this action again.";
+	private String prefix_not_owned = "<Red>You don't have this prefix.";
+	private String global_chat_enabled = "<Green>You've enabled global chat.";
+	private String global_chat_disabled = "<DarkAqua>You've disabled global chat.";
+	private String broadcast_format = "<Gray>[<Red>Broadcast<Gray>] <Yellow>{message}";
+	private String mute_message = "<Red>You are muted. Expires in {time}";
+	private String ranked_ban_message = "<Red>You are banned from playing ranked. Contact staff for more information.";
+	private String kick_message = "<Red>You have been kicked from the server. Reason: <White>{reason}";
+	private String[] ban_message = {
+		"<Danger>You are banned",
+		"<Red>Reason<White>: {reason}",
+		"<Red>Expires<White>: {time}",
+		"You may purchase an unban at <DarkPurple>https://dystellar.gg/"
+	};
+	private String[] blacklist_message = {
+		"<Danger>You are blacklisted",
+		"<Red>Reason<White>: <reason>",
+		"<Red>Expires<White>: Never",
 		"This type of punishment cannot be appealed."
 	};
-	public String[] warn_message = {
-		"§7§m----------------------------------",
+	private String[] warn_message = {
+		"<Gray>----------------------------------",
 		" ",
-		"§cYou have been warned!",
-		"Reason: <reason>",
+		"<Red>You have been warned!",
+		"<Red>Reason<White>: <reason>",
 		" ",
-		"§4Be careful, getting multiple warnings will get you banned!",
+		"<DarkRed>Be careful, getting multiple warnings will get you banned!",
 		" ",
-		"§7§m----------------------------------"
+		"<Gray>----------------------------------"
 	};
-	public String fly_need_rank = "§cYou need §aplus §crank or higher to enable fly mode.";
-	public String fly_mode_enabled = "§aYou have enabled the fly mode.";
-	public String fly_mode_disabled = "§eYou have disabled the fly mode.";
-	public String fly_mode_enabled_by_admin = "§aAn admin has enabled flight for you.";
-	public String fly_mod_disabled_by_admin = "§cAn admin has disabled flight for you.";
-	public String admin_fly_mod_enabled_other = "§aYou have enabled the fly mode for §3<player>§a.";
-	public String admin_fly_mod_disabled_other = "§eYou have disabled the fly mode for §3<player>§e.";
-	public String[] freeze_message = {
+	private String fly_need_rank = "<Red>You need {rank_name} <Red>rank or higher to enable fly mode.";
+	private String fly_mode_enabled = "<Green>You have enabled the fly mode.";
+	private String fly_mode_disabled = "<Yellow>You have disabled the fly mode.";
+	private String fly_mode_enabled_by_admin = "<Green>An admin has enabled flight for you.";
+	private String fly_mode_disabled_by_admin = "<Red>An admin has disabled flight for you.";
+	private String admin_fly_mod_enabled_other = "<Green>You have enabled the fly mode for <DarkAqua>{player}<Green>.";
+	private String admin_fly_mod_disabled_other = "<Yellow>You have disabled the fly mode for <DarkAqua>{player}<Yellow>.";
+	private String[] freeze_message = {
 		"--------------------------------",
-		"&cYou have been frozen!",
+		"<Danger>You have been frozen!",
 		"--------------------------------",
 	};
-	public String unfreeze_message = "§aYou have been unfreezed. Sorry and thanks for your time!";
-	public String staff_message_freeze = "§e<player> is now frozen.";
-	public String staff_message_unfreeze = "§a<player> is now free to go.";
+	private String unfreeze_message = "<Green>You have been unfreezed. Sorry and thanks for your time!";
+	private String staff_message_freeze = "<Yellow>{player} is now frozen.";
+	private String staff_message_unfreeze = "<Green>{player} is now free to go.";
+
+	private Message parseMsg(String msg) {
+		StringBuilder builder = new StringBuilder(msg);
+		List<Message> parts = new ArrayList<>();
+		int idx = 0;
+		int from = 0;
+		Optional<ColorDeclaration> opt = Optional.empty();
+
+		while ((idx = builder.indexOf("<", from)) != -1) {
+			if (idx > 0) {
+				if (opt.isPresent()) {
+					var col = opt.get();
+					parts.add(Message.raw(builder.substring(from, idx))
+						.color(col.hex_color)
+						.bold(col.bold)
+						.italic(col.italic)
+						.monospace(col.monospace));
+				} else {
+					parts.add(Message.raw(builder.substring(from, idx)));
+				}
+			}
+			from = idx + 1;
+			int end = builder.indexOf(">", from);
+			if (end == -1)
+				break;
+
+			String key = builder.substring(from, end);
+			opt = Utils.findArr(this.color_declarations, declaration -> declaration.name == key);
+		}
+		if (idx > 0) {
+			if (opt.isPresent()) {
+				var col = opt.get();
+				parts.add(Message.raw(builder.substring(from, idx))
+					.color(col.hex_color)
+					.bold(col.bold)
+					.italic(col.italic)
+					.monospace(col.monospace));
+			} else {
+				parts.add(Message.raw(builder.substring(from, idx)));
+			}
+		}
+
+		return Message.join(parts.toArray(new Message[parts.size()]));
+	}
+
+	public void compile() {
+		this.pmsEnabled = parseMsg(pms_enabled);
+		this.pmsEnabledBlocking = parseMsg(pms_enabled_blocking);
+		this.pmsEnabledFriendsOnly = parseMsg(pms_enabled_friends_only);
+		this.pmsDisabled = parseMsg(pms_disabled);
+		this.playerMsgDisabled = parseMsg(player_msg_disabled);
+		this.msgSendFormat = parseMsg(msg_send_format);
+		this.msgReceiveFormat = parseMsg(msg_receive_format);
+		this.commandDenyIngame = parseMsg(command_deny_ingame);
+		this.noPermission = parseMsg(no_permission);
+		this.errorPlayerNotOnline = parseMsg(error_player_not_online);
+		this.errorPlayerNoLongerOnline = parseMsg(error_player_no_longer_online);
+		this.errorPlayerDoesNotExist = parseMsg(error_player_does_not_exist);
+		this.errorPlayerNotFound = parseMsg(error_player_not_found);
+		this.errorInputNotNumber = parseMsg(error_input_not_number);
+		this.errorNotAPlayer = parseMsg(error_not_a_player);
+		this.serverConnectionError = parseMsg(server_connection_error);
+		this.mCooldown = parseMsg(cooldown);
+		this.prefixNotOwned = parseMsg(prefix_not_owned);
+		this.globalChatEnabled = parseMsg(global_chat_enabled);
+		this.globalChatDisabled = parseMsg(global_chat_disabled);
+		this.broadcastFormat = parseMsg(broadcast_format);
+		this.muteMessage = parseMsg(mute_message);
+		this.rankedBanMessage = parseMsg(ranked_ban_message);
+		this.kickMessage = parseMsg(kick_message);
+		this.banMessage = Arrays.stream(ban_message).map(s -> parseMsg(s)).toArray(Message[]::new);
+		this.blacklistMessage = Arrays.stream(blacklist_message).map(s -> parseMsg(s)).toArray(Message[]::new);
+		this.warnMessage = Arrays.stream(warn_message).map(s -> parseMsg(s)).toArray(Message[]::new);
+		this.flyNeedRank = parseMsg(fly_need_rank);
+		this.flyModeEnabled = parseMsg(fly_mode_enabled);
+		this.flyModeDisabled = parseMsg(fly_mode_disabled);
+		this.flyModeEnabledByAdmin = parseMsg(fly_mode_enabled_by_admin);
+		this.flyModeDisabledByAdmin = parseMsg(fly_mode_disabled_by_admin);
+		this.adminFlyModEnabledOther = parseMsg(admin_fly_mod_enabled_other);
+		this.adminFlyModDisabledOther = parseMsg(admin_fly_mod_disabled_other);
+		this.freezeMessage = Arrays.stream(freeze_message).map(s -> parseMsg(s)).toArray(Message[]::new);
+		this.unfreezeMessage = parseMsg(unfreeze_message);
+		this.staffMessageFreeze = parseMsg(staff_message_freeze);
+		this.staffMessageUnfreeze = parseMsg(staff_message_unfreeze);
+	}
+
+	public transient Message pmsEnabled;
+	public transient Message pmsEnabledBlocking;
+	public transient Message pmsEnabledFriendsOnly;
+	public transient Message pmsDisabled;
+	public transient Message playerMsgDisabled;
+	public transient Message msgSendFormat;
+	public transient Message msgReceiveFormat;
+	public transient Message commandDenyIngame;
+	public transient Message noPermission;
+	public transient Message errorPlayerNotOnline;
+	public transient Message errorPlayerNoLongerOnline;
+	public transient Message errorPlayerDoesNotExist;
+	public transient Message errorPlayerNotFound;
+	public transient Message errorInputNotNumber;
+	public transient Message errorNotAPlayer;
+	public transient Message serverConnectionError;
+	public transient Message mCooldown;
+	public transient Message prefixNotOwned;
+	public transient Message globalChatEnabled;
+	public transient Message globalChatDisabled;
+	public transient Message broadcastFormat;
+	public transient Message muteMessage;
+	public transient Message rankedBanMessage;
+	public transient Message kickMessage;
+	public transient Message[] banMessage;
+	public transient Message[] blacklistMessage;
+	public transient Message[] warnMessage;
+	public transient Message flyNeedRank;
+	public transient Message flyModeEnabled;
+	public transient Message flyModeDisabled;
+	public transient Message flyModeEnabledByAdmin;
+	public transient Message flyModeDisabledByAdmin;
+	public transient Message adminFlyModEnabledOther;
+	public transient Message adminFlyModDisabledOther;
+	public transient Message[] freezeMessage;
+	public transient Message unfreezeMessage;
+	public transient Message staffMessageFreeze;
+	public transient Message staffMessageUnfreeze;
+
+	private static class ColorDeclaration {
+		private String name;
+		private String hex_color;
+		private boolean bold = false;
+		private boolean italic = false;
+		private boolean monospace = false;
+		private boolean underlined = false;
+
+		public ColorDeclaration(final String name, final String hexColor) {
+			this.name = name;
+			this.hex_color = hexColor;
+		}
+
+		public ColorDeclaration(final String name, final String hexColor, boolean bold, boolean italic, boolean monospace, boolean underlined) {
+			this.name = name;
+			this.hex_color = hexColor;
+			this.bold = bold;
+			this.italic = italic;
+			this.monospace = monospace;
+			this.underlined = underlined;
+		}
+	}
 }

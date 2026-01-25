@@ -13,8 +13,19 @@ import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 public class Utils {
+
+	public static <T> Optional<T> findArr(T[] arr, Predicate<T> predicate) {
+		for (T t : arr) {
+			if (predicate.test(t))
+				return Optional.ofNullable(t);
+		}
+
+		return Optional.empty();
+	}
 
     /**
      * Formats the time from an expiration date.
