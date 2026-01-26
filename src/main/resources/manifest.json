@@ -12,6 +12,7 @@
   ],
   "Main": "gg.dystellar.core.DystellarCore",
   "Website": "https://dystellar.gg",
+  "IncludesAssetPack": true,
   "ServerVersion": "*",
   "Dependencies": {},
   "OptionalDependencies": {},

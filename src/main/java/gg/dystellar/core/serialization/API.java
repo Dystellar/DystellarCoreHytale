@@ -1,134 +1,76 @@
 package gg.dystellar.core.serialization;
 
 import gg.dystellar.core.DystellarCore;
-import net.zylesh.dystellarcore.core.inbox.Inbox;
-import net.zylesh.dystellarcore.core.Suffix;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.core.inbox.Sendable;
-import net.zylesh.dystellarcore.core.punishments.Ban;
-import net.zylesh.dystellarcore.core.punishments.Punishment;
-import net.zylesh.dystellarcore.core.punishments.SenderContainer;
-import net.zylesh.dystellarcore.utils.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.mariadb.jdbc.MariaDbDataSource;
+import gg.dystellar.core.common.User;
 
 import javax.annotation.Nullable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+
+import com.google.gson.Gson;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpClient.Redirect;
+import java.net.http.HttpClient.Version;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodyHandler;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.time.Duration;
+import java.util.Optional;
 import java.util.logging.Level;
 
 /**
  * Database storage, should use the backend instead.
  */
-public class MariaDB {
+public final class API {
 
-    private MariaDB() {}
+	private final Gson gson = new Gson();
 
-    private static final int SERIALIZAION_VERSION = 1;
+    public API(String url, String token) throws IOException, InterruptedException {
+		this.url = url;
+		this.token = token;
+		this.client = HttpClient.newBuilder()
+			.version(Version.HTTP_2)
+			.followRedirects(Redirect.NEVER)
+			.connectTimeout(Duration.ofSeconds(20))
+			.build();
+		this.testConnection();
+	}
 
-    private static String HOST;
-    private static int PORT;
-    private static String DATABASE;
-    private static String USER;
-    private static String PASSWORD;
-    private static MariaDbDataSource DS;
+	private final HttpClient client;
+	private final String url;
+	private final String token;
 
-    public static void loadFromConfig() {
-        HOST = DystellarCore.getInstance().getConfig().getString("mariadb.host");
-        PORT = DystellarCore.getInstance().getConfig().getInt("mariadb.port");
-        DATABASE = DystellarCore.getInstance().getConfig().getString("mariadb.database");
-        USER = DystellarCore.getInstance().getConfig().getString("mariadb.user");
-        PASSWORD = DystellarCore.getInstance().getConfig().getString("mariadb.password");
-    }
+	private Response getJson(String path) throws IOException, InterruptedException {
+		final var request = HttpRequest.newBuilder(URI.create(this.url + path))
+			.method("GET", BodyPublishers.noBody())
+			.header("Authorization", this.token)
+			.header("Content-Type", "application/json")
+			.build();
+		final HttpResponse<String> res = client.send(request, BodyHandlers.ofString());
 
-    public static void dataSourceTestInit() throws SQLException {
-        MariaDbDataSource ds = new MariaDbDataSource("jdbc:mariadb://" + HOST + ":" + PORT + "/" + DATABASE);
-        ds.setLoginTimeout(5);
-        ds.setUser(USER);
-        ds.setPassword(PASSWORD);
-        DS = ds;
-        try (Connection connection = getConnection()) {
-            if (!connection.isValid(5)) {
-                throw new SQLException("Could not create a connection.");
-            }
-        }
-    }
+		return new Response(res.body(), res.statusCode());
+	}
 
-    @Nullable
-    public static User loadPlayerFromDatabase(UUID uuid, String IP, String name) {
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(
-                "SELECT chat, messages, suffix, punishments, notes, lang, inbox, version, tabcompletion, scoreboard, ignoreList, friends, otherConfigs, tips FROM players_core WHERE uuid = ?;"
-        )) {
-            statement.setString(1, uuid.toString());
-            ResultSet resultSet = statement.executeQuery();
-            User user;
-            if (resultSet.next()) {
-                user = new User(uuid, IP, name);
-                user.setGlobalChatEnabled(resultSet.getBoolean("chat"));
-                user.setPrivateMessagesMode((byte) resultSet.getInt("messages"));
-                user.setSuffix(Suffix.valueOf(resultSet.getString("suffix")));
-                Punishments.deserializePunishments(resultSet.getString("punishments"), user.getPunishments());
-                if (resultSet.getString("notes") != null) user.getNotes().addAll(Punishments.deserializeNotes(resultSet.getString("notes")));
-                user.setLanguage(resultSet.getString("lang"));
-                String inbox = resultSet.getString("inbox");
-                if (inbox == null) {
-                    user.assignInbox(new Inbox(user));
-                } else {
-                    user.assignInbox(InboxSerialization.stringToInbox(inbox, user));
-                }
-                int version = resultSet.getInt("version");
-                user.setVersion(version);
-                user.setGlobalTabComplete(resultSet.getBoolean("tabcompletion"));
-                user.setScoreboardEnabled(resultSet.getBoolean("scoreboard"));
-                for (String uuids : resultSet.getString("ignoreList").split(";"))
-                    user.getIgnoreList().add(UUID.fromString(uuids));
-                if (version == 0) {
-                    user.assignTips(Utils.stringToBytes(resultSet.getString("tips"), true));
-                    user.assignExtraOptions(Utils.stringToBytes(resultSet.getString("otherConfigs"), true));
-                } else {
-                    user.assignTips(Utils.stringToBytes(resultSet.getString("tips"), false));
-                    user.assignExtraOptions(Utils.stringToBytes(resultSet.getString("otherConfigs"), false));
-                }
-                return user;
-            } else {
-                user = new User(uuid, IP, name);
+	private Response requestJson(String path, String method, String json) throws IOException, InterruptedException {
+		final var request = HttpRequest.newBuilder(URI.create(this.url + path))
+			.method(method, BodyPublishers.ofString(json))
+			.header("Authorization", this.token)
+			.header("Content-Type", "application/json")
+			.build();
+		final HttpResponse<String> res = client.send(request, BodyHandlers.ofString());
 
-                byte[] tips = new byte[50];
-                user.assignTips(tips);
+		return new Response(res.body(), res.statusCode());
+	}
 
-                byte[] otherConfigs = new byte[50];
-                otherConfigs[Consts.EXTRA_OPTION_FRIEND_REQUESTS_ENABLED_POS] = Consts.BYTE_TRUE;
-                otherConfigs[Consts.EXTRA_OPTION_RESOURCEPACK_PROMPT_POS] = Consts.BYTE_TRUE;
-                user.assignExtraOptions(otherConfigs);
+	private void testConnection() throws IOException, InterruptedException {
+		if (getJson("/api/signal/status").status != 200)
+			throw new IOException("Backend service didn't respond as expected");
+	}
 
-                return user;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Bukkit.getLogger().log(Level.SEVERE, "Could not load data for " + uuid.toString());
-        }
-        return null;
-    }
-
-    @Nullable
-    public static Mapping loadMapping(String IP) {
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT something1, something2, punishments FROM mappings WHERE something0 = ?;")) {
-            statement.setString(1, IP);
-            ResultSet rs = statement.executeQuery();
-            if (!rs.next()) return null;
-            Set<Punishment> punishmentSet = new HashSet<>();
-            for (String s : rs.getString("punishments").split(":")) punishmentSet.add(Punishments.deserialize(s));
-            return new Mapping(UUID.fromString(rs.getString("something2")), IP, rs.getString("something1"), punishmentSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Bukkit.getLogger().log(Level.SEVERE, "Could not load mapping for " + IP);
-        }
-        return null;
+    public static Optional<User> getPlayer(UUID uuid, String IP, String name) {
     }
 
     /**
@@ -410,4 +352,14 @@ public class MariaDB {
     public static boolean stringIsUUID(String s) {
         return s.length() == 36;
     }
+
+	private static final class Response {
+		public final String json;
+		public final int status;
+
+		public Response(String json, int status) {
+			this.json = json;
+			this.status = status;
+		}
+	}
 }

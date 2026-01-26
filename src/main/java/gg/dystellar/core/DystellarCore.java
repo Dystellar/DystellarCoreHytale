@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.ShutdownReason;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 
@@ -19,15 +21,18 @@ import gg.dystellar.core.config.Config;
 import gg.dystellar.core.config.Messages;
 import gg.dystellar.core.config.Setup;
 import gg.dystellar.core.listeners.*;
+import gg.dystellar.core.serialization.API;
 import gg.dystellar.core.arenasapi.AbstractArena;
 import gg.dystellar.core.commands.*;
 
 public final class DystellarCore extends JavaPlugin {
 
     private static DystellarCore INSTANCE;
+	private static API API;
 
     public static DystellarCore getInstance() { return INSTANCE; }
 	public static HytaleLogger getLog() { return getInstance().LOGGER; }
+	public static API getApi() { return API; }
 
 	private final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
@@ -86,102 +91,36 @@ public final class DystellarCore extends JavaPlugin {
 
 	private final Config<Setup> config = new Config<>(this, "setup.json", Setup.class);
 	private final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
-    private final YamlConfiguration spawnitems = YamlConfiguration.loadConfiguration(si);
-
-    @Override
-    public void onDisable() {
-        Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, "BungeeCord");
-        Bukkit.getMessenger().unregisterIncomingPluginChannel(this, "BungeeCord");
-        Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, CHANNEL);
-        Bukkit.getMessenger().unregisterIncomingPluginChannel(this, CHANNEL);
-    }
+	private final Config<Messages> lang_es = new Config<>(this, "lang_es.json", Messages.class);
 
     private void loadConfig() {
-
         try {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[Dystellar] Loading configuration...");
-            saveResource("config.yml", false);
-            saveResource("spawnitems.yml", false);
-            saveResource("lang-en.yml", false);
-            config.load(conf);
-            spawnitems.load(si);
-            lang.load(m);
-            String currentVersion = lang.getString("config-version");
-            InputStreamReader reader0 = new InputStreamReader(getResource("lang-en.yml"));
-            YamlConfiguration rawLang = YamlConfiguration.loadConfiguration(reader0);
-            reader0.close();
-            String newVersion = rawLang.getString("config-version");
-            if (currentVersion.equals("1.0") && newVersion.equals("1.1")) {
-                saveResource("lang-en.yml", true);
-                lang.load(m);
-            }
-            Msgs.init();
-            if (am.createNewFile()) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(getClassLoader().getResourceAsStream("automated-messages.txt")))); PrintWriter writer = new PrintWriter(am)) {
-                    reader.lines().forEach(writer::println);
-                }
-            }
-            Bukkit.getConsoleSender().sendMessage("[Dystellar] Configuration loaded successfully");
-            try {
-                MariaDB.loadFromConfig();
-                Bukkit.getLogger().info("Testing database configuration provided in config.yml");
-                MariaDB.dataSourceTestInit();
-                initDb();
-                Bukkit.getLogger().info("Your configuration looks great!");
-            } catch (Exception e) {
-                e.printStackTrace();
-                Bukkit.getLogger().severe("Failed to initialize database, check your configuration. Server will now shutdown.");
-                Bukkit.getServer().shutdown();
-            }
-        } catch (IOException | InvalidConfigurationException e) {
+			LOGGER.atInfo().log("[Dystellar] Loading configuration...");
+            config.load();
+
+			API = new API(config.get().api, config.get().api_key);
+
+            lang_en.load();
+            lang_es.load();
+
+			lang_en.get().compile();
+			lang_es.get().compile();
+
+            LOGGER.atInfo().log("[Dystellar] Configuration loaded successfully");
+        } catch (Exception e) {
             e.printStackTrace();
+			LOGGER.atSevere().log("[Dystellat] Failed to load core plugin, server will shutdown");
+			HytaleServer.get().shutdownServer(ShutdownReason.CRASH);
         }
-    }
-
-    public YamlConfiguration getLang() {
-        return lang;
-    }
-
-    private void initDb() throws IOException, SQLException {
-        String setup;
-        try (InputStream in = getClassLoader().getResourceAsStream("database.sql");
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-            setup = reader.lines().collect(Collectors.joining());
-            String[] queries = setup.split(";");
-            for (String query : queries) {
-                if (query.isEmpty()) continue;
-                try (Connection connection = MariaDB.getConnection()) {
-                    PreparedStatement statement = connection.prepareStatement(query);
-                    statement.execute();
-                }
-            }
-        }
-        getLogger().info("§2Database setup complete.");
     }
 
     private void initialize() {
-        ConfValues.init(getConfig());
         Suffix.initialize();
     }
 
     @Override
     public YamlConfiguration getConfig() {
         return config;
-    }
-
-    public YamlConfiguration getSpawnitems() {
-        return spawnitems;
-    }
-
-    @Override
-    public void saveConfig() {
-        try {
-            config.save(conf);
-            spawnitems.save(si);
-            lang.save(m);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void addInboxMessage(UUID target, Sendable sender, Player issuer) {
