@@ -19,6 +19,7 @@ import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -70,7 +71,13 @@ public final class API {
 			throw new IOException("Backend service didn't respond as expected");
 	}
 
-    public static Optional<User> getPlayer(UUID uuid, String IP, String name) {
+    public Optional<User> getPlayer(UUID uuid) throws IOException, InterruptedException {
+		final var res = this.getJson("/api/privileged/player_data?uuid=" + uuid.toString());
+		
+		if (res.status != 200)
+			return Optional.empty();
+
+		return Optional.of(gson.fromJson(res.json, User.class));
     }
 
     /**
