@@ -37,6 +37,11 @@ public class BanCommand extends AbstractAsyncCommand {
 		final var sender = ctx.sender();
 
 		final var player = ctx.get(playerArg);
+		final var reason = ctx.get(reasonArg);
+		final var ipban = ctx.get(ipbanArg);
+		final var time = ctx.get(timeArg);
+
+		
 		return CompletableFuture.completedFuture(null);
 	}
 

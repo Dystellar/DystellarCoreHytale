@@ -2,6 +2,7 @@ package gg.dystellar.core.serialization;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.User;
+import gg.dystellar.core.common.punishments.Punishment;
 
 import javax.annotation.Nullable;
 
@@ -79,6 +80,10 @@ public final class API {
 
 		return Optional.of(gson.fromJson(res.json, User.class));
     }
+
+	public Optional<Punishment> punish() {
+		
+	}
 
     /**
      * Highly recommended to do this async
@@ -165,148 +170,6 @@ public final class API {
         }
     }
 
-    public static void deletePlayerData(User user) {
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(
-                "DELETE FROM players_core WHERE uuid = ?;"
-        )) {
-            statement.setString(1, user.getUUID().toString());
-            statement.execute();
-            if (User.getUsers().containsKey(user.getUUID())) {
-                User realUser = User.get(user.getUUID());
-                User user1 = new User(realUser.getUUID(), realUser.getIp(), realUser.getName());
-                User.getUsers().replace(realUser.getUUID(), user1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Bukkit.getLogger().log(Level.SEVERE, "Could not delete data for " + user.toString());
-        }
-    }
-
-    public static Connection getConnection() throws SQLException {
-        return DS.getConnection();
-    }
-
-    public static void deleteAllData(CommandSender sender) {
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(
-                "SELECT uuid FROM players_core;"
-        )) {
-            ResultSet resultSet = statement.executeQuery();
-            List<User> players = new ArrayList<>();
-            while (resultSet.next()) {
-                User user = new User(UUID.fromString(resultSet.getString("uuid")), "", "");
-                players.add(user);
-            }
-            players.forEach(MariaDB::deletePlayerData);
-            sender.sendMessage(ChatColor.GREEN + "You deleted all data.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Bukkit.getLogger().log(Level.SEVERE, "Could not delete data.");
-        }
-    }
-
-    public static Set<Mapping> getUUIDMappings(UUID... uuids) {
-        Set<Mapping> uuidMappings = new HashSet<>();
-        Set<UUID> uuids1 = new HashSet<>(Arrays.asList(uuids));
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT something0, something1, something2, punishments FROM mappings;")) {
-            ResultSet rs = statement.executeQuery();
-            if (uuids1.isEmpty()) {
-                while (rs.next()) {
-                    String uuid = rs.getString("something0");
-                    if (!stringIsUUID(uuid)) continue;
-                    String ip = rs.getString("something1");
-                    String name = rs.getString("something2");
-                    Set<Punishment> punishmentSet = null;
-                    String punishments = rs.getString("punishments");
-                    if (punishments != null) {
-                        punishmentSet = new HashSet<>();
-                        for (String s : punishments.split(":"))
-                            punishmentSet.add(Punishments.deserialize(s));
-                    }
-                    uuidMappings.add(new Mapping(UUID.fromString(uuid), ip, name, punishmentSet));
-                }
-            } else {
-                while (rs.next()) {
-                    String uuid = rs.getString("something0");
-                    UUID realUUID = UUID.fromString(uuid);
-                    if (!stringIsUUID(uuid) || !uuids1.contains(realUUID)) continue;
-                    String ip = rs.getString("something1");
-                    String name = rs.getString("something2");
-                    Set<Punishment> punishmentSet = null;
-                    String punishments = rs.getString("punishments");
-                    if (punishments != null) {
-                        punishmentSet = new HashSet<>();
-                        for (String s : punishments.split(":"))
-                            punishmentSet.add(Punishments.deserialize(s));
-                    }
-                    uuidMappings.add(new Mapping(UUID.fromString(uuid), ip, name, punishmentSet));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return uuidMappings;
-    }
-
-    /*
-    UUID, IP, Name
-    IP, Name, UUID
-    Name, UUID, IP
-     */
-
-    @Nullable
-    public static UUID loadUUID(String aString) {
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT something1, something2 FROM mappings WHERE something0 = ?;")) {
-            statement.setString(1, aString);
-            ResultSet rs = statement.executeQuery();
-            if (!rs.next()) return null;
-            if (stringIsIP(aString)) {
-                return UUID.fromString(rs.getString("something2"));
-            } else {
-                return UUID.fromString(rs.getString("something1"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Bukkit.getLogger().log(Level.SEVERE, "Could not load UUID from " + aString);
-        }
-        return null;
-    }
-
-    @Nullable
-    public static String loadIP(String aString) {
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT something1, something2 FROM mappings WHERE something0 = ?;")) {
-            statement.setString(1, aString);
-            ResultSet rs = statement.executeQuery();
-            if (!rs.next()) return null;
-            if (stringIsUUID(aString)) {
-                return rs.getString("something1");
-            } else {
-                return rs.getString("something2");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Bukkit.getLogger().log(Level.SEVERE, "Could not load UUID from " + aString);
-        }
-        return null;
-    }
-
-    @Nullable
-    public static String loadName(String aString) {
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT something1, something2 FROM mappings WHERE something0 = ?;")) {
-            statement.setString(1, aString);
-            ResultSet rs = statement.executeQuery();
-            if (!rs.next()) return null;
-            if (stringIsUUID(aString)) {
-                return rs.getString("something2");
-            } else if (stringIsIP(aString)) {
-                return rs.getString("something1");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Bukkit.getLogger().log(Level.SEVERE, "Could not load UUID from " + aString);
-        }
-        return null;
-    }
-
     public static SenderContainer[] loadSenderContainers() {
         Set<SenderContainer> containers = new HashSet<>();
         try (
@@ -350,14 +213,6 @@ public final class API {
             e.printStackTrace();
             Bukkit.getLogger().log(Level.SEVERE, "Could not delete sender container.");
         }
-    }
-
-    public static boolean stringIsIP(String s) {
-        return s.split("\\.").length == 4 && s.matches("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+");
-    }
-
-    public static boolean stringIsUUID(String s) {
-        return s.length() == 36;
     }
 
 	private static final class Response {

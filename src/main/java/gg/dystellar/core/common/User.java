@@ -1,35 +1,12 @@
 package gg.dystellar.core.common;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.inbox.Inbox;
-import net.zylesh.dystellarcore.core.punishments.Punishment;
-import net.zylesh.dystellarcore.serialization.Consts;
-import net.zylesh.dystellarcore.serialization.Mapping;
-import net.zylesh.dystellarcore.serialization.MariaDB;
-import net.zylesh.dystellarcore.utils.Utils;
-import net.zylesh.dystellarcore.utils.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import gg.dystellar.core.common.inbox.Inbox;
+import gg.dystellar.core.common.punishments.Punishment;
 
 public class User {
 
@@ -53,9 +30,9 @@ public class User {
 
     private final UUID id;
     private boolean globalChatEnabled = true;
-    private byte privateMessagesMode = PMS_ENABLED_WITH_IGNORELIST;
+    private byte privateMessagesMode = PMS_ENABLED;
     private Suffix suffix = Suffix.NONE;
-    private final TreeSet<Punishment> punishments = new TreeSet<>();
+    private final List<Punishment> punishments = new ArrayList<>();
     private String language = "en";
     private User lastMessagedPlayer;
     private final String ip;
@@ -78,159 +55,29 @@ public class User {
         this.name = name;
     }
 
+	// TODO: implement properly
     public void punish(Punishment punishment) {
         this.punishments.add(punishment);
-        punishment.onPunishment(this);
-    }
-
-    private Inventory configManager;
-
-    private ItemStack globalChatItem;
-    private ItemStack pmsItem;
-    private ItemStack globalTabCompleteItem;
-    private ItemStack scoreboardEnabledItem;
-
-    public void initializeSettingsPanel(Player p) {
-        configManager = Bukkit.createInventory(p, 18, ChatColor.DARK_AQUA + "Settings");
-
-        this.globalChatItem = new ItemStack(Material.PAPER);
-        this.pmsItem = new ItemStack(Material.BOOK);
-        this.globalTabCompleteItem = new ItemStack(Material.COMMAND_BLOCK);
-        this.scoreboardEnabledItem = new ItemStack(Material.CLAY);
-
-        updateGlobalChatItem();
-        updatePmsItem();
-        updateGlobalTabCompleteItem();
-        updateScoreboardItem();
-    }
-
-    private void updateScoreboardItem() {
-        ItemMeta meta = scoreboardEnabledItem.getItemMeta();
-        meta.setDisplayName(ChatColor.DARK_AQUA + "Scoreboard");
-        List<String> metaList = List.of(
-                " ",
-                scoreboardEnabled ? ChatColor.GREEN + "➢ On" : ChatColor.GRAY + " On",
-                !scoreboardEnabled ? ChatColor.RED + "➢ Off" : ChatColor.GRAY + " Off",
-                " ",
-                ChatColor.YELLOW + "Click to toggle."
-        );
-        meta.setLore(metaList);
-        scoreboardEnabledItem.setItemMeta(meta);
-        configManager.setItem(0, scoreboardEnabledItem);
     }
 
     public void toggleScoreboard() {
         setScoreboardEnabled(!scoreboardEnabled);
-        updateScoreboardItem();
-    }
-
-    private void updateGlobalTabCompleteItem() {
-        ItemMeta gtci = globalTabCompleteItem.getItemMeta();
-        gtci.setDisplayName(ChatColor.DARK_AQUA + "Global Tab Completion" + ChatColor.WHITE + ":");
-        List<String> gciList = List.of(
-                " ",
-                globalTabComplete ? ChatColor.GREEN + "➢ On" : ChatColor.GRAY + " On",
-                !globalTabComplete ? ChatColor.RED + "➢ Off" : ChatColor.GRAY + " Off",
-                " ",
-                ChatColor.YELLOW + "Click to toggle."
-        );
-        gtci.setLore(gciList);
-        globalTabCompleteItem.setItemMeta(gtci);
-        configManager.setItem(1, globalTabCompleteItem);
+        // TODO: updateScoreboardItem();
     }
 
     public void toggleGlobalTabComplete() {
         setGlobalTabComplete(!globalTabComplete);
-        updateGlobalTabCompleteItem();
-    }
-
-    private void updateGlobalChatItem() {
-        ItemMeta gci = globalChatItem.getItemMeta();
-        gci.setDisplayName(ChatColor.DARK_AQUA + "Global Chat" + ChatColor.WHITE + ":");
-        List<String> gciList = List.of(
-                " ",
-                globalChatEnabled ? ChatColor.GREEN + "➢ On" : ChatColor.GRAY + " On",
-                !globalChatEnabled ? ChatColor.RED + "➢ Off" : ChatColor.GRAY + " Off",
-                " ",
-                ChatColor.YELLOW + "Click to toggle."
-        );
-        gci.setLore(gciList);
-        globalChatItem.setItemMeta(gci);
-        configManager.setItem(2, globalChatItem);
+        // TODO: updateGlobalTabCompleteItem();
     }
 
     public void toggleGlobalChat() {
         setGlobalChatEnabled(!globalChatEnabled);
-        updateGlobalChatItem();
-    }
-
-    /**
-     * Tip: the class Consts contains all bytes entries for all the tips.
-     */
-    public boolean checkIsTipSent(byte entry) {
-        if ((entry + 1) > tipsSent.length) return false;
-        return tipsSent[entry] == Consts.BYTE_TRUE;
-    }
-
-    private void updatePmsItem() {
-        ItemMeta pmsi = pmsItem.getItemMeta();
-        pmsi.setDisplayName(ChatColor.DARK_AQUA + "Private Messages" + ChatColor.WHITE + ":");
-        List<String> pmsiList = null;
-        switch (privateMessagesMode) {
-            case PMS_ENABLED:
-                pmsiList = List.of(
-                        " ",
-                        ChatColor.GREEN + "➢ On",
-                        ChatColor.GRAY + " On (with Ignore List)",
-                        ChatColor.GRAY + " On (Friends Only)",
-                        ChatColor.GRAY + " Off",
-                        " ",
-                        ChatColor.YELLOW + "Click to change."
-                );
-                break;
-            case PMS_ENABLED_WITH_IGNORELIST:
-                pmsiList = List.of(
-                        " ",
-                        ChatColor.GRAY + " On",
-                        ChatColor.YELLOW + "➢ On (with Ignore List)",
-                        ChatColor.GRAY + " On (Friends Only)",
-                        ChatColor.GRAY + " Off",
-                        " ",
-                        ChatColor.YELLOW + "Click to change."
-                );
-                break;
-            case PMS_ENABLED_FRIENDS_ONLY:
-                pmsiList = List.of(
-                        " ",
-                        ChatColor.GRAY + " On",
-                        ChatColor.GRAY + " On (with Ignore List)",
-                        ChatColor.GOLD + "➢ On (Friends Only)",
-                        ChatColor.GRAY + " Off",
-                        " ",
-                        ChatColor.YELLOW + "Click to change."
-                );
-                break;
-            case PMS_DISABLED:
-                pmsiList = List.of(
-                        " ",
-                        ChatColor.GRAY + " On",
-                        ChatColor.GRAY + " On (with Ignore List)",
-                        ChatColor.GRAY + " On (Friends Only)",
-                        ChatColor.RED + "➢ Off",
-                        " ",
-                        ChatColor.YELLOW + "Click to change."
-                );
-                break;
-        }
-        pmsi.setLore(pmsiList);
-        pmsItem.setItemMeta(pmsi);
-        configManager.setItem(3, pmsItem);
+        // TODO: updateGlobalChatItem();
     }
 
     public void togglePms() {
         switch (privateMessagesMode) {
             case PMS_ENABLED:
-            case PMS_ENABLED_WITH_IGNORELIST:
             case PMS_ENABLED_FRIENDS_ONLY:
                 privateMessagesMode++;
                 break;
@@ -238,7 +85,7 @@ public class User {
                 privateMessagesMode = PMS_ENABLED;
                 break;
         }
-        updatePmsItem();
+        // TODO: updatePmsItem();
     }
 
     public Set<String> getNotes() {
@@ -301,7 +148,7 @@ public class User {
         this.language = language;
     }
 
-    public Set<Punishment> getPunishments() {
+    public List<Punishment> getPunishments() {
         return punishments;
     }
 

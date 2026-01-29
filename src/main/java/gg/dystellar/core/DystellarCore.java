@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import gg.dystellar.core.services.Services;
 import gg.dystellar.core.utils.Hooks;
 import gg.dystellar.core.common.PacketListener;
+import gg.dystellar.core.common.Suffix;
 import gg.dystellar.core.common.User;
 import gg.dystellar.core.common.inbox.Inbox;
 import gg.dystellar.core.config.Config;
@@ -116,11 +117,6 @@ public final class DystellarCore extends JavaPlugin {
 
     private void initialize() {
         Suffix.initialize();
-    }
-
-    @Override
-    public YamlConfiguration getConfig() {
-        return config;
     }
 
     public void addInboxMessage(UUID target, Sendable sender, Player issuer) {
