@@ -80,6 +80,7 @@ public final class DystellarCore extends JavaPlugin {
 	@Override
 	protected void setup() {
 		initialize();
+		JoinsListener.register(this);
 		this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
 	}
 
