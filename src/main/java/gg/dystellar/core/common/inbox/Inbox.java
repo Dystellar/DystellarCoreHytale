@@ -1,23 +1,10 @@
 package gg.dystellar.core.common.inbox;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.User;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-
-import static gg.zylesh.dystellarcore.DystellarCore.NULL_GLASS;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import gg.dystellar.core.common.UserComponent;
 
 /**
  * An inbox for emails, every player has one and its capable of receiving custom emails, some including custom rewards and stuff.
@@ -26,21 +13,10 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class Inbox {
 
-    public static final ItemStack[] LAYOUT = new ItemStack[54];
-    static {
-        for (int i = 0; i < 9; i++) {
-            LAYOUT[i] = NULL_GLASS;
-        }
-        for (int i = 45; i < 54; i++) {
-            LAYOUT[i] = NULL_GLASS;
-        }
-    }
-
-    private final User user;
-    private final Inventory inbox;
+    public final User user;
     protected final SortedSet<Sendable> senders = Collections.synchronizedSortedSet(new TreeSet<>());
 
-    public Inbox(User user) {
+    public Inbox(UserComponent user) {
         this.user = user;
         this.inbox = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "Inbox");
         this.inbox.setContents(LAYOUT);

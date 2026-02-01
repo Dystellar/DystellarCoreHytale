@@ -1,6 +1,8 @@
 package gg.dystellar.core.perms;
 
-public class Permission {
+import java.util.function.Supplier;
+
+public class Permission implements Supplier<Boolean> {
 
     private final String perm;
     private boolean value;
@@ -14,7 +16,7 @@ public class Permission {
         return perm;
     }
 
-    public boolean get() {
-        return negate;
+    public Boolean get() {
+        return value;
     }
 }

@@ -1,8 +1,9 @@
 package gg.dystellar.core.serialization;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.User;
+import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.punishments.Punishment;
+import gg.dystellar.core.serialization.Protocol.RawUser;
 
 import javax.annotation.Nullable;
 
@@ -19,6 +20,8 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -53,7 +56,12 @@ public final class API {
 			.build();
 		final HttpResponse<String> res = client.send(request, BodyHandlers.ofString());
 
-		return new Response(res.body(), res.statusCode());
+		final var result = new Response(res.body(), res.statusCode());
+
+		if (result.status != 200)
+			DystellarCore.getLog().atSevere().log("Failed request GET " + path + ": " + result.json);
+
+		return result;
 	}
 
 	private Response requestJson(String path, String method, String json) throws IOException, InterruptedException {
@@ -64,7 +72,12 @@ public final class API {
 			.build();
 		final HttpResponse<String> res = client.send(request, BodyHandlers.ofString());
 
-		return new Response(res.body(), res.statusCode());
+		final var result = new Response(res.body(), res.statusCode());
+
+		if (result.status != 200)
+			DystellarCore.getLog().atSevere().log("Failed request " + method + ' ' + path + ": " + result.json);
+
+		return result;
 	}
 
 	private void testConnection() throws IOException, InterruptedException {
@@ -72,23 +85,46 @@ public final class API {
 			throw new IOException("Backend service didn't respond as expected");
 	}
 
-    public Optional<User> getPlayer(UUID uuid) throws IOException, InterruptedException {
+    public Optional<UserComponent> getPlayer(UUID uuid) throws IOException, InterruptedException {
 		final var res = this.getJson("/api/privileged/player_data?uuid=" + uuid.toString());
 		
 		if (res.status != 200)
 			return Optional.empty();
 
-		return Optional.of(gson.fromJson(res.json, User.class));
+		return Optional.of(gson.fromJson(res.json, UserComponent.class));
     }
 
-	public Optional<Punishment> punish() {
-		
+	public UserComponent playerConnected(String uuid, String name, String address) throws IOException, InterruptedException {
+		final var res = this.getJson("/api/privileged/user_connected?uuid=" + uuid + "&name=" + name + "&address=" + address);
+
+		if (res.status != 200)
+			throw new IOException("Failed fetch user on connection request");
+
+		return gson.fromJson(res.json, RawUser.class).toUserComponent(address);
 	}
 
-    /**
-     * Highly recommended to do this async
-     * @param user player to save
-     */
+	public Optional<Punishment> punish(UUID uuid, String title, String type, LocalDateTime creation_date, Optional<LocalDateTime> expiration_date, String reason, boolean alsoip, boolean allow_chat, boolean allow_ranked, boolean allow_unranked, boolean allow_join_minigames) throws IOException, InterruptedException {
+		Protocol.PunishParams params = new Protocol.PunishParams();
+		params.user_uuid = uuid.toString();
+		params.title = title;
+		params.type = type;
+		params.creation_date = creation_date.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
+		params.expiration_date = expiration_date.map(t -> t.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli()).orElse(null);
+		params.reason = reason;
+		params.alsoip = alsoip;
+		params.allow_chat = allow_chat;
+		params.allow_ranked = allow_ranked;
+		params.allow_unranked = allow_unranked;
+		params.allow_join_minigames = allow_join_minigames;
+
+		final var res = this.requestJson("/api/privileged/punish", "POST", this.gson.toJson(params));
+
+		if (res.status != 200)
+			return Optional.empty();
+
+		return Optional.of(gson.fromJson(res.json, Protocol.RawPunishment.class).toPunishment());
+	}
+
     public static void savePlayerToDatabase(User user) {
         Inbox.SenderListener.unregisterInbox(user.getUUID());
         StringBuilder ipP = null;

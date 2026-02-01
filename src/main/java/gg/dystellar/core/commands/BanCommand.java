@@ -1,6 +1,9 @@
 package gg.dystellar.core.commands;
 
+import java.awt.Color;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.hypixel.hytale.server.core.Message;
@@ -15,6 +18,10 @@ import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.permissions.provider.HytalePermissionsProvider;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+
+import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.User;
+import gg.dystellar.core.common.UserComponent;
 
 /**
  * Custom ban command, generally the same as the builtin ban command but this also notifies the backend and updates the player's profile.
@@ -40,8 +47,41 @@ public class BanCommand extends AbstractAsyncCommand {
 		final var reason = ctx.get(reasonArg);
 		final var ipban = ctx.get(ipbanArg);
 		final var time = ctx.get(timeArg);
+		LocalDateTime expirationDate = null;
 
-		
+		if (time != null) {
+			if (!time.matches("^[0-9]+[ydhm]$")) {
+				sender.sendMessage(Message.raw("Time format incorrect, regex is '^[0-9]+[ydhm]$'").color(new Color(0xFF0000)));
+				return CompletableFuture.completedFuture(null);
+			}
+
+			expirationDate = LocalDateTime.now(ZoneId.of("UTC"));
+			int integer = Integer.parseInt(time.substring(0, time.length() - 1));
+			switch (time.charAt(time.length() - 1)) {
+				case 'y': expirationDate = expirationDate.plusYears(integer); break;
+				case 'd': expirationDate = expirationDate.plusDays(integer); break;
+				case 'h': expirationDate = expirationDate.plusHours(integer); break;
+				case 'm': expirationDate = expirationDate.plusMinutes(integer); break;
+			}
+		}
+
+		try {
+			final var punishment = DystellarCore.getApi().punish(
+				player.getUuid(), "YOU HAVE BEEN BANNED", "ban",
+				LocalDateTime.now(ZoneId.of("UTC")), Optional.ofNullable(expirationDate),
+				reason, ipban, false, false, false, false
+			);
+
+			punishment.ifPresentOrElse(p -> {
+				
+			}, () -> sender.sendMessage(
+				Message.raw("Failed to create punishment, this player probably doesn't exist. Check logs for further information").color(new Color(0xFF0000))
+			));
+		} catch (Exception e) {
+			e.printStackTrace();
+			sender.sendMessage(Message.raw("Failed to create punishment: " + e.getMessage()).color(new Color(0xFF0000)));
+		}
+
 		return CompletableFuture.completedFuture(null);
 	}
 
