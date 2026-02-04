@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 import com.hypixel.hytale.event.EventPriority;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
@@ -20,7 +21,17 @@ public final class JoinsListener {
 	}
 
 	private static void onLeave(PlayerDisconnectEvent e) {
-		// TODO
+		final var holder = e.getPlayerRef().getHolder();
+		final var user = holder.getComponent(UserComponent.getComponentType());
+		HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+			try {
+				DystellarCore.getApi().saveUser(user);
+				DystellarCore.getLog().atInfo().log("The player '" + user.name + "' with an uuid of '" + user.uuid + "' has been saved correctly!");
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				DystellarCore.getLog().atSevere().log("Failed to save " + user.name + "'s data: " + ex.getMessage());
+			}
+		});
 	}
 
 	private static void onConnect(PlayerConnectEvent e) {
@@ -37,7 +48,7 @@ public final class JoinsListener {
 				});
 			}
 			return null;
-		}).thenAccept(user -> {
+		}, HytaleServer.SCHEDULED_EXECUTOR).thenAccept(user -> {
 			e.getWorld().execute(() -> {
 				user.init(p);
 

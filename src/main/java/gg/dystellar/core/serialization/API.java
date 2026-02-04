@@ -103,8 +103,11 @@ public final class API {
 		return gson.fromJson(res.json, RawUser.class).toUserComponent(address);
 	}
 
-	public UserComponent playerDisconnected(UserComponent user) {
-		final var res = requestJson("/api/privileged/user_disconnected", "PUT", gson.toJson(RawUser.fromUserComponent(user)));
+	public void saveUser(UserComponent user) throws IOException, InterruptedException {
+		final var res = requestJson("/api/privileged/user_save", "PUT", gson.toJson(RawUser.fromUserComponent(user)));
+
+		if (res.status != 200)
+			throw new IOException("Failed to save player. Json: " + res.json);
 	}
 
 	public Optional<Punishment> punish(UUID uuid, String title, String type, LocalDateTime creation_date, Optional<LocalDateTime> expiration_date, String reason, boolean alsoip, boolean allow_chat, boolean allow_ranked, boolean allow_unranked, boolean allow_join_minigames) throws IOException, InterruptedException {
