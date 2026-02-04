@@ -63,25 +63,12 @@ public class Messages {
 	private String mute_message = "<Red>You are muted. Expires in {time}";
 	private String ranked_ban_message = "<Red>You are banned from playing ranked. Contact staff for more information.";
 	private String kick_message = "<Red>You have been kicked from the server. Reason: <White>{reason}";
-	private String[] ban_message = {
-		"<Danger>You are banned",
-		"<Red>Reason<White>: {reason}",
-		"<Red>Expires<White>: {time}",
-		"You may purchase an unban at <DarkPurple>https://dystellar.gg/"
-	};
-	private String[] blacklist_message = {
-		"<Danger>You are blacklisted",
-		"<Red>Reason<White>: <reason>",
-		"<Red>Expires<White>: Never",
-		"This type of punishment cannot be appealed."
-	};
-	private String[] warn_message = {
+	private String[] punish_message = {
 		"<Gray>----------------------------------",
 		" ",
-		"<Red>You have been warned!",
-		"<Red>Reason<White>: <reason>",
-		" ",
-		"<DarkRed>Be careful, getting multiple warnings will get you banned!",
+		"<Red>{title}",
+		"<Red>Reason<White>: {reason}",
+		"<Red>Expires<White>: {expiration}",
 		" ",
 		"<Gray>----------------------------------"
 	};
@@ -170,9 +157,7 @@ public class Messages {
 		this.muteMessage = parseMsg(mute_message);
 		this.rankedBanMessage = parseMsg(ranked_ban_message);
 		this.kickMessage = parseMsg(kick_message);
-		this.banMessage = Arrays.stream(ban_message).map(s -> parseMsg(s)).toArray(Message[]::new);
-		this.blacklistMessage = Arrays.stream(blacklist_message).map(s -> parseMsg(s)).toArray(Message[]::new);
-		this.warnMessage = Arrays.stream(warn_message).map(s -> parseMsg(s)).toArray(Message[]::new);
+		this.punishMessage = Arrays.stream(punish_message).map(s -> parseMsg(s)).toArray(Message[]::new);
 		this.flyNeedRank = parseMsg(fly_need_rank);
 		this.flyModeEnabled = parseMsg(fly_mode_enabled);
 		this.flyModeDisabled = parseMsg(fly_mode_disabled);
@@ -210,9 +195,7 @@ public class Messages {
 	public transient Message muteMessage;
 	public transient Message rankedBanMessage;
 	public transient Message kickMessage;
-	public transient Message[] banMessage;
-	public transient Message[] blacklistMessage;
-	public transient Message[] warnMessage;
+	public transient Message[] punishMessage;
 	public transient Message flyNeedRank;
 	public transient Message flyModeEnabled;
 	public transient Message flyModeDisabled;

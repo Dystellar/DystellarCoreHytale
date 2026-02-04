@@ -1,17 +1,24 @@
 package gg.dystellar.core.common;
 
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
+import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.inbox.Inbox;
 import gg.dystellar.core.common.punishments.Punishment;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
+import gg.dystellar.core.utils.Utils;
 
 public class UserComponent implements Component<EntityStore> {
 
@@ -29,6 +36,7 @@ public class UserComponent implements Component<EntityStore> {
     public static final byte PMS_ENABLED_FRIENDS_ONLY = 1;
     public static final byte PMS_DISABLED = 2;
 
+	public PlayerRef player;
     public final UUID uuid;
     public Suffix suffix = Suffix.NONE;
     public final List<Punishment> punishments = new ArrayList<>();
@@ -45,6 +53,7 @@ public class UserComponent implements Component<EntityStore> {
 	public boolean friendRequests = true;
     public byte privateMessagesMode = PMS_ENABLED;
 	public Optional<Group> group = Optional.ofNullable(Group.DEFAULT_GROUP);
+	public LocalDateTime creationDate = LocalDateTime.now();
 
 	public final List<UUID> friends = new ArrayList<>();
     public final List<UUID> ignoreList = new ArrayList<>();
@@ -57,15 +66,40 @@ public class UserComponent implements Component<EntityStore> {
 		this.inbox = new Inbox(this);
     }
 
+	public void init(PlayerRef player) {
+		this.player = player;
+	}
+
 	@Override
 	public Component<EntityStore> clone() {
 		System.out.println("UserComponent was cloned (resource loss)");
 		return new UserComponent(uuid, ip, name);
 	}
 
-	// TODO: implement properly
     public void punish(Punishment punishment) {
         this.punishments.add(punishment);
+		final var lang = DystellarCore.getInstance().getLang(language);
+		for (Message msg : lang.punishMessage) {
+			final var out = Message.join(msg)
+				.param("title", punishment.getTitle())
+				.param("reason", punishment.getReason())
+				.param("expiration", Utils.getTimeFormat(punishment.getExpirationDate().orElse(null)));
+
+			player.sendMessage(out);
+		}
+		if (!DystellarCore.getInstance().getSetup().allow_banned_players && !punishment.allowJoinMinigames()) {
+			final var ref = player.getReference();
+			if (ref.isValid()) {
+				final var world = ref.getStore().getComponent(ref, Player.getComponentType()).getWorld();
+				HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+					world.execute(() -> {
+						player.getPacketHandler().disconnect("You have been banned");
+					});
+				}, 3, TimeUnit.SECONDS);
+			} else {
+				player.getPacketHandler().disconnect("You have been banned");
+			}
+		}
     }
 
     public void togglePms() {

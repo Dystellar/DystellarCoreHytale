@@ -1,42 +1,58 @@
 package gg.dystellar.core.listeners;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
+import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.punishments.Punishment;
 
-import com.hypixel.hytale.server.core.event.events.player.PlayerSetupConnectEvent;
 
 public final class JoinsListener {
 	public static void register(JavaPlugin plugin) {
-		plugin.getEventRegistry().register(PlayerConnectEvent.class, e -> onConnect(e));
+		plugin.getEventRegistry().register(EventPriority.FIRST, PlayerConnectEvent.class, e -> onConnect(e));
+		plugin.getEventRegistry().register(EventPriority.LAST, PlayerDisconnectEvent.class, e -> onLeave(e));
+	}
+
+	private static void onLeave(PlayerDisconnectEvent e) {
+		// TODO
 	}
 
 	private static void onConnect(PlayerConnectEvent e) {
 		final var p = e.getPlayerRef();
 		final var holder = e.getHolder();
 
-		try {
-			final var user = DystellarCore.getApi().playerConnected(p.getUuid().toString(), p.getUsername(), p.getPacketHandler().getAuth().getReferralSource().host);
-
-			holder.addComponent(UserComponent.getComponentType(), user);
-			final var now = LocalDateTime.now();
-			for (Punishment pun : user.punishments) {
-				if (!pun.allowJoinMinigames() && !DystellarCore.getInstance().getSetup().allow_banned_players && (!pun.getExpirationDate().isPresent() || pun.getExpirationDate().get().isBefore(now))) {
-					p.getPacketHandler().disconnect("You are banned from this server");
-				}
+		CompletableFuture.supplyAsync(() -> {
+			try {
+				return DystellarCore.getApi().playerConnected(p.getUuid().toString(), p.getUsername(), p.getPacketHandler().getAuth().getReferralSource().host);
+			} catch (Exception ex) {
+				e.getWorld().execute(() -> {
+					ex.printStackTrace();
+					p.getPacketHandler().disconnect(ex.getMessage());
+				});
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			p.getPacketHandler().disconnect(ex.getMessage());
-		}
-	}
+			return null;
+		}).thenAccept(user -> {
+			e.getWorld().execute(() -> {
+				user.init(p);
 
+				holder.addComponent(UserComponent.getComponentType(), user);
+				final var now = LocalDateTime.now();
+				for (Punishment pun : user.punishments) {
+					if (!pun.allowJoinMinigames() && !DystellarCore.getInstance().getSetup().allow_banned_players && (!pun.getExpirationDate().isPresent() || pun.getExpirationDate().get().isBefore(now))) {
+						p.getPacketHandler().disconnect("You have been banned from Dystellar Network");
+					}
+				}
+			});
+		});
+	}
+	
+	/* TODO:
 	public void onJoin(PlayerJoinEvent event) {
 		User user = User.get(event.getPlayer());
 		user.initializeSettingsPanel(event.getPlayer());
@@ -48,8 +64,9 @@ public final class JoinsListener {
 			}
 		}, 30L);
 	}
+	*/
 
-	@EventHandler
+	/* TODO:
 	public void clicked(InventoryClickEvent event) {
 		User u = User.get(event.getWhoClicked().getUniqueId());
 		if (u == null) {
@@ -69,19 +86,12 @@ public final class JoinsListener {
 		}
 	}
 
-	@EventHandler
-	public void drag(InventoryDragEvent event) {
-		User u = User.get(event.getWhoClicked().getUniqueId());
-		if (event.getInventory().equals(u.configManager)) event.setCancelled(true);
-	}
-
-	@EventHandler
 	public void onLeave(PlayerQuitEvent event) {
 		DystellarCore.getAsyncManager().submit(() -> MariaDB.savePlayerToDatabase(users.get(event.getPlayer().getUniqueId())));
 	}
 
-	@EventHandler
 	public void onKick(PlayerKickEvent event) {
 		DystellarCore.getAsyncManager().submit(() -> MariaDB.savePlayerToDatabase(users.get(event.getPlayer().getUniqueId())));
 	}
+	*/
 }

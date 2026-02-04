@@ -1,61 +1,61 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.core.punishments.Blacklist;
-import net.zylesh.dystellarcore.serialization.Punishments;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import java.awt.Color;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+
+import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.UserComponent;
 
 /**
  * Blacklist command, more severe than ban, and only used for special cases,
  * like for problematic people that you really don't want them connecting to the server ever again.
  */
-public class BlacklistCommand implements CommandExecutor {
+public class BlacklistCommand extends AbstractAsyncCommand {
 
-    public BlacklistCommand() {
-        Bukkit.getPluginCommand("blacklist").setExecutor(this);
+	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF);
+	private final RequiredArg<String> reasonArg = this.withRequiredArg("reason", "Why punishing this player", ArgTypes.STRING);
+
+    public BlacklistCommand(String name, String description) {
+		super(name, description);
+		this.requirePermission("dystellar.admin");
     }
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (!commandSender.hasPermission("dystellar.admin")) {
-            commandSender.sendMessage(ChatColor.RED + "No permission.");
-            return true;
-        }
-        if (strings.length < 2) {
-            commandSender.sendMessage(ChatColor.RED + "Usage: /blacklist <player> <reason>");
-            return true;
-        }
-        Player playerInt = Bukkit.getPlayer(strings[0]);
-        if (playerInt != null && playerInt.isOnline()) {
-            User userInt = User.get(playerInt);
-            StringBuilder reason = new StringBuilder();
-            for (int i = 2; i < strings.length; i++) {
-                if (i == 2) reason.append(strings[i]);
-                else reason.append(" ").append(strings[i]);
-            }
-            Blacklist blacklist = new Blacklist(reason.toString());
-            userInt.punish(blacklist);
-        } else {
-            if (!(commandSender instanceof Player)) {
-                commandSender.sendMessage(ChatColor.RED + "You must be a player in order to punish offline players.");
-                return true;
-            }
-            Player p = (Player) commandSender;
-            StringBuilder reason = new StringBuilder();
-            for (int i = 2; i < strings.length; i++) {
-                if (i == 2) reason.append(strings[i]);
-                else reason.append(" ").append(strings[i]);
-            }
-            Blacklist ban = new Blacklist(reason.toString());
-            DystellarCore.getInstance().sendPluginMessage(p, DystellarCore.PUNISHMENT_ADD_PROXYBOUND, strings[0], Punishments.serialize(ban));
-        }
-        return true;
-    }
+	@Override
+	protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
+		final var sender = ctx.sender();
+
+		final var player = ctx.get(playerArg);
+		final var reason = ctx.get(reasonArg);
+
+		try {
+			final var punishment = DystellarCore.getApi().punish(
+				player.getUuid(), "YOU HAVE BEEN BANNED", "ban",
+				LocalDateTime.now(ZoneId.of("UTC")), Optional.empty(),
+				reason, true, false, false, false, false
+			);
+
+			punishment.ifPresentOrElse(p -> {
+				UserComponent user = player.getHolder().getComponent(UserComponent.getComponentType());
+				if (user != null)
+					user.punish(p);
+			}, () -> sender.sendMessage(
+				Message.raw("Failed to create punishment, this player probably doesn't exist. Check logs for further information").color(new Color(0xFF0000))
+			));
+		} catch (Exception e) {
+			e.printStackTrace();
+			sender.sendMessage(Message.raw("Failed to create punishment: " + e.getMessage()).color(new Color(0xFF0000)));
+		}
+
+		return CompletableFuture.completedFuture(null);
+	}
 }
-

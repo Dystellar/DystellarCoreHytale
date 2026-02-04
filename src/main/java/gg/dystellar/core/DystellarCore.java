@@ -111,6 +111,13 @@ public final class DystellarCore extends JavaPlugin {
 		}
 	}
 
+	public Messages getLang(String lang) {
+		switch (lang) {
+			case "es": return lang_es.get();
+			default: return lang_en.get();
+		}
+	}
+
 	public Setup getSetup() {
 		return this.config.get();
 	}
