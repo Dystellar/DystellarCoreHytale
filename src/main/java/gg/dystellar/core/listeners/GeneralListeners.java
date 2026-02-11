@@ -1,25 +1,8 @@
 package gg.dystellar.core.listeners;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.config.ConfValues;
-import net.zylesh.dystellarcore.services.messaging.Types;
-import net.zylesh.dystellarcore.utils.PluginMessageScheduler;
-import net.zylesh.dystellarcore.utils.Utils;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.server.RemoteServerCommandEvent;
-import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.event.weather.WeatherChangeEvent;
 
 public class GeneralListeners implements Listener {
 

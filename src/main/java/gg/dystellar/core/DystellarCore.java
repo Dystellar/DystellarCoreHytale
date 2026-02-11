@@ -9,10 +9,10 @@ import com.google.gson.GsonBuilder;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.ShutdownReason;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 
-import gg.dystellar.core.services.Services;
 import gg.dystellar.core.utils.Hooks;
 import gg.dystellar.core.common.PacketListener;
 import gg.dystellar.core.common.Suffix;
@@ -62,7 +62,7 @@ public final class DystellarCore extends JavaPlugin {
 		new SetSpawnCommand(); new GameModeCommand();
 		new FlyCommand(); new FreezeCommand(); new BroadcastCommand();
 		new JoinCommand(); new MSGCommand(); new ReplyCommand();
-		new BlacklistCommand(); new MuteCommand();
+		new MuteCommand();
 		new NoteCommand(); new PunishmentsCommand(); new NotesCommand();
 		new GiveItemCommand(); new ItemMetaCommand(); new PingCommand();
 		new ToggleChatCommand(); new TogglePrivateMessagesCommand();
@@ -82,6 +82,7 @@ public final class DystellarCore extends JavaPlugin {
 		initialize();
 		JoinsListener.register(this);
 		this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
+		this.getCommandRegistry().registerCommand(new BlacklistCommand("blacklist", "Permanently invalidate a player from joining the server in"));
 	}
 
 	public static final String CHANNEL = "dyst:ellar";
@@ -161,9 +162,7 @@ public final class DystellarCore extends JavaPlugin {
 	@Override
 	public void onPluginMessageReceived(String s, @NotNull Player p, byte[] bytes) {
 		if (!s.equalsIgnoreCase(CHANNEL))
-		return;
+			return;
 		Types.handle(p, bytes);
 	}
-
-	public final Map<UUID, UUID> requests = new HashMap<>();
 }

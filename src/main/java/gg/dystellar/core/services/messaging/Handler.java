@@ -6,23 +6,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteStreams;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.core.inbox.Sendable;
-import net.zylesh.dystellarcore.core.punishments.Punishment;
-import net.zylesh.dystellarcore.serialization.InboxSerialization;
-import net.zylesh.dystellarcore.serialization.Punishments;
-import net.zylesh.dystellarcore.utils.Utils;
-import net.zylesh.dystellarcore.utils.factory.InventoryBuilder;
-
 /**
  * Handles incoming plugin messages, this has been refactorized already.
  */
 public class Handler {
-	public static void handle(Player p, byte[] data) {
+	public static void handle(byte[] data) {
 		ByteArrayDataInput in = ByteStreams.newDataInput(data);
         byte id = in.readByte();
 

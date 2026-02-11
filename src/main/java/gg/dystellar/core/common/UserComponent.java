@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.HytaleServer;
@@ -113,4 +115,48 @@ public class UserComponent implements Component<EntityStore> {
                 break;
         }
     }
+
+	public boolean hasPermission(String perm) {
+		var permission = lookupPermission(perm, this.perms);
+		if (permission != null)
+			return permission.get();
+
+		if (group.isPresent()) {
+			permission = lookupPermission(perm, group.get().getPermissions());
+			if (permission != null)
+				return permission.get();
+		}
+
+		return false;
+	}
+
+	@Nullable
+	private static Permission lookupPermission(String perm, Map<String, Permission> perms) {
+		var permission = perms.get(perm);
+		if (permission != null)
+			return permission;
+
+		permission = perms.get("*");
+		if (permission != null)
+			return permission;
+
+		String[] split = perm.split("\\.");
+
+		for (Permission p : perms.values()) {
+			if (!p.getPerm().contains("*"))
+				continue;
+			String[] permSplit = p.getPerm().split("\\.");
+
+			int min = Math.min(split.length, permSplit.length);
+
+			for (int j = 0; j < min; j++) {
+				if (permSplit[j].equals("*"))
+					return p;
+				if (!permSplit[j].equalsIgnoreCase(split[j]))
+					break;
+			}
+		}
+
+		return null;
+	}
 }
