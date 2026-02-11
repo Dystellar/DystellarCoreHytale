@@ -39,7 +39,7 @@ public class BlacklistCommand extends AbstractAsyncCommand {
 
 		try {
 			final var punishment = DystellarCore.getApi().punish(
-				player.getUuid(), "YOU HAVE BEEN BANNED", "ban",
+				player.getUuid(), "YOU HAVE BEEN BLACKLISTED", "blacklist",
 				LocalDateTime.now(ZoneId.of("UTC")), Optional.empty(),
 				reason, true, false, false, false, false
 			);

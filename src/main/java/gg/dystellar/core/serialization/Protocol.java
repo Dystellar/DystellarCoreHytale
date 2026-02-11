@@ -3,8 +3,10 @@ package gg.dystellar.core.serialization;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -80,6 +82,18 @@ public final class Protocol {
 		public String prefix;
 		public String suffix;
 		public Permission[] perms;
+
+		public Group toGroup() {
+			List<Permission> permissions = new ArrayList<>();
+			Collections.addAll(permissions, perms);
+
+			return new Group(name, prefix, suffix, permissions);
+		}
+	}
+
+	public static final class RawGroupsData {
+		public String default_group;
+		public RawGroup[] groups;
 	}
 
 	public static final class RawUser {

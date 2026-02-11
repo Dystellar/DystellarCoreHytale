@@ -1,20 +1,6 @@
 package gg.dystellar.core.perms;
 
-import com.google.common.io.ByteArrayDataInput;
-
-import net.md_5.bungee.api.ChatColor;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.NameTagVisibility;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
-
-import live.taketsu.config.ConfValues;
-import live.taketsu.core.User;
-import live.taketsu.messaging.Encoder.Perms;
-import live.taketsu.serialization.MariaDB;
-
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,68 +8,43 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.serialization.Protocol.RawGroup;
+
 /**
  * Group of permissions, you may understand better if you refer to it as ranks.
  */
 public class Group {
 
-    public static Group DEFAULT_GROUP;
+    public static Optional<Group> DEFAULT_GROUP = Optional.empty();
     public static boolean PERMS_LOADED = true;
 
-    private static final Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
     public static final Map<String, Group> groups = new HashMap<>();
 
-    private final int id;
+	public static boolean initGroups() throws IOException, InterruptedException {
+		groups.clear();
+		final var groupsOpt = DystellarCore.getApi().getGroupsData();
+		if (!groupsOpt.isPresent())
+			return false;
+
+		final var rawGroups = groupsOpt.get();
+		for (RawGroup g : rawGroups.groups)
+			groups.put(g.name, g.toGroup());
+
+		DEFAULT_GROUP = Optional.ofNullable(groups.get(rawGroups.default_group));
+		return true;
+	}
+
     private final String name;
     private String prefix;
     private String suffix;
     private final Map<String, Permission> permissions = new HashMap<>();
-    private Team team;
-	private LocalDateTime lastModification;
 
-    public Group(int id, String name, String prefix, String suffix, List<Permission> permissions, LocalDateTime lastModification) {
-        this.id = id;
+    public Group(String name, String prefix, String suffix, List<Permission> permissions) {
         this.name = name;
         this.prefix = prefix;
         this.suffix = suffix;
-		if (lastModification != null)
-			this.lastModification = lastModification;
-		else
-			this.lastModification = LocalDateTime.now();
         permissions.forEach(permission -> this.permissions.put(permission.getPerm(), permission));
-        initTeam();
-    }
-
-    private void initTeam() {
-        team = sb.getTeam(this.name);
-
-        if (team == null)
-            team = sb.registerNewTeam(this.name);
-
-        team.setPrefix(this.prefix);
-        team.setSuffix(this.suffix);
-        team.setAllowFriendlyFire(true);
-        team.setNameTagVisibility(NameTagVisibility.ALWAYS);
-    }
-
-	public LocalDateTime getLastModification() {
-		return lastModification;
-	}
-
-	public void setLastModification(LocalDateTime lastModification) {
-		this.lastModification = lastModification;
-	}
-
-	public void applyTeam(String player) {
-        this.team.addEntry(player);
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getName() {
@@ -104,37 +65,18 @@ public class Group {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
-		this.team.setPrefix(prefix);
     }
 
     public void setSuffix(String suffix) {
         this.suffix = suffix;
-		this.team.setSuffix(suffix);
     }
 
     public static Optional<Group> getGroup(String name) {
         return Optional.ofNullable(groups.get(name));
     }
 
-    public static Group getDefault() {
-        return DEFAULT_GROUP;
-    }
-
     public static void registerGroup(Group group) {
         groups.put(group.name, group);
-    }
-
-    public static void init() {
-        if (!MariaDB.loadGroups(groups)) {
-            Bukkit.getLogger().severe("Fatal error trying to load groups, aborting...");
-            PERMS_LOADED = false;
-            return;
-        }
-
-        String defaultGroupN = MariaDB.getDefaultGroup();
-        DEFAULT_GROUP = groups.get(defaultGroupN);
-        if (DEFAULT_GROUP == null)
-            Bukkit.getLogger().warning("Default group is not set!");
     }
 
     public static void handleMsg(Player p, ByteArrayDataInput in) {

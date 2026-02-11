@@ -10,6 +10,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.ShutdownReason;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.permissions.PermissionsModule;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 
@@ -22,6 +23,8 @@ import gg.dystellar.core.config.Config;
 import gg.dystellar.core.config.Messages;
 import gg.dystellar.core.config.Setup;
 import gg.dystellar.core.listeners.*;
+import gg.dystellar.core.perms.CustomPermProvider;
+import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.serialization.API;
 import gg.dystellar.core.arenasapi.AbstractArena;
 import gg.dystellar.core.commands.*;
@@ -81,6 +84,7 @@ public final class DystellarCore extends JavaPlugin {
 	protected void setup() {
 		initialize();
 		JoinsListener.register(this);
+		PermissionsModule.get().addProvider(new CustomPermProvider());
 		this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
 		this.getCommandRegistry().registerCommand(new BlacklistCommand("blacklist", "Permanently invalidate a player from joining the server in"));
 	}
@@ -91,7 +95,7 @@ public final class DystellarCore extends JavaPlugin {
 	private final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
 	private final Config<Messages> lang_es = new Config<>(this, "lang_es.json", Messages.class);
 
-	private void loadConfig() {
+	public void loadConfig() {
 		try {
 			LOGGER.atInfo().log("[Dystellar] Loading configuration...");
 			config.load();
@@ -103,6 +107,8 @@ public final class DystellarCore extends JavaPlugin {
 
 			lang_en.get().compile();
 			lang_es.get().compile();
+
+			Group.initGroups();
 
 			LOGGER.atInfo().log("[Dystellar] Configuration loaded successfully");
 		} catch (Exception e) {

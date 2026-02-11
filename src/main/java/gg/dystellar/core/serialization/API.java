@@ -3,6 +3,7 @@ package gg.dystellar.core.serialization;
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.punishments.Punishment;
+import gg.dystellar.core.serialization.Protocol.RawGroupsData;
 import gg.dystellar.core.serialization.Protocol.RawUser;
 
 import javax.annotation.Nullable;
@@ -130,6 +131,15 @@ public final class API {
 			return Optional.empty();
 
 		return Optional.of(gson.fromJson(res.json, Protocol.RawPunishment.class).toPunishment());
+	}
+
+	public Optional<RawGroupsData> getGroupsData() throws IOException, InterruptedException {
+		final var res = this.getJson("/api/privileged/get_groups");
+
+		if (res.status != 200)
+			return Optional.empty();
+
+		return Optional.of(gson.fromJson(res.json, RawGroupsData.class));
 	}
 
     public static void savePlayerToDatabase(User user) {
