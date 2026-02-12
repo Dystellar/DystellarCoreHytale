@@ -53,17 +53,13 @@ public final class DystellarCore extends JavaPlugin {
 			Services.startAutomatedMessagesService();
 
 		// Listeners start
-		if (ConfValues.SCOREBOARD_ENABLED) new Scoreboards();
-		if (ConfValues.HANDLE_SPAWN_MECHANICS) new SpawnMechanics();
-		if (ConfValues.PACK_ENABLED) new ResourceListener();
-		new User.UserListener(); new Inbox.SenderListener(); new Punish();
+		new Inbox.SenderListener(); new Punish();
 		new PacketListener(); new GeneralListeners();
 		// Listeners end
 
 		// Commands start
-		if (ConfValues.HANDLE_SPAWN_PROTECTION) new EditmodeCommand();
 		new SetSpawnCommand(); new GameModeCommand();
-		new FlyCommand(); new FreezeCommand(); new BroadcastCommand();
+		new FlyCommand(); new FreezeCommand();
 		new JoinCommand(); new MSGCommand(); new ReplyCommand();
 		new MuteCommand();
 		new NoteCommand(); new PunishmentsCommand(); new NotesCommand();
@@ -72,9 +68,6 @@ public final class DystellarCore extends JavaPlugin {
 		new ToggleGlobalTabComplete(); new IgnoreCommand(); new IgnoreListCommand();
 		new InboxCommand(); new FriendCommand(); new SuffixCommand();
 		new WandCommand(); new UnpunishCommand();
-		// Commands end
-
-		AbstractArena.init();
 	}
 
 	/**
@@ -83,17 +76,23 @@ public final class DystellarCore extends JavaPlugin {
 	@Override
 	protected void setup() {
 		initialize();
+		AbstractArena.init();
+
 		JoinsListener.register(this);
+		FreezeCommand.register(this);
+
+		this.getCommandRegistry().registerCommand(new BanCommand());
+		this.getCommandRegistry().registerCommand(new BlacklistCommand());
+		this.getCommandRegistry().registerCommand(new BroadcastCommand());
+
 		PermissionsModule.get().addProvider(new CustomPermProvider());
-		this.getCommandRegistry().registerCommand(new BanCommand("ban", "Dystellar's custom ban command"));
-		this.getCommandRegistry().registerCommand(new BlacklistCommand("blacklist", "Permanently invalidate a player from joining the server in"));
 	}
 
 	public static final String CHANNEL = "dyst:ellar";
 
-	private final Config<Setup> config = new Config<>(this, "setup.json", Setup.class);
-	private final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
-	private final Config<Messages> lang_es = new Config<>(this, "lang_es.json", Messages.class);
+	public final Config<Setup> config = new Config<>(this, "setup.json", Setup.class);
+	public final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
+	public final Config<Messages> lang_es = new Config<>(this, "lang_es.json", Messages.class);
 
 	public void loadConfig() {
 		try {

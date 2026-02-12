@@ -52,6 +52,7 @@ public class Messages {
 	private String error_player_no_longer_online = "<Red>This player is no longer online.";
 	private String error_player_does_not_exist = "<Red>This player does not exist or is not online.";
 	private String error_player_not_found = "<Red>This player does not exist in our database.";
+	private String error_player_not_in_a_world = "<Red>This player is not in an actual world";
 	private String error_input_not_number = "<Red>Input must be a number, try again.";
 	private String error_not_a_player = "<Red>You must be a player to perform this action.";
 	private String server_connection_error = "<Red>Error trying to connect to server.";
@@ -146,6 +147,7 @@ public class Messages {
 		this.errorPlayerNoLongerOnline = parseMsg(error_player_no_longer_online);
 		this.errorPlayerDoesNotExist = parseMsg(error_player_does_not_exist);
 		this.errorPlayerNotFound = parseMsg(error_player_not_found);
+		this.errorPlayerNotInAWorld = parseMsg(error_player_not_in_a_world);
 		this.errorInputNotNumber = parseMsg(error_input_not_number);
 		this.errorNotAPlayer = parseMsg(error_not_a_player);
 		this.serverConnectionError = parseMsg(server_connection_error);
@@ -184,6 +186,7 @@ public class Messages {
 	public transient Message errorPlayerNoLongerOnline;
 	public transient Message errorPlayerDoesNotExist;
 	public transient Message errorPlayerNotFound;
+	public transient Message errorPlayerNotInAWorld;
 	public transient Message errorInputNotNumber;
 	public transient Message errorNotAPlayer;
 	public transient Message serverConnectionError;

@@ -1,26 +1,21 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.Msgs;
-import net.zylesh.practice.PUser;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import gg.zylesh.skywars.SkywarsAPI;
+import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 /**
  * This command is for premium people, so they can fly in the lobbys, so they can explore the buildings with ease.
  * It shouldn't have any effect on actual games.
  */
-public class FlyCommand implements CommandExecutor {
+public class FlyCommand extends CommandBase {
+
+	private final OptionalArg<PlayerRef> playerArg = this.withOptionalArg("target", "Player to apply this command to", ArgTypes.PLAYER_REF);
 
     public FlyCommand() {
-        Bukkit.getPluginCommand("fly").setExecutor(this);
+		super("fly", "Fly command for the privileged");
+		this.requirePermission("dystellar.fly");
     }
 
     @Override

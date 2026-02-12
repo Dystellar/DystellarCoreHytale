@@ -25,8 +25,8 @@ public class BlacklistCommand extends AbstractAsyncCommand {
 	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF);
 	private final RequiredArg<String> reasonArg = this.withRequiredArg("reason", "Why punishing this player", ArgTypes.STRING);
 
-    public BlacklistCommand(String name, String description) {
-		super(name, description);
+    public BlacklistCommand() {
+		super("blacklist", "Permanently invalidate a player from joining the server in");
 		this.requirePermission("dystellar.admin");
     }
 

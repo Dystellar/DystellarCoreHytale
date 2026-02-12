@@ -8,15 +8,11 @@ import java.util.concurrent.CompletableFuture;
 
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.Argument;
 import com.hypixel.hytale.server.core.command.system.arguments.system.FlagArg;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
-import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.permissions.provider.HytalePermissionsProvider;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import gg.dystellar.core.DystellarCore;
@@ -32,8 +28,8 @@ public class BanCommand extends AbstractAsyncCommand {
 	private final OptionalArg<String> timeArg = this.withOptionalArg("time", "Duration of the punishment e.g. 30m, 30d, 2y", ArgTypes.STRING);
 	private final FlagArg ipbanArg = this.withFlagArg("ipban", "If the punishment also applies to the player's IP address");
 
-    public BanCommand(String name, String description) {
-		super(name, description);
+    public BanCommand() {
+		super("ban", "Dystellar's custom ban command");
 		this.requirePermission("dystellar.punish");
     }
 
