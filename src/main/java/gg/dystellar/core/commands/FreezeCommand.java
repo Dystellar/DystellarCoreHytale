@@ -3,6 +3,8 @@ package gg.dystellar.core.commands;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.component.ArchetypeChunk;
@@ -12,6 +14,8 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
@@ -24,6 +28,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.utils.Pair;
 
 /**
@@ -50,7 +55,7 @@ public class FreezeCommand extends CommandBase {
 		this.requirePermission("dystellar.freeze");
     }
 
-    private static final Map<UUID, Pair<Vector3d, Vector3f>> frozenPlayers = new HashMap<>();
+    private static final Map<UUID, Pair<Pair<Vector3d, Vector3f>, ScheduledFuture<?>>> frozenPlayers = new HashMap<>();
 
 	@Override
 	protected void executeSync(CommandContext ctx) {
@@ -69,9 +74,21 @@ public class FreezeCommand extends CommandBase {
 		final var comp = ref.getStore().getComponent(ref, TransformComponent.getComponentType());
 		final var pos = comp.getPosition().clone();
 		final var rot = comp.getRotation().clone();
+		final var removed = frozenPlayers.remove(player.getUuid());
+		final var user = player.getHolder().getComponent(UserComponent.getComponentType());
+		final var lang = DystellarCore.getInstance().getLang(user.language);
 
-		if (frozenPlayers.remove(player.getUuid()) != null)
-			frozenPlayers.put(player.getUuid(), new Pair<>(pos, rot));
+		if (removed == null) {
+			final ScheduledFuture<?> task =  HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+				if (player.isValid()) {
+					for (Message msg : lang.freezeMessage)
+						player.sendMessage(msg);
+				}
+			}, 0, 2, TimeUnit.SECONDS);
+
+			frozenPlayers.put(player.getUuid(), new Pair<>(new Pair<>(pos, rot), task));
+
+		} else removed.second.cancel(false);
 	}
 
 	static class MoveSystem extends EntityTickingSystem<EntityStore> {
@@ -92,8 +109,8 @@ public class FreezeCommand extends CommandBase {
 			final var transform = chunk.getComponent(idx, TransformComponent.getComponentType());
 
 			if (posData != null && (!transform.getPosition().equals(posData.first) || !transform.getRotation().equals(posData.second))) {
-				transform.setPosition(posData.first);
-				transform.setRotation(posData.second);
+				transform.setPosition(posData.first.first);
+				transform.setRotation(posData.first.second);
 			}
 		}
 	}
