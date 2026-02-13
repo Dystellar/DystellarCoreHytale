@@ -1,12 +1,20 @@
 package gg.dystellar.core.commands;
 
+import java.awt.Color;
+
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.protocol.SavedMovementStates;
+import com.hypixel.hytale.protocol.packets.player.SetMovementStates;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
@@ -26,85 +34,73 @@ public class FlyCommand extends CommandBase {
 
 	@Override
 	protected void executeSync(CommandContext ctx) {
-		final Player target;
 		final var arg = ctx.get(playerArg);
 
 		if (arg != null && arg.isValid()) {
+			final var langEn = DystellarCore.getInstance().lang_en.get();
 			if (!ctx.sender().hasPermission("dystellar.fly.other")) {
-				ctx.sender().sendMessage(DystellarCore.getInstance().lang_en.get().noPermission);
+				ctx.sender().sendMessage(langEn.noPermission);
 				return;
 			}
 
 			final var ref = arg.getReference();
 			if (!ref.isValid()) {
-				ctx.sender().sendMessage(DystellarCore.getInstance().lang_en.get().errorPlayerNotInAWorld);
+				ctx.sender().sendMessage(langEn.errorPlayerNotInAWorld);
 				return;
 			}
 
-			target = ref.getStore().getComponent(ref, Player.getComponentType());
+			final var res = toggleFly(ref);
+			if (res == null) {
+				ctx.sendMessage(Message.raw("Something went wrong...").color(new Color(0xFF0000)));
+				return;
+			}
+			final var user = arg.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+			arg.sendMessage(res ? lang.flyModeEnabledByAdmin : lang.flyModeDisabledByAdmin);
+			ctx.sendMessage(res ? langEn.adminFlyModEnabledOther : langEn.adminFlyModDisabledOther);
 		} else {
 			if (!(ctx.sender() instanceof Player)) {
 				ctx.sender().sendMessage(DystellarCore.getInstance().lang_en.get().errorNotAPlayer);
 				return;
 			}
-			target = (Player)ctx.sender();
+			final var target = (Player)ctx.sender();
 			final var ref = target.getReference();
-			final var pref = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
-			final var user = pref.getHolder().getComponent(UserComponent.getComponentType());
-
-			if (user.isInGame) {
-				final var lang = DystellarCore.getInstance().getLang(user.language);
-				pref.sendMessage(lang.commandDenyIngame);
-
-				return;
-			}
+			
+			if (toggleFly(ref) == null)
+				ctx.sendMessage(Message.raw("Something went wrong...").color(new Color(0xFF0000)));
 		}
-
-
-		final var ref = target.getReference();
-		final var move = ref.getStore().getComponent(ref, MovementStatesComponent.getComponentType());
 	}
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (!(commandSender instanceof Player)) return true;
-        Player player = (Player) commandSender;
-        if (strings.length < 1) {
-            if (!player.hasPermission("dystellar.plus")) {
-                player.sendMessage(Msgs.FLY_NEED_PLUS_RANK);
-                return true;
-            }
-            if ((DystellarCore.PRACTICE_HOOK && PUser.get(player).isInGame()) || (DystellarCore.SKYWARS_HOOK && SkywarsAPI.getPlayerUser(player).isInGame())) {
-                player.sendMessage(Msgs.COMMAND_DENY_INGAME);
-                return true;
-            }
-            player.setAllowFlight(!player.getAllowFlight());
-            if (player.getAllowFlight()) {
-                player.sendMessage(Msgs.FLY_MODE_ENABLED);
-            } else {
-                player.setFlying(false);
-                player.sendMessage(Msgs.FLY_MODE_DISABLED);
-            }
-        } else {
-            if (!player.getName().equalsIgnoreCase(strings[0]) && !player.hasPermission("dystellar.mod")) {
-                player.sendMessage(Msgs.NO_PERMISSION);
-                return true;
-            }
-            Player p = Bukkit.getPlayer(strings[0]);
-            if (p == null || !p.isOnline()) {
-                player.sendMessage(Msgs.ERROR_PLAYER_NOT_ONLINE);
-                return true;
-            }
-            p.setAllowFlight(!p.getAllowFlight());
-            if (p.getAllowFlight()) {
-                player.sendMessage(Msgs.ADMIN_FLY_MODE_ENABLED_OTHER.replace("<player>", player.getName()));
-                p.sendMessage(Msgs.FLY_MODE_ENABLED_BY_ADMIN);
-            } else {
-                p.setFlying(false);
-                player.sendMessage(Msgs.ADMIN_FLY_MODE_DISABLED_OTHER.replace("<player>", player.getName()));
-                p.sendMessage(Msgs.FLY_MODE_DISABLED_BY_ADMIN);
-            }
-        }
-        return true;
-    }
+	private static Boolean toggleFly(Ref<EntityStore> ref) {
+		final var playerRef = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
+		final var move = ref.getStore().getComponent(ref, MovementStatesComponent.getComponentType());
+		final var mngr = ref.getStore().getComponent(ref, MovementManager.getComponentType());
+
+		if (move != null && mngr != null && playerRef != null) {
+			final var user = playerRef.getHolder().getComponent(UserComponent.getComponentType());
+			if (user.isInGame) {
+				final var lang = DystellarCore.getInstance().getLang(user.language);
+				playerRef.sendMessage(lang.commandDenyIngame);
+
+				return null;
+			}
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+			final var targetFly = !mngr.getSettings().canFly;
+			
+			mngr.getSettings().canFly = targetFly;
+			if (mngr.getDefaultSettings() != null)
+				mngr.getDefaultSettings().canFly = targetFly;
+
+			if (!targetFly) {
+				move.getMovementStates().flying = false;
+				playerRef.getPacketHandler().writeNoCache(new SetMovementStates(new SavedMovementStates(false)));
+			}
+
+			mngr.update(playerRef.getPacketHandler());
+			playerRef.sendMessage(targetFly ? lang.flyModeEnabled : lang.flyModeDisabled);
+
+			return targetFly;
+		}
+		return null;
+	}
 }
