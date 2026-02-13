@@ -71,6 +71,9 @@ public class FlyCommand extends CommandBase {
 		}
 	}
 
+	/**
+	 * Toggle fly little helper
+	 */
 	private static Boolean toggleFly(Ref<EntityStore> ref) {
 		final var playerRef = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
 		final var move = ref.getStore().getComponent(ref, MovementStatesComponent.getComponentType());
