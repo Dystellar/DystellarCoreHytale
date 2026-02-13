@@ -88,6 +88,13 @@ public class Messages {
 	private String unfreeze_message = "<Green>You have been unfreezed. Sorry and thanks for your time!";
 	private String staff_message_freeze = "<Yellow>{player} is now frozen.";
 	private String staff_message_unfreeze = "<Green>{player} is now free to go.";
+	private String[] automated_messages = {
+		"Test",
+		"Test",
+		"Test",
+		"Test",
+		"Test"
+	};
 
 	private Message parseMsg(String msg) {
 		StringBuilder builder = new StringBuilder(msg);
@@ -171,6 +178,7 @@ public class Messages {
 		this.unfreezeMessage = parseMsg(unfreeze_message);
 		this.staffMessageFreeze = parseMsg(staff_message_freeze);
 		this.staffMessageUnfreeze = parseMsg(staff_message_unfreeze);
+		this.automatedMessages = Arrays.stream(automated_messages).map(s -> parseMsg(s)).toArray(Message[]::new);
 	}
 
 	public transient Message pmsEnabled;
@@ -210,6 +218,7 @@ public class Messages {
 	public transient Message unfreezeMessage;
 	public transient Message staffMessageFreeze;
 	public transient Message staffMessageUnfreeze;
+	public transient Message[] automatedMessages;
 
 	private static class ColorDeclaration {
 		private String name;
@@ -217,7 +226,7 @@ public class Messages {
 		private boolean bold = false;
 		private boolean italic = false;
 		private boolean monospace = false;
-		private boolean underlined = false;
+		private boolean underlined = false; // TODO: Not available...yet?
 
 		public ColorDeclaration(final String name, final String hexColor) {
 			this.name = name;

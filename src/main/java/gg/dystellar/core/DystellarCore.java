@@ -2,6 +2,7 @@ package gg.dystellar.core;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
@@ -13,6 +14,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.permissions.PermissionsModule;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.utils.Hooks;
 import gg.dystellar.core.common.PacketListener;
@@ -49,8 +51,8 @@ public final class DystellarCore extends JavaPlugin {
 		Hooks.registerHooks();
 		loadConfig();
 
-		if (ConfValues.AUTOMATED_MESSAGES_ENABLED)
-			Services.startAutomatedMessagesService();
+		if (config.get().automated_messages)
+			startAutomatedMessages();
 
 		// Listeners start
 		new Inbox.SenderListener(); new Punish();
@@ -131,6 +133,34 @@ public final class DystellarCore extends JavaPlugin {
 	private void initialize() {
 		UserComponent.init(this);
 		Suffix.initialize();
+	}
+
+	private void startAutomatedMessages() {
+		final byte[] b = {0, 0};
+
+		HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+			b[0]++;
+			b[1]++;
+			if (b[0] >= lang_en.get().automatedMessages.length)
+				b[0] = 0;
+			if (b[1] >= lang_en.get().automatedMessages.length)
+				b[1] = 0;
+
+			try {
+				Universe.get().getPlayers().forEach(p -> {
+					if (p.isValid()) {
+						final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+
+						switch (user.language) {
+							case "es" -> p.sendMessage(lang_es.get().automatedMessages[b[1]]);
+							default -> p.sendMessage(lang_en.get().automatedMessages[b[0]]);
+						}
+					}
+				});
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}, config.get().automated_messages_rate, config.get().automated_messages_rate, TimeUnit.SECONDS);
 	}
 
 	public void addInboxMessage(UUID target, Sendable sender, Player issuer) {
