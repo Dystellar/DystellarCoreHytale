@@ -54,12 +54,14 @@ public class UserComponent implements Component<EntityStore> {
     public boolean scoreboardEnabled = true;
 	public boolean friendRequests = true;
     public byte privateMessagesMode = PMS_ENABLED;
-	public Optional<Group> group = Optional.ofNullable(Group.DEFAULT_GROUP);
+	public Optional<Group> group = Group.DEFAULT_GROUP;
 	public LocalDateTime creationDate = LocalDateTime.now();
 
 	public final List<UUID> friends = new ArrayList<>();
     public final List<UUID> ignoreList = new ArrayList<>();
 	public final Map<String, Permission> perms = new HashMap<>();
+
+	public transient boolean isInGame = false;
 
     public UserComponent(UUID id, String ip, String name) {
         this.uuid = id;

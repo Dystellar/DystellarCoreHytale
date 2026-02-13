@@ -1,9 +1,15 @@
 package gg.dystellar.core.commands;
 
+import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+
+import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.UserComponent;
 
 /**
  * This command is for premium people, so they can fly in the lobbys, so they can explore the buildings with ease.
@@ -17,6 +23,47 @@ public class FlyCommand extends CommandBase {
 		super("fly", "Fly command for the privileged");
 		this.requirePermission("dystellar.fly");
     }
+
+	@Override
+	protected void executeSync(CommandContext ctx) {
+		final Player target;
+		final var arg = ctx.get(playerArg);
+
+		if (arg != null && arg.isValid()) {
+			if (!ctx.sender().hasPermission("dystellar.fly.other")) {
+				ctx.sender().sendMessage(DystellarCore.getInstance().lang_en.get().noPermission);
+				return;
+			}
+
+			final var ref = arg.getReference();
+			if (!ref.isValid()) {
+				ctx.sender().sendMessage(DystellarCore.getInstance().lang_en.get().errorPlayerNotInAWorld);
+				return;
+			}
+
+			target = ref.getStore().getComponent(ref, Player.getComponentType());
+		} else {
+			if (!(ctx.sender() instanceof Player)) {
+				ctx.sender().sendMessage(DystellarCore.getInstance().lang_en.get().errorNotAPlayer);
+				return;
+			}
+			target = (Player)ctx.sender();
+			final var ref = target.getReference();
+			final var pref = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
+			final var user = pref.getHolder().getComponent(UserComponent.getComponentType());
+
+			if (user.isInGame) {
+				final var lang = DystellarCore.getInstance().getLang(user.language);
+				pref.sendMessage(lang.commandDenyIngame);
+
+				return;
+			}
+		}
+
+
+		final var ref = target.getReference();
+		final var move = ref.getStore().getComponent(ref, MovementStatesComponent.getComponentType());
+	}
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
