@@ -37,6 +37,7 @@ public class Messages {
 		new ColorDeclaration("MaterialEmerald", "#47A036"),
 		new ColorDeclaration("DarkerRed", "#971607"),
 		new ColorDeclaration("Danger", "#AA0000", true, false, false, false),
+		new ColorDeclaration("Test", "#000000", true, true, true, true)
 	};
 
 	private String pms_enabled = "<Green>You are now accepting all private messages.";

@@ -21,15 +21,15 @@ import gg.dystellar.core.common.PacketListener;
 import gg.dystellar.core.common.Suffix;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.inbox.Inbox;
-import gg.dystellar.core.config.Config;
 import gg.dystellar.core.config.Messages;
 import gg.dystellar.core.config.Setup;
 import gg.dystellar.core.listeners.*;
 import gg.dystellar.core.perms.CustomPermProvider;
 import gg.dystellar.core.perms.Group;
-import gg.dystellar.core.serialization.API;
 import gg.dystellar.core.arenasapi.AbstractArena;
 import gg.dystellar.core.commands.*;
+import gg.dystellar.core.api.API;
+import gg.dystellar.core.api.Config;
 
 public final class DystellarCore extends JavaPlugin {
 
@@ -61,7 +61,6 @@ public final class DystellarCore extends JavaPlugin {
 
 		// Commands start
 		new SetSpawnCommand(); new GameModeCommand();
-		new FlyCommand(); new FreezeCommand();
 		new JoinCommand(); new MSGCommand(); new ReplyCommand();
 		new MuteCommand();
 		new NoteCommand(); new PunishmentsCommand(); new NotesCommand();
@@ -80,17 +79,20 @@ public final class DystellarCore extends JavaPlugin {
 		initialize();
 		AbstractArena.init();
 
+		// Listeners
 		JoinsListener.register(this);
 		FreezeCommand.register(this);
 
+		// Commands
 		this.getCommandRegistry().registerCommand(new BanCommand());
 		this.getCommandRegistry().registerCommand(new BlacklistCommand());
 		this.getCommandRegistry().registerCommand(new BroadcastCommand());
+		this.getCommandRegistry().registerCommand(new FlyCommand());
+		this.getCommandRegistry().registerCommand(new FreezeCommand());
 
+		// Register provider
 		PermissionsModule.get().addProvider(new CustomPermProvider());
 	}
-
-	public static final String CHANNEL = "dyst:ellar";
 
 	public final Config<Setup> config = new Config<>(this, "setup.json", Setup.class);
 	public final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);

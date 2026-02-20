@@ -1,4 +1,4 @@
-package gg.dystellar.core.config;
+package gg.dystellar.core.api;
 
 import java.io.File;
 import java.io.FileReader;
@@ -77,7 +77,6 @@ public final class Config<T> implements Supplier<T> {
 			this.value = GSON.fromJson(r, this.clazz);
 			r.close();
 		}
-
 	}
 
 	/**

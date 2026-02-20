@@ -1,74 +1,80 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.Msgs;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.serialization.Consts;
-import net.zylesh.dystellarcore.serialization.MariaDB;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
  * Friends command, lets any player manage their list of friends.
  * Should definitely be implemented in the proxy or redirecter if hytale has one, because otherwise it needs a bunch of protocols and packets and there is no need.
  */
-public class FriendCommand implements CommandExecutor, Listener {
-
-    public static final Map<UUID, UUID> messagesCache = new HashMap<>();
-    public static final Set<UUID> requestsCache = new HashSet<>();
-    private static final Set<UUID> cooldowns = new HashSet<>();
-
-    private static final Map<Player, Map<String, UUID>> uuidsCache = new ConcurrentHashMap<>(); // Avoid list connections spam to the database
-
-    public static void requestAccepted(Player p, UUID uuid, String name) {
-        if (!requestsCache.remove(p.getUniqueId())) {
-            return;
-        }
-        User u = User.get(p);
-        boolean sendTip = false;
-        if (u.friends.isEmpty() && u.tipsSent[Consts.FIRST_FRIEND_TIP_POS] == Consts.BYTE_FALSE) {
-            u.tipsSent[Consts.FIRST_FRIEND_TIP_POS] = Consts.BYTE_TRUE;
-            sendTip = true;
-        }
-        u.friends.add(uuid);
-        p.sendMessage(Msgs.FRIEND_REQUEST_ACCEPTED_SENDER.replace("<player>", name));
-        if (sendTip) p.sendMessage(Consts.FIRST_FRIEND_TIP_MSG);
-    }
-
-    public static void requestRejected(Player p, String name) {
-        if (!requestsCache.remove(p.getUniqueId())) {
-            return;
-        }
-        p.sendMessage(Msgs.FRIEND_REQUEST_REJECTED_SENDER.replace("<player>", name));
-    }
-
-    private static final String[] help = {
-            ChatColor.WHITE + "===========================",
-            ChatColor.DARK_AQUA + "/friend add <player>",
-            ChatColor.DARK_AQUA + "/friend remove <player>",
-            ChatColor.DARK_AQUA + "/friend find <player>",
-            ChatColor.DARK_AQUA + "/friend list",
-            ChatColor.DARK_AQUA + "/friend accept",
-            ChatColor.DARK_AQUA + "/friend reject",
-            ChatColor.DARK_AQUA + "/friend togglerequests",
-            ChatColor.WHITE + "==========================="
-    };
+public class FriendCommand extends CommandBase {
 
     public FriendCommand() {
-        Bukkit.getPluginCommand("friend").setExecutor(this);
-        Bukkit.getPluginCommand("f").setExecutor(this);
+		super("friend", "Friends system base command");
+		this.addAliases("f");
+		this.addSubCommand(new AddCommand());
+		this.addSubCommand(new RemoveCommand());
+		this.addSubCommand(new FindCommand());
+		this.addSubCommand(new ListCommand());
+		this.addSubCommand(new AcceptCommand());
+		this.addSubCommand(new RejectCommand());
+		this.addSubCommand(new ToggleCommand());
     }
+
+	@Override
+	protected void executeSync(CommandContext arg0) {
+	}
+
+	private static final class AddCommand extends AbstractPlayerCommand {
+		@Override
+		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		}
+	}
+
+	private static final class RemoveCommand extends AbstractPlayerCommand {
+		@Override
+		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		}
+	}
+
+	private static final class FindCommand extends AbstractPlayerCommand {
+		@Override
+		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		}
+	}
+
+	private static final class ListCommand extends AbstractPlayerCommand {
+		@Override
+		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		}
+	}
+
+	private static final class AcceptCommand extends AbstractPlayerCommand {
+		@Override
+		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		}
+	}
+
+	private static final class RejectCommand extends AbstractPlayerCommand {
+		@Override
+		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		}
+	}
+
+	private static final class ToggleCommand extends AbstractPlayerCommand {
+		@Override
+		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		}
+	}
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
@@ -216,20 +222,5 @@ public class FriendCommand implements CommandExecutor, Listener {
             }
         }
         return true;
-    }
-
-    @EventHandler
-    public void leave(PlayerQuitEvent event) {
-        remove(event.getPlayer());
-    }
-
-    @EventHandler
-    public void leave(PlayerKickEvent event) {
-        remove(event.getPlayer());
-    }
-
-    private static void remove(Player p) {
-        messagesCache.remove(p.getUniqueId());
-        requestsCache.remove(p.getUniqueId());
     }
 }

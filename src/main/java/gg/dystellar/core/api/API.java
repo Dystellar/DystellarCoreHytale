@@ -1,12 +1,12 @@
-package gg.dystellar.core.serialization;
+package gg.dystellar.core.api;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.punishments.Punishment;
+import gg.dystellar.core.serialization.Protocol;
 import gg.dystellar.core.serialization.Protocol.RawGroupsData;
 import gg.dystellar.core.serialization.Protocol.RawUser;
 
-import javax.annotation.Nullable;
 
 import com.google.gson.Gson;
 
@@ -49,7 +49,7 @@ public final class API {
 	private final String url;
 	private final String token;
 
-	private Response getJson(String path) throws IOException, InterruptedException {
+	public Response getJson(String path) throws IOException, InterruptedException {
 		final var request = HttpRequest.newBuilder(URI.create(this.url + path))
 			.method("GET", BodyPublishers.noBody())
 			.header("Authorization", this.token)
@@ -65,7 +65,7 @@ public final class API {
 		return result;
 	}
 
-	private Response requestJson(String path, String method, String json) throws IOException, InterruptedException {
+	public Response requestJson(String path, String method, String json) throws IOException, InterruptedException {
 		final var request = HttpRequest.newBuilder(URI.create(this.url + path))
 			.method(method, BodyPublishers.ofString(json))
 			.header("Authorization", this.token)
