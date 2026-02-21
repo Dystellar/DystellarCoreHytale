@@ -26,17 +26,17 @@ public final class WsClient {
 	final WebSocket client;
 	private final Map<String, Channel> channels = new HashMap<>();
 
-	public WsClient(String url, String token, HttpClient httpClient) throws InterruptedException, ExecutionException {
+	public WsClient(String url, String token, String name, HttpClient httpClient) throws InterruptedException, ExecutionException {
 		this.url = url;
 		this.token = token;
 
 		this.client = httpClient.newWebSocketBuilder()
 			.header("Authorization", this.token)
-			.buildAsync(URI.create(this.url), this.new WsListener())
+			.buildAsync(URI.create(this.url + "?name" + name), this.new WsListener())
 			.get();
 	}
 
-	public Channel registerSubchannel(String channelId, Receiver callback) {
+	public Channel registerChannel(String channelId, Receiver callback) {
 		final var channel = new Channel(channelId, this, callback);
 
 		channels.put(channelId, channel);

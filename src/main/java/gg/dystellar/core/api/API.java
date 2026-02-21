@@ -1,6 +1,7 @@
 package gg.dystellar.core.api;
 
 import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.api.comms.WsClient;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.punishments.Punishment;
 import gg.dystellar.core.serialization.Protocol;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 /**
@@ -34,7 +36,7 @@ public final class API {
 
 	private final Gson gson = new Gson();
 
-    public API(String url, String token) throws IOException, InterruptedException {
+    public API(String url, String wsUrl, String name, String token) throws IOException, InterruptedException, ExecutionException {
 		this.url = url;
 		this.token = token;
 		this.client = HttpClient.newBuilder()
@@ -43,11 +45,13 @@ public final class API {
 			.connectTimeout(Duration.ofSeconds(20))
 			.build();
 		this.testConnection();
+		this.wsClient = new WsClient(wsUrl, token, name, this.client);
 	}
 
 	private final HttpClient client;
 	private final String url;
 	private final String token;
+	public final WsClient wsClient;
 
 	public Response getJson(String path) throws IOException, InterruptedException {
 		final var request = HttpRequest.newBuilder(URI.create(this.url + path))
