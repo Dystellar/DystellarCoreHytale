@@ -87,7 +87,7 @@ public final class ByteBufferStreams {
 		private void ensureCapacity(int additional) {
 			if (buf.remaining() >= additional) return;
 
-			int newCapacity = Math.max(buf.capacity() * 2, buf.capacity() + additional);
+			final int newCapacity = Math.max(buf.capacity() * 2, buf.capacity() + additional);
 			final var newBuf = ByteBuffer.allocate(newCapacity);
 
 			this.buf.flip();

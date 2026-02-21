@@ -23,7 +23,7 @@ import gg.dystellar.core.utils.ByteBufferStreams;
 public final class WsClient {
 	private final String url;
 	private final String token;
-	private final WebSocket client;
+	final WebSocket client;
 	private final Map<String, Channel> channels = new HashMap<>();
 
 	public WsClient(String url, String token, HttpClient httpClient) throws InterruptedException, ExecutionException {
