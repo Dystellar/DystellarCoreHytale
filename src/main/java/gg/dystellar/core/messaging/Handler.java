@@ -1,4 +1,4 @@
-package gg.dystellar.core.services.messaging;
+package gg.dystellar.core.messaging;
 
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
@@ -6,7 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import gg.dystellar.core.utils.ByteBufferStreams.ByteBufferInputStream;
+import gg.dystellar.core.api.comms.Channel.ByteBufferInputStream;
+import gg.dystellar.core.utils.Utils;
 
 /**
  * Handles incoming plugin messages, this has been refactorized already.

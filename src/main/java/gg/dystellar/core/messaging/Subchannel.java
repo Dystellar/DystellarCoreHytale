@@ -1,4 +1,4 @@
-package gg.dystellar.core.services.messaging;
+package gg.dystellar.core.messaging;
 
 import java.util.Optional;
 
