@@ -31,6 +31,8 @@ import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.utils.Pair;
 
+// TODO: Test this
+
 /**
  * Moderator command that lets you freeze a player to prevent them from moving.
  * This is useful for moderators that want to redirect the player somewhere and ask them a few questions.

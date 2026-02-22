@@ -3,20 +3,44 @@ package gg.dystellar.core.messaging;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.NameMatching;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+
+import gg.dystellar.core.api.comms.Receiver;
 import gg.dystellar.core.api.comms.Channel.ByteBufferInputStream;
+import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Utils;
 
 /**
- * Handles incoming plugin messages, this has been refactorized already.
+ * Incoming plugin messages handler.
  */
 public class Handler {
 	public static void handle(String source, ByteBufferInputStream in) {
 		try {
 			Subchannel.values()[in.read()].callback.ifPresent(f -> f.receive(source, in));
 		} catch (Exception ignored) {}
+	}
+
+	private static final Random RAND = new Random();
+	private static final Map<Integer, Pair<ScheduledFuture<?>, Receiver>> SESSIONS = new ConcurrentHashMap<>();
+
+	public static int createMessageSession(Receiver callback, long expirationMillis) {
+		final int id = RAND.nextInt();
+
+		final var task = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> SESSIONS.remove(id), expirationMillis, TimeUnit.MILLISECONDS);
+		SESSIONS.put(id, new Pair<>(task, callback));
+
+		return id;
 	}
 
 	public static void handlePunData(String source, ByteBufferInputStream in) {
@@ -42,16 +66,7 @@ public class Handler {
 		p.openInventory(inv);
 	}
 
-	public static void handleRegRes(String source, ByteBufferInputStream in) {
-		String unsafe = in.readUTF();
-		Player player = Bukkit.getPlayer(unsafe);
-		if (player == null || !player.isOnline()) {
-			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
-			return;
-		}
-		awaitingPlayers.remove(player.getUniqueId());
-	}
-
+	/* TODO:
 	public static void handleInboxUpdate(String source, ByteBufferInputStream in) {
 		UUID uuid = UUID.fromString(in.readUTF());
 		if (!User.getUsers().containsKey(uuid)) return;
@@ -84,7 +99,7 @@ public class Handler {
 				break;
 			}
 		}
-	}
+	}*/
 
 	public static void handleInboxManagerUpdate() {}
 
@@ -99,48 +114,36 @@ public class Handler {
 	public static void handleDemIsPlayerAcceptingReqs() {}
 
 	public static void handleDemIsPlayerWithinNetwork(String source, ByteBufferInputStream in) {
-		String pe = in.readUTF();
-		if (runnables.containsKey(pe)) {
-			if (in.readBoolean())
-			runnables.get(pe).getKey().run();
-			else
-			runnables.get(pe).getValue().run();
-		}
+
 	}
 
 	public static void handleFriendRemove() {}
 
-	public static void handleDemFindPlayerRes(String source, ByteBufferInputStream in) {
-		String unsafe = in.readUTF();
-		Player player = Bukkit.getPlayer(unsafe);
-		if (player == null || !player.isOnline()) {
-			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
-			return;
-		}
-		String pla = in.readUTF();
-		String srv = in.readUTF();
-		if (srv.equals("null")) {
-			player.sendMessage(ChatColor.DARK_AQUA + "This player is joining the server right now!" + ChatColor.GRAY + " (Login screen)");
-		} else {
-			player.sendMessage(ChatColor.DARK_AQUA + pla + ChatColor.WHITE + " is currently playing at " + ChatColor.YELLOW + srv + ChatColor.WHITE + ".");
+	public static void handleDemFindPlayer(String source, ByteBufferInputStream in) {
+		final var playerName = in.readPrefixedUTF8();
+		final var playerRef = Universe.get().getPlayerByUsername(playerName, NameMatching.EXACT);
+
+		if (playerRef != null) {
+			final var id = in.readInt();
+			Utils.sendTargetedOutputStream(source, Subchannel.DEMAND_FIND_PLAYER_RES, 50, out -> out.writeInt(id));
 		}
 	}
 
-	public static void handleDemPlayerNotOnline(String source, ByteBufferInputStream in) {
-		String unsafe = in.readUTF();
-		Player player = Bukkit.getPlayer(unsafe);
-		if (player == null || !player.isOnline()) {
-			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
-			return;
+	public static void handleDemFindPlayerRes(String source, ByteBufferInputStream in) {
+		final var id = in.readInt();
+		
+		final var pair = SESSIONS.remove(id);
+		if (pair != null) {
+			pair.first.cancel(true);
+			pair.second.receive(source, in);
 		}
-
-		player.sendMessage(ChatColor.RED + "This player is not online.");
 	}
 
 	public static void handleFriendReqAccept() {}
 
 	public static void handleFriendReqReject() {}
 
+	/* TODO: Implement inboxes stuff
 	public static void handleInboxSend(String source, ByteBufferInputStream in) {
 		String unsafe = in.readUTF();
 		Player player = Bukkit.getPlayer(unsafe);
@@ -151,7 +154,7 @@ public class Handler {
 		User user = User.get(player);
 		Sendable sender = InboxSerialization.stringToSender(in.readUTF(), user.getInbox());
 		user.getInbox().addSender(sender);
-	}
+	}*/
 
 	public static void handleShouldSendPackRes() {}
 

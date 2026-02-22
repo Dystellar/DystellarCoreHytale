@@ -18,6 +18,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 
+// TODO: Test this
+
 /**
  * Custom ban command, generally the same as the builtin ban command but this also notifies the backend and updates the player's profile.
  */

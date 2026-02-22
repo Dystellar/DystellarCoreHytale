@@ -1,16 +1,5 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.core.Msgs;
-import net.zylesh.dystellarcore.core.User;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import static net.zylesh.dystellarcore.core.User.*;
-
 /**
  * This lets you toggle private messages mode.
  */

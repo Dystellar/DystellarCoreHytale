@@ -19,6 +19,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 
+// TODO: Test this
+
 /**
  * This command is for premium people, so they can fly in the lobbys, so they can explore the buildings with ease.
  * It shouldn't have any effect on actual games.

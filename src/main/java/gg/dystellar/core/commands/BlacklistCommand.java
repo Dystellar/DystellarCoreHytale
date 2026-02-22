@@ -16,6 +16,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 
+// TODO: Test this
+
 /**
  * Blacklist command, more severe than ban, and only used for special cases,
  * like for problematic people that you really don't want them connecting to the server ever again.

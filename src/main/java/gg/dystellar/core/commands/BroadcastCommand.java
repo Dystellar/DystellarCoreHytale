@@ -15,6 +15,8 @@ import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.config.Messages;
 
+// TODO: Test this
+
 /**
  * With this command you can send a message that all the people in the server will see, like a public announcement.
  * This probably should be implemented in the proxy or redirecter if hytale has one instead of here.

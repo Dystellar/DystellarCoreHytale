@@ -3,6 +3,7 @@ package gg.dystellar.core.utils;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent;
@@ -11,11 +12,11 @@ import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 
 import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.api.comms.Channel;
 import gg.dystellar.core.api.comms.Channel.ByteBufferOutputStream;
 import gg.dystellar.core.messaging.Subchannel;
 
 public class Utils {
-
 	public static <T> Optional<T> findArr(T[] arr, Predicate<T> predicate) {
 		for (T t : arr) {
 			if (predicate.test(t))
@@ -38,6 +39,7 @@ public class Utils {
         return (between > 0 ? between + " days, " : "") + (betweenHours > 0 ? betweenHours + " hours and " : "") + (betweenMinutes > 0 ? betweenMinutes + " minutes." : "");
     }
 
+	// TODO: Test this
     public static void resetEffects(Player p) {
 		final var ref = p.getReference();
 		final var effectStatus = ref.getStore().getComponent(ref, EffectControllerComponent.getComponentType());
@@ -53,27 +55,23 @@ public class Utils {
 		}
     }
 
-	public ByteBufferOutputStream createPropagatedOutputStream(Subchannel subchannel, int capacity) {
+	public static void sendPropagatedOutputStream(Subchannel subchannel, int capacity, Consumer<ByteBufferOutputStream> func) {
 		final var channel = DystellarCore.getChannel();
 		try {
 			final var out = channel.createPropagatedMessageStream(capacity);
 			out.write(subchannel.ordinal());
-
-			return out;
+			func.accept(out);
+			channel.sendMessage(out.getBuffer());
 		} catch (Exception ignored) {}
-
-		return null;
 	}
 
-	public ByteBufferOutputStream createTargetedOutputStream(String target, Subchannel subchannel, int capacity) {
+	public static void sendTargetedOutputStream(String target, Subchannel subchannel, int capacity, Consumer<ByteBufferOutputStream> func) {
 		final var channel = DystellarCore.getChannel();
 		try {
 			final var out = channel.createTargetedMessageStream(target, capacity);
 			out.write(subchannel.ordinal());
-
-			return out;
+			func.accept(out);
+			channel.sendMessage(out.getBuffer());
 		} catch (Exception ignored) {}
-
-		return null;
 	}
 }
