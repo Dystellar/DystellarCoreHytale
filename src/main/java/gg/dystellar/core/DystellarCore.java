@@ -99,6 +99,11 @@ public final class DystellarCore extends JavaPlugin {
 		PermissionsModule.get().addProvider(new CustomPermProvider());
 	}
 
+	@Override
+	protected void shutdown() {
+	    super.shutdown();
+	}
+
 	public final Config<Setup> config = new Config<>(this, "setup.json", Setup.class);
 	public final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
 	public final Config<Messages> lang_es = new Config<>(this, "lang_es.json", Messages.class);
@@ -151,7 +156,7 @@ public final class DystellarCore extends JavaPlugin {
 			b[1]++;
 			if (b[0] >= lang_en.get().automatedMessages.length)
 				b[0] = 0;
-			if (b[1] >= lang_en.get().automatedMessages.length)
+			if (b[1] >= lang_es.get().automatedMessages.length)
 				b[1] = 0;
 
 			try {
