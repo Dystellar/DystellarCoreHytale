@@ -1,12 +1,10 @@
 package gg.dystellar.core.api.comms;
 
-import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Listener;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -46,21 +44,10 @@ public final class WsClient {
 	private final class WsListener implements Listener {
 		@Override
 		public CompletionStage<?> onBinary(WebSocket socket, ByteBuffer data, boolean last) {
-			var bytes = new ByteArrayOutputStream();
-			byte b;
-			while ((b = data.get()) != 0) {
-				bytes.write(b);
-			}
-
-			final var source = bytes.toString(StandardCharsets.UTF_8);
 			final var inputStream = ByteBufferStreams.newInputStream(data);
+			final var source = inputStream.readPrefixedUTF8();
+			final var channelName = inputStream.readPrefixedUTF8();
 
-			bytes = new ByteArrayOutputStream();
-			while ((b = data.get()) != 0) {
-				bytes.write(b);
-			}
-
-			final var channelName = bytes.toString(StandardCharsets.UTF_8);
 			final var channel = channels.get(channelName);
 			if (channel == null)
 				DystellarCore.getLog().atWarning().log("Received a ws message for a channel that doesn't exist");

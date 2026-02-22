@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.utils.Hooks;
+import gg.dystellar.core.utils.ByteBufferStreams.ByteBufferInputStream;
 import gg.dystellar.core.common.PacketListener;
 import gg.dystellar.core.common.Suffix;
 import gg.dystellar.core.common.UserComponent;
@@ -26,19 +27,23 @@ import gg.dystellar.core.config.Setup;
 import gg.dystellar.core.listeners.*;
 import gg.dystellar.core.perms.CustomPermProvider;
 import gg.dystellar.core.perms.Group;
+import gg.dystellar.core.services.messaging.Handler;
 import gg.dystellar.core.arenasapi.AbstractArena;
 import gg.dystellar.core.commands.*;
 import gg.dystellar.core.api.API;
 import gg.dystellar.core.api.Config;
+import gg.dystellar.core.api.comms.Channel;
 
 public final class DystellarCore extends JavaPlugin {
 
 	private static DystellarCore INSTANCE;
 	private static API API;
+	private static Channel CHANNEL;
 
 	public static DystellarCore getInstance() { return INSTANCE; }
 	public static HytaleLogger getLog() { return getInstance().LOGGER; }
 	public static API getApi() { return API; }
+	public static Channel getChannel() { return CHANNEL; }
 
 	private final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
@@ -103,7 +108,8 @@ public final class DystellarCore extends JavaPlugin {
 			LOGGER.atInfo().log("[Dystellar] Loading configuration...");
 			config.load();
 
-			API = new API(config.get().api, config.get().api_key);
+			API = new API(config.get().api, config.get().websocket_endpoint, config.get().server_name, config.get().api_key);
+			CHANNEL = API.wsClient.registerChannel("core", (source, input) -> Handler.handle(source, input));
 
 			lang_en.load();
 			lang_es.load();
@@ -194,12 +200,5 @@ public final class DystellarCore extends JavaPlugin {
 			if (compatibility == EloGainNotifier.PRACTICE) Collections.addAll(obj, target.toString(), ELO_GAIN_NOTIFIER, id, submission, elo, compatibility, ladder, msg, from, claimed, deleted);
 			else if (compatibility == EloGainNotifier.SKYWARS) Collections.addAll(obj, target.toString(), ELO_GAIN_NOTIFIER, id, submission, elo, compatibility, msg, from, claimed, deleted);
 		}*/
-	}
-
-	@Override
-	public void onPluginMessageReceived(String s, @NotNull Player p, byte[] bytes) {
-		if (!s.equalsIgnoreCase(CHANNEL))
-			return;
-		Types.handle(p, bytes);
 	}
 }

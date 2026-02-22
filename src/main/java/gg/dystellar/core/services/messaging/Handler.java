@@ -6,18 +6,19 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import gg.dystellar.core.utils.ByteBufferStreams.ByteBufferInputStream;
+
 /**
  * Handles incoming plugin messages, this has been refactorized already.
  */
 public class Handler {
-	public static void handle(byte[] data) {
-		ByteArrayDataInput in = ByteStreams.newDataInput(data);
-        byte id = in.readByte();
-
-		Subchannel.values()[id].callback.ifPresent(f -> f.handle(p, in));
+	public static void handle(String source, ByteBufferInputStream in) {
+		try {
+			Subchannel.values()[in.read()].callback.ifPresent(f -> f.receive(source, in));
+		} catch (Exception ignored) {}
 	}
 
-	public static void handlePunData(Player p, ByteArrayDataInput in) {
+	public static void handlePunData(String source, ByteBufferInputStream in) {
 		String string = in.readUTF();
 		Player player = Bukkit.getPlayer(string);
 
@@ -26,7 +27,7 @@ public class Handler {
 		Utils.sendPluginMessage(player, Types.PUNISHMENTS_DATA_RESPONSE, Punishments.serializePunishments(user.getPunishments()));
 	}
 
-	public static void handlePunDataRes(Player p, ByteArrayDataInput in) {
+	public static void handlePunDataRes(String source, ByteBufferInputStream in) {
 		String string = in.readUTF();
 		Player player = Bukkit.getPlayer(string);
 
@@ -40,7 +41,7 @@ public class Handler {
 		p.openInventory(inv);
 	}
 
-	public static void handleRegRes(Player p, ByteArrayDataInput in) {
+	public static void handleRegRes(String source, ByteBufferInputStream in) {
 		String unsafe = in.readUTF();
 		Player player = Bukkit.getPlayer(unsafe);
 		if (player == null || !player.isOnline()) {
@@ -50,7 +51,7 @@ public class Handler {
 		awaitingPlayers.remove(player.getUniqueId());
 	}
 
-	public static void handleInboxUpdate(Player p, ByteArrayDataInput in) {
+	public static void handleInboxUpdate(String source, ByteBufferInputStream in) {
 		UUID uuid = UUID.fromString(in.readUTF());
 		if (!User.getUsers().containsKey(uuid)) return;
 		User user = User.get(uuid);
@@ -96,7 +97,7 @@ public class Handler {
 
 	public static void handleDemIsPlayerAcceptingReqs() {}
 
-	public static void handleDemIsPlayerWithinNetwork(Player p, ByteArrayDataInput in) {
+	public static void handleDemIsPlayerWithinNetwork(String source, ByteBufferInputStream in) {
 		String pe = in.readUTF();
 		if (runnables.containsKey(pe)) {
 			if (in.readBoolean())
@@ -108,7 +109,7 @@ public class Handler {
 
 	public static void handleFriendRemove() {}
 
-	public static void handleDemFindPlayerRes(Player p, ByteArrayDataInput in) {
+	public static void handleDemFindPlayerRes(String source, ByteBufferInputStream in) {
 		String unsafe = in.readUTF();
 		Player player = Bukkit.getPlayer(unsafe);
 		if (player == null || !player.isOnline()) {
@@ -124,7 +125,7 @@ public class Handler {
 		}
 	}
 
-	public static void handleDemPlayerNotOnline(Player p, ByteArrayDataInput in) {
+	public static void handleDemPlayerNotOnline(String source, ByteBufferInputStream in) {
 		String unsafe = in.readUTF();
 		Player player = Bukkit.getPlayer(unsafe);
 		if (player == null || !player.isOnline()) {
@@ -139,7 +140,7 @@ public class Handler {
 
 	public static void handleFriendReqReject() {}
 
-	public static void handleInboxSend(Player p, ByteArrayDataInput in) {
+	public static void handleInboxSend(String source, ByteBufferInputStream in) {
 		String unsafe = in.readUTF();
 		Player player = Bukkit.getPlayer(unsafe);
 		if (player == null || !player.isOnline()) {
@@ -153,7 +154,7 @@ public class Handler {
 
 	public static void handleShouldSendPackRes() {}
 
-	public static void handlePunishmentAddServer(Player p, ByteArrayDataInput in) {
+	public static void handlePunishmentAddServer(String source, ByteBufferInputStream in) {
 		String unsafe = in.readUTF();
 		Player player = Bukkit.getPlayer(unsafe);
 		if (player == null || !player.isOnline()) {
@@ -166,7 +167,7 @@ public class Handler {
 		user.punish(punishment);
 	}
 
-	public static void handleRemovePunishmentById(Player p, ByteArrayDataInput in) {
+	public static void handleRemovePunishmentById(String source, ByteBufferInputStream in) {
 		String unsafe = in.readUTF();
 		int pId = in.readInt();
 		Player player = Bukkit.getPlayer(unsafe);

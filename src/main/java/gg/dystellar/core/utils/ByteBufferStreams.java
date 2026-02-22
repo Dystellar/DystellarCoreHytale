@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public final class ByteBufferStreams {
 
@@ -24,6 +25,30 @@ public final class ByteBufferStreams {
 
 		ByteBufferInputStream(ByteBuffer buf) {
 			this.buf = buf;
+		}
+
+		public String readPrefixedUTF8() {
+			final var len = this.buf.getShort();
+			final byte[] str = new byte[len];
+
+			this.buf.get(str);
+			return new String(str, StandardCharsets.UTF_8);
+		}
+
+		public int readInt() {
+			return this.buf.getInt();
+		}
+
+		public long readLong() {
+			return this.buf.getLong();
+		}
+
+		public float readFloat() {
+			return this.buf.getFloat();
+		}
+
+		public double readDouble() {
+			return this.buf.getDouble();
 		}
 
 		@Override
@@ -95,9 +120,53 @@ public final class ByteBufferStreams {
 			this.buf = newBuf;
 		}
 
+		public void writePrefixedUTF8(String s) {
+			final byte[] utfBytes = s.getBytes(StandardCharsets.UTF_8);
+			this.ensureCapacity(utfBytes.length + 2);
+
+			this.buf.putShort((short)utfBytes.length);
+			this.buf.put(utfBytes);
+		}
+
+		public void writeInt(int i) {
+			this.ensureCapacity(4);
+			this.buf.putInt(i);
+		}
+
+		public void writeLong(long l) {
+			this.ensureCapacity(8);
+			this.buf.putLong(l);
+		}
+
+		public void writeFloat(float f) {
+			this.ensureCapacity(4);
+			this.buf.putFloat(f);
+		}
+
+		public void writeDouble(double d) {
+			this.ensureCapacity(8);
+			this.buf.putDouble(d);
+		}
+
+		@Override
+		public void write(byte[] src) throws IOException {
+			this.ensureCapacity(src.length);
+			this.buf.put(src);
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			this.ensureCapacity(len);
+			buf.put(b, off, len);
+		}
+
+		public ByteBuffer getBuffer() {
+		    return buf;
+		}
+
 		@Override
 		public void write(int b) throws IOException {
-			// TODO
+			this.buf.put((byte)b);
 		}
 	}
 }
