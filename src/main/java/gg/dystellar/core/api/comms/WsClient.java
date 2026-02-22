@@ -12,7 +12,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.utils.ByteBufferStreams;
 
 /**
  * Abstraction layer of a websocket client.
@@ -44,7 +43,7 @@ public final class WsClient {
 	private final class WsListener implements Listener {
 		@Override
 		public CompletionStage<?> onBinary(WebSocket socket, ByteBuffer data, boolean last) {
-			final var inputStream = ByteBufferStreams.newInputStream(data);
+			final var inputStream = new Channel.ByteBufferInputStream(data);
 			final var source = inputStream.readPrefixedUTF8();
 			final var channelName = inputStream.readPrefixedUTF8();
 

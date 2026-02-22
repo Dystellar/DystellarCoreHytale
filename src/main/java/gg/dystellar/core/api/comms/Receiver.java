@@ -1,6 +1,6 @@
 package gg.dystellar.core.api.comms;
 
-import gg.dystellar.core.utils.ByteBufferStreams.ByteBufferInputStream;
+import gg.dystellar.core.api.comms.Channel.ByteBufferInputStream;
 
 @FunctionalInterface
 public interface Receiver {

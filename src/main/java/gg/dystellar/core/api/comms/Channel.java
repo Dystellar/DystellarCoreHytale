@@ -8,10 +8,6 @@ import java.nio.charset.StandardCharsets;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 
-import gg.dystellar.core.utils.ByteBufferStreams;
-import gg.dystellar.core.utils.IOUtils;
-import gg.dystellar.core.utils.ByteBufferStreams.ByteBufferOutputStream;
-
 public final class Channel {
 	final String name;
 	final WsClient handle;
