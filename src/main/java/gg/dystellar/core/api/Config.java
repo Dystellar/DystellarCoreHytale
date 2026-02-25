@@ -92,10 +92,12 @@ public final class Config<T> implements Supplier<T> {
 	}
 
 	/**
-	 * WARNING! If Config#load() is not called, this will return null.
+	 * WARNING! If Config#load() is not called, this will throw IllegalStateException.
 	 */
 	@Override
 	public T get() {
+		if (this.value == null)
+			throw new IllegalStateException("Called get but the config wasn't loaded yet. Call Config#load() first");
 	    return this.value;
 	}
 }

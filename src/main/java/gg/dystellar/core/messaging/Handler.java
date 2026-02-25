@@ -34,13 +34,20 @@ public class Handler {
 	private static final Random RAND = new Random();
 	private static final Map<Integer, Pair<ScheduledFuture<?>, Receiver>> SESSIONS = new ConcurrentHashMap<>();
 
-	public static int createMessageSession(Receiver callback, long expirationMillis) {
+	public static int createMessageSession(Receiver callback, Runnable failed, long expirationMillis) {
 		final int id = RAND.nextInt();
 
-		final var task = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> SESSIONS.remove(id), expirationMillis, TimeUnit.MILLISECONDS);
+		final var task = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+			SESSIONS.remove(id);
+			failed.run();
+		}, expirationMillis, TimeUnit.MILLISECONDS);
 		SESSIONS.put(id, new Pair<>(task, callback));
 
 		return id;
+	}
+
+	public static int createMessageSession(Receiver callback, Runnable failed) {
+		return createMessageSession(callback, failed, 2000L);
 	}
 
 	public static void handlePunData(String source, ByteBufferInputStream in) {

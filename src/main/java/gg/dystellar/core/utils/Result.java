@@ -1,5 +1,6 @@
 package gg.dystellar.core.utils;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -16,15 +17,18 @@ public final class Result<R, E> implements Supplier<R> {
 	}
 
 	public static <R, E> Result<R, E> ok(final R result) {
+		Objects.requireNonNull(result);
 		return new Result<>(result, null);
 	}
 
 	public static <R, E> Result<R, E> err(final E error) {
+		Objects.requireNonNull(error);
 		return new Result<>(null, error);
 	}
 
 	@Override
 	public R get() {
+
 		return this.res;
 	}
 	

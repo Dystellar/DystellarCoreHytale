@@ -26,8 +26,6 @@ import gg.dystellar.core.common.UserComponent;
  */
 public class FlyCommand extends AbstractPlayerCommand {
 
-	private final OptionalArg<PlayerRef> playerArg = this.withOptionalArg("target", "Player to apply this command to", ArgTypes.PLAYER_REF);
-
     public FlyCommand() {
 		super("fly", "Fly command for the privileged");
 		this.requirePermission("dystellar.fly");

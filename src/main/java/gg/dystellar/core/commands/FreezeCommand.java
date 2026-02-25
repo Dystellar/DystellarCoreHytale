@@ -30,7 +30,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
-import gg.dystellar.core.utils.Pair;
+import gg.dystellar.core.utils.Triple;
 
 // TODO: Test this
 
@@ -56,7 +56,7 @@ public class FreezeCommand extends AbstractTargetPlayerCommand {
 		this.requirePermission("dystellar.freeze");
     }
 
-    private static final Map<UUID, Pair<Pair<Vector3d, Vector3f>, ScheduledFuture<?>>> frozenPlayers = new ConcurrentHashMap<>();
+    private static final Map<UUID, Triple<Vector3d, Vector3f, ScheduledFuture<?>>> frozenPlayers = new ConcurrentHashMap<>();
 
 	@Override
 	protected void execute(CommandContext ctx, Ref<EntityStore> ref, Ref<EntityStore> src, PlayerRef target, World w, Store<EntityStore> store) {
@@ -75,10 +75,10 @@ public class FreezeCommand extends AbstractTargetPlayerCommand {
 				}
 			}, 0, 2, TimeUnit.SECONDS);
 
-			frozenPlayers.put(target.getUuid(), new Pair<>(new Pair<>(pos, rot), task));
+			frozenPlayers.put(target.getUuid(), new Triple<>(pos, rot, task));
 			ctx.sender().sendMessage(Message.raw("Player frozen!").color(Color.GREEN));
 		} else {
-			removed.second.cancel(false);
+			removed.third.cancel(false);
 			target.sendMessage(lang.unfreezeMessage);
 			ctx.sender().sendMessage(Message.raw("Player unfrozen!").color(Color.YELLOW));
 		}
@@ -102,8 +102,8 @@ public class FreezeCommand extends AbstractTargetPlayerCommand {
 			final var transform = chunk.getComponent(idx, TransformComponent.getComponentType());
 
 			if (posData != null && (!transform.getPosition().equals(posData.first) || !transform.getRotation().equals(posData.second))) {
-				transform.setPosition(posData.first.first);
-				transform.setRotation(posData.first.second);
+				transform.setPosition(posData.first);
+				transform.setRotation(posData.second);
 			}
 		}
 	}
