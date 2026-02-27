@@ -12,7 +12,6 @@ import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.api.comms.Channel;
 import gg.dystellar.core.api.comms.Channel.ByteBufferOutputStream;
 import gg.dystellar.core.messaging.Subchannel;
 
@@ -56,20 +55,28 @@ public class Utils {
     }
 
 	public static void sendPropagatedOutputStream(Subchannel subchannel, int capacity, Consumer<ByteBufferOutputStream> func) {
+		sendPropagatedOutputStream(subchannel.ordinal(), capacity, func);
+	}
+
+	public static void sendTargetedOutputStream(String target, Subchannel subchannel, int capacity, Consumer<ByteBufferOutputStream> func) {
+		sendTargetedOutputStream(target, subchannel.ordinal(), capacity, func);
+	}
+
+	public static void sendPropagatedOutputStream(int id, int capacity, Consumer<ByteBufferOutputStream> func) {
 		final var channel = DystellarCore.getChannel();
 		try {
 			final var out = channel.createPropagatedMessageStream(capacity);
-			out.write(subchannel.ordinal());
+			out.write(id);
 			func.accept(out);
 			channel.sendMessage(out.getBuffer());
 		} catch (Exception ignored) {}
 	}
 
-	public static void sendTargetedOutputStream(String target, Subchannel subchannel, int capacity, Consumer<ByteBufferOutputStream> func) {
+	public static void sendTargetedOutputStream(String target, int id, int capacity, Consumer<ByteBufferOutputStream> func) {
 		final var channel = DystellarCore.getChannel();
 		try {
 			final var out = channel.createTargetedMessageStream(target, capacity);
-			out.write(subchannel.ordinal());
+			out.write(id);
 			func.accept(out);
 			channel.sendMessage(out.getBuffer());
 		} catch (Exception ignored) {}

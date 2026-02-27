@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.HytaleServer;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -83,8 +82,8 @@ public class UserComponent implements Component<EntityStore> {
     public void punish(Punishment punishment) {
         this.punishments.add(punishment);
 		final var lang = DystellarCore.getInstance().getLang(language);
-		for (Message msg : lang.punishMessage) {
-			final var out = Message.join(msg)
+		for (final var msg : lang.punishMessage) {
+			final var out = msg.buildMessage()
 				.param("title", punishment.getTitle())
 				.param("reason", punishment.getReason())
 				.param("expiration", Utils.getTimeFormat(punishment.getExpirationDate().orElse(null)));

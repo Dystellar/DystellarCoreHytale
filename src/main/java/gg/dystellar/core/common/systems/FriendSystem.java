@@ -1,11 +1,53 @@
 package gg.dystellar.core.common.systems;
 
+import java.time.Instant;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+
+import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.api.comms.Channel;
+import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.messaging.Handler;
+import gg.dystellar.core.utils.Pair;
+import gg.dystellar.core.utils.Result;
+import gg.dystellar.core.utils.Triple;
 
 public final class FriendSystem {
-	private FriendSystem() {}
 
-	public 
+	private Map<UUID, Instant> cooldowns = new ConcurrentHashMap<>(); // Player, cooldown expiration
+	private Map<UUID, Triple<Integer, String, ScheduledFuture<?>>> pending = new ConcurrentHashMap<>();
+
+	public FriendSystem() {}
+
+	public void friendAdd(PlayerRef from, String target, Consumer<Result<Void, Message>> callback) {
+		final var user = from.getHolder().getComponent(UserComponent.getComponentType());
+		final var lang = DystellarCore.getInstance().getLang(user.language);
+		final var cooldown = cooldowns.get(from.getUuid());
+
+		if (cooldown != null) {
+			callback.accept(Result.err(lang.mCooldown.buildMessage().param("seconds", cooldown.getEpochSecond() - Instant.now().getEpochSecond())));
+			return;
+		}
+
+		Instant cooldownExpiration = Instant.now().plusSeconds(5L);
+		cooldowns.put(from.getUuid(), cooldownExpiration);
+
+		HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> { cooldowns.remove(from.getUuid()); }, 5L, TimeUnit.SECONDS);
+		final int id = Handler.createMessageSession((source, input) -> {
+			
+		}, () -> {
+
+		}, 31L);
+	}
 
 	switch (strings[0]) {
             case "add": {

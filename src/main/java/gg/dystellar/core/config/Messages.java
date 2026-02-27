@@ -7,12 +7,15 @@ import java.util.Optional;
 
 import com.hypixel.hytale.server.core.Message;
 
+import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Utils;
 
 /**
  * Plugin messages, these are just values because gson will dump values from json.
  */
 public class Messages {
+	private final static ColorDeclaration DEFAULT_COLOR = new ColorDeclaration("Default", "#FFFFFF");
+	
 	private ColorDeclaration[] color_declarations = {
 		new ColorDeclaration("Black", "#000000"),
 		new ColorDeclaration("DarkBlue", "#0000AA"),
@@ -97,25 +100,18 @@ public class Messages {
 		"Test"
 	};
 
-	private Message parseMsg(String msg) {
+	private CompiledMessage compileMsg(String msg) {
 		StringBuilder builder = new StringBuilder(msg);
-		List<Message> parts = new ArrayList<>();
+		final var compiled = new CompiledMessage();
 		int idx = 0;
 		int from = 0;
 		Optional<ColorDeclaration> opt = Optional.empty();
 
 		while ((idx = builder.indexOf("<", from)) != -1) {
 			if (idx > 0) {
-				if (opt.isPresent()) {
-					var col = opt.get();
-					parts.add(Message.raw(builder.substring(from, idx))
-						.color(col.hex_color)
-						.bold(col.bold)
-						.italic(col.italic)
-						.monospace(col.monospace));
-				} else {
-					parts.add(Message.raw(builder.substring(from, idx)));
-				}
+				final var col = opt.orElse(DEFAULT_COLOR);
+
+				compiled.parts.add(new Pair<>(builder.substring(from, idx), col));
 			}
 			from = idx + 1;
 			int end = builder.indexOf(">", from);
@@ -126,100 +122,92 @@ public class Messages {
 			opt = Utils.findArr(this.color_declarations, declaration -> declaration.name == key);
 		}
 		if (idx > 0) {
-			if (opt.isPresent()) {
-				var col = opt.get();
-				parts.add(Message.raw(builder.substring(from, idx))
-					.color(col.hex_color)
-					.bold(col.bold)
-					.italic(col.italic)
-					.monospace(col.monospace));
-			} else {
-				parts.add(Message.raw(builder.substring(from, idx)));
-			}
+			final var col = opt.orElse(DEFAULT_COLOR);
+			compiled.parts.add(new Pair<>(builder.substring(from, idx), col));
 		}
 
-		return Message.join(parts.toArray(new Message[parts.size()]));
+		return compiled;
 	}
 
 	public void compile() {
-		this.pmsEnabled = parseMsg(pms_enabled);
-		this.pmsEnabledBlocking = parseMsg(pms_enabled_blocking);
-		this.pmsEnabledFriendsOnly = parseMsg(pms_enabled_friends_only);
-		this.pmsDisabled = parseMsg(pms_disabled);
-		this.playerMsgDisabled = parseMsg(player_msg_disabled);
-		this.msgSendFormat = parseMsg(msg_send_format);
-		this.msgReceiveFormat = parseMsg(msg_receive_format);
-		this.commandDenyIngame = parseMsg(command_deny_ingame);
-		this.noPermission = parseMsg(no_permission);
-		this.errorPlayerNotOnline = parseMsg(error_player_not_online);
-		this.errorPlayerNoLongerOnline = parseMsg(error_player_no_longer_online);
-		this.errorPlayerDoesNotExist = parseMsg(error_player_does_not_exist);
-		this.errorPlayerNotFound = parseMsg(error_player_not_found);
-		this.errorPlayerNotInAWorld = parseMsg(error_player_not_in_a_world);
-		this.errorInputNotNumber = parseMsg(error_input_not_number);
-		this.errorNotAPlayer = parseMsg(error_not_a_player);
-		this.serverConnectionError = parseMsg(server_connection_error);
-		this.mCooldown = parseMsg(cooldown);
-		this.prefixNotOwned = parseMsg(prefix_not_owned);
-		this.globalChatEnabled = parseMsg(global_chat_enabled);
-		this.globalChatDisabled = parseMsg(global_chat_disabled);
-		this.broadcastFormat = parseMsg(broadcast_format);
-		this.muteMessage = parseMsg(mute_message);
-		this.rankedBanMessage = parseMsg(ranked_ban_message);
-		this.kickMessage = parseMsg(kick_message);
-		this.punishMessage = Arrays.stream(punish_message).map(s -> parseMsg(s)).toArray(Message[]::new);
-		this.flyNeedRank = parseMsg(fly_need_rank);
-		this.flyModeEnabled = parseMsg(fly_mode_enabled);
-		this.flyModeDisabled = parseMsg(fly_mode_disabled);
-		this.flyModeEnabledByAdmin = parseMsg(fly_mode_enabled_by_admin);
-		this.flyModeDisabledByAdmin = parseMsg(fly_mode_disabled_by_admin);
-		this.adminFlyModEnabledOther = parseMsg(admin_fly_mod_enabled_other);
-		this.adminFlyModDisabledOther = parseMsg(admin_fly_mod_disabled_other);
-		this.freezeMessage = Arrays.stream(freeze_message).map(s -> parseMsg(s)).toArray(Message[]::new);
-		this.unfreezeMessage = parseMsg(unfreeze_message);
-		this.staffMessageFreeze = parseMsg(staff_message_freeze);
-		this.staffMessageUnfreeze = parseMsg(staff_message_unfreeze);
-		this.automatedMessages = Arrays.stream(automated_messages).map(s -> parseMsg(s)).toArray(Message[]::new);
+		this.pmsEnabled = compileMsg(pms_enabled);
+		this.pmsEnabledBlocking = compileMsg(pms_enabled_blocking);
+		this.pmsEnabledFriendsOnly = compileMsg(pms_enabled_friends_only);
+		this.pmsDisabled = compileMsg(pms_disabled);
+		this.playerMsgDisabled = compileMsg(player_msg_disabled);
+		this.msgSendFormat = compileMsg(msg_send_format);
+		this.msgReceiveFormat = compileMsg(msg_receive_format);
+		this.commandDenyIngame = compileMsg(command_deny_ingame);
+		this.noPermission = compileMsg(no_permission);
+		this.errorPlayerNotOnline = compileMsg(error_player_not_online);
+		this.errorPlayerNoLongerOnline = compileMsg(error_player_no_longer_online);
+		this.errorPlayerDoesNotExist = compileMsg(error_player_does_not_exist);
+		this.errorPlayerNotFound = compileMsg(error_player_not_found);
+		this.errorPlayerNotInAWorld = compileMsg(error_player_not_in_a_world);
+		this.errorInputNotNumber = compileMsg(error_input_not_number);
+		this.errorNotAPlayer = compileMsg(error_not_a_player);
+		this.serverConnectionError = compileMsg(server_connection_error);
+		this.mCooldown = compileMsg(cooldown);
+		this.prefixNotOwned = compileMsg(prefix_not_owned);
+		this.globalChatEnabled = compileMsg(global_chat_enabled);
+		this.globalChatDisabled = compileMsg(global_chat_disabled);
+		this.broadcastFormat = compileMsg(broadcast_format);
+		this.muteMessage = compileMsg(mute_message);
+		this.rankedBanMessage = compileMsg(ranked_ban_message);
+		this.kickMessage = compileMsg(kick_message);
+		this.punishMessage = Arrays.stream(punish_message).map(s -> compileMsg(s)).toArray(CompiledMessage[]::new);
+		this.flyNeedRank = compileMsg(fly_need_rank);
+		this.flyModeEnabled = compileMsg(fly_mode_enabled);
+		this.flyModeDisabled = compileMsg(fly_mode_disabled);
+		this.flyModeEnabledByAdmin = compileMsg(fly_mode_enabled_by_admin);
+		this.flyModeDisabledByAdmin = compileMsg(fly_mode_disabled_by_admin);
+		this.adminFlyModEnabledOther = compileMsg(admin_fly_mod_enabled_other);
+		this.adminFlyModDisabledOther = compileMsg(admin_fly_mod_disabled_other);
+		this.freezeMessage = Arrays.stream(freeze_message).map(s -> compileMsg(s)).toArray(CompiledMessage[]::new);
+		this.unfreezeMessage = compileMsg(unfreeze_message);
+		this.staffMessageFreeze = compileMsg(staff_message_freeze);
+		this.staffMessageUnfreeze = compileMsg(staff_message_unfreeze);
+		this.automatedMessages = Arrays.stream(automated_messages).map(s -> compileMsg(s)).toArray(CompiledMessage[]::new);
 	}
 
-	public transient Message pmsEnabled;
-	public transient Message pmsEnabledBlocking;
-	public transient Message pmsEnabledFriendsOnly;
-	public transient Message pmsDisabled;
-	public transient Message playerMsgDisabled;
-	public transient Message msgSendFormat;
-	public transient Message msgReceiveFormat;
-	public transient Message commandDenyIngame;
-	public transient Message noPermission;
-	public transient Message errorPlayerNotOnline;
-	public transient Message errorPlayerNoLongerOnline;
-	public transient Message errorPlayerDoesNotExist;
-	public transient Message errorPlayerNotFound;
-	public transient Message errorPlayerNotInAWorld;
-	public transient Message errorInputNotNumber;
-	public transient Message errorNotAPlayer;
-	public transient Message serverConnectionError;
-	public transient Message mCooldown;
-	public transient Message prefixNotOwned;
-	public transient Message globalChatEnabled;
-	public transient Message globalChatDisabled;
-	public transient Message broadcastFormat;
-	public transient Message muteMessage;
-	public transient Message rankedBanMessage;
-	public transient Message kickMessage;
-	public transient Message[] punishMessage;
-	public transient Message flyNeedRank;
-	public transient Message flyModeEnabled;
-	public transient Message flyModeDisabled;
-	public transient Message flyModeEnabledByAdmin;
-	public transient Message flyModeDisabledByAdmin;
-	public transient Message adminFlyModEnabledOther;
-	public transient Message adminFlyModDisabledOther;
-	public transient Message[] freezeMessage;
-	public transient Message unfreezeMessage;
-	public transient Message staffMessageFreeze;
-	public transient Message staffMessageUnfreeze;
-	public transient Message[] automatedMessages;
+	public transient CompiledMessage pmsEnabled;
+	public transient CompiledMessage pmsEnabledBlocking;
+	public transient CompiledMessage pmsEnabledFriendsOnly;
+	public transient CompiledMessage pmsDisabled;
+	public transient CompiledMessage playerMsgDisabled;
+	public transient CompiledMessage msgSendFormat;
+	public transient CompiledMessage msgReceiveFormat;
+	public transient CompiledMessage commandDenyIngame;
+	public transient CompiledMessage noPermission;
+	public transient CompiledMessage errorPlayerNotOnline;
+	public transient CompiledMessage errorPlayerNoLongerOnline;
+	public transient CompiledMessage errorPlayerDoesNotExist;
+	public transient CompiledMessage errorPlayerNotFound;
+	public transient CompiledMessage errorPlayerNotInAWorld;
+	public transient CompiledMessage errorInputNotNumber;
+	public transient CompiledMessage errorNotAPlayer;
+	public transient CompiledMessage serverConnectionError;
+	public transient CompiledMessage mCooldown;
+	public transient CompiledMessage prefixNotOwned;
+	public transient CompiledMessage globalChatEnabled;
+	public transient CompiledMessage globalChatDisabled;
+	public transient CompiledMessage broadcastFormat;
+	public transient CompiledMessage muteMessage;
+	public transient CompiledMessage rankedBanMessage;
+	public transient CompiledMessage kickMessage;
+	public transient CompiledMessage[] punishMessage;
+	public transient CompiledMessage flyNeedRank;
+	public transient CompiledMessage flyModeEnabled;
+	public transient CompiledMessage flyModeDisabled;
+	public transient CompiledMessage flyModeEnabledByAdmin;
+	public transient CompiledMessage flyModeDisabledByAdmin;
+	public transient CompiledMessage adminFlyModEnabledOther;
+	public transient CompiledMessage adminFlyModDisabledOther;
+	public transient CompiledMessage[] freezeMessage;
+	public transient CompiledMessage unfreezeMessage;
+	public transient CompiledMessage staffMessageFreeze;
+	public transient CompiledMessage staffMessageUnfreeze;
+	public transient CompiledMessage[] automatedMessages;
 
 	private static class ColorDeclaration {
 		private String name;
@@ -241,6 +229,26 @@ public class Messages {
 			this.italic = italic;
 			this.monospace = monospace;
 			this.underlined = underlined;
+		}
+	}
+
+	public static class CompiledMessage {
+		List<Pair<String, ColorDeclaration>> parts = new ArrayList<>();
+
+		public Message buildMessage() {
+			final var message = Message.empty();
+
+			for (final var part : this.parts) {
+				final var child = Message.raw(part.first)
+					.color(part.second.hex_color)
+					.bold(part.second.bold)
+					.italic(part.second.italic)
+					.monospace(part.second.monospace);
+
+				message.insert(child);
+			}
+
+			return message;
 		}
 	}
 }

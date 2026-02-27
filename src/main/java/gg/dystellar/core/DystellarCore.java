@@ -165,8 +165,8 @@ public final class DystellarCore extends JavaPlugin {
 						final var user = p.getHolder().getComponent(UserComponent.getComponentType());
 
 						switch (user.language) {
-							case "es" -> p.sendMessage(lang_es.get().automatedMessages[b[1]]);
-							default -> p.sendMessage(lang_en.get().automatedMessages[b[0]]);
+							case "es" -> p.sendMessage(lang_es.get().automatedMessages[b[1]].buildMessage());
+							default -> p.sendMessage(lang_en.get().automatedMessages[b[0]].buildMessage());
 						}
 					}
 				});

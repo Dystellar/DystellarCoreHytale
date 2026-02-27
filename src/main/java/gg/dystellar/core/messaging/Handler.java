@@ -32,10 +32,10 @@ public class Handler {
 	}
 
 	private static final Random RAND = new Random();
-	private static final Map<Integer, Pair<ScheduledFuture<?>, Receiver>> SESSIONS = new ConcurrentHashMap<>();
+	public static final Map<Integer, Pair<ScheduledFuture<?>, Receiver>> SESSIONS = new ConcurrentHashMap<>();
 
 	public static int createMessageSession(Receiver callback, Runnable failed, long expirationMillis) {
-		final int id = RAND.nextInt();
+		final int id = -RAND.nextInt(Integer.MAX_VALUE);
 
 		final var task = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
 			SESSIONS.remove(id);

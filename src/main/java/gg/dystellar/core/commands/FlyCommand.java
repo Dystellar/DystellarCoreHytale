@@ -5,8 +5,6 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.SavedMovementStates;
 import com.hypixel.hytale.protocol.packets.player.SetMovementStates;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
-import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractTargetPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
@@ -48,7 +46,7 @@ public class FlyCommand extends AbstractPlayerCommand {
 		final var user = playerRef.getHolder().getComponent(UserComponent.getComponentType());
 		if (user.isInGame) {
 			final var lang = DystellarCore.getInstance().getLang(user.language);
-			playerRef.sendMessage(lang.commandDenyIngame);
+			playerRef.sendMessage(lang.commandDenyIngame.buildMessage());
 
 			return null;
 		}
@@ -65,7 +63,7 @@ public class FlyCommand extends AbstractPlayerCommand {
 		}
 
 		mngr.update(playerRef.getPacketHandler());
-		playerRef.sendMessage(targetFly ? lang.flyModeEnabled : lang.flyModeDisabled);
+		playerRef.sendMessage(targetFly ? lang.flyModeEnabled.buildMessage() : lang.flyModeDisabled.buildMessage());
 
 		return targetFly;
 	}
@@ -80,7 +78,7 @@ public class FlyCommand extends AbstractPlayerCommand {
 		protected void execute(CommandContext ctx, Ref<EntityStore> ref, Ref<EntityStore> arg2, PlayerRef target, World w, Store<EntityStore> store) {
 			final var langEn = DystellarCore.getInstance().lang_en.get();
 			if (!ctx.sender().hasPermission("dystellar.fly.other")) {
-				ctx.sender().sendMessage(langEn.noPermission);
+				ctx.sender().sendMessage(langEn.noPermission.buildMessage());
 				return;
 			}
 
@@ -90,8 +88,8 @@ public class FlyCommand extends AbstractPlayerCommand {
 
 			final var user = target.getHolder().getComponent(UserComponent.getComponentType());
 			final var lang = DystellarCore.getInstance().getLang(user.language);
-			target.sendMessage(res ? lang.flyModeEnabledByAdmin : lang.flyModeDisabledByAdmin);
-			ctx.sendMessage(res ? langEn.adminFlyModEnabledOther : langEn.adminFlyModDisabledOther);
+			target.sendMessage(res ? lang.flyModeEnabledByAdmin.buildMessage() : lang.flyModeDisabledByAdmin.buildMessage());
+			ctx.sendMessage(res ? langEn.adminFlyModEnabledOther.buildMessage() : langEn.adminFlyModDisabledOther.buildMessage());
 		}
 
 	}
