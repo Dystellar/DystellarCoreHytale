@@ -108,6 +108,15 @@ public class Handler {
 		}
 	}*/
 
+	public static void handleSession(String source, ByteBufferInputStream in) {
+		final var session = SESSIONS.remove(in.readInt());
+
+		if (session != null) {
+			session.first.cancel(false);
+			session.second.receive(source, in);
+		}
+	}
+
 	public static void handleInboxManagerUpdate() {}
 
 	public static void handleFriendReqApprove() {}
@@ -132,17 +141,7 @@ public class Handler {
 
 		if (playerRef != null) {
 			final var id = in.readInt();
-			Utils.sendTargetedOutputStream(source, Subchannel.DEMAND_FIND_PLAYER_RES, 50, out -> out.writeInt(id));
-		}
-	}
-
-	public static void handleDemFindPlayerRes(String source, ByteBufferInputStream in) {
-		final var id = in.readInt();
-		
-		final var pair = SESSIONS.remove(id);
-		if (pair != null) {
-			pair.first.cancel(true);
-			pair.second.receive(source, in);
+			Utils.sendTargetedOutputStream(source, Subchannel.SESSION, 50, out -> out.writeInt(id));
 		}
 	}
 

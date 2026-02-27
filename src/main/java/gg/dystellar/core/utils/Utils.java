@@ -2,6 +2,7 @@ package gg.dystellar.core.utils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -18,6 +19,15 @@ import gg.dystellar.core.messaging.Subchannel;
 public class Utils {
 	public static <T> Optional<T> findArr(T[] arr, Predicate<T> predicate) {
 		for (T t : arr) {
+			if (predicate.test(t))
+				return Optional.ofNullable(t);
+		}
+
+		return Optional.empty();
+	}
+
+	public static <T> Optional<T> findList(final List<T> ls, Predicate<T> predicate) {
+		for (T t : ls) {
 			if (predicate.test(t))
 				return Optional.ofNullable(t);
 		}

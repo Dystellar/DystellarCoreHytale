@@ -1,6 +1,9 @@
 package gg.dystellar.core.common.systems;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -11,7 +14,9 @@ import java.util.function.Consumer;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.api.comms.Channel;
@@ -20,11 +25,12 @@ import gg.dystellar.core.messaging.Handler;
 import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Result;
 import gg.dystellar.core.utils.Triple;
+import gg.dystellar.core.utils.Utils;
 
 public final class FriendSystem {
 
 	private Map<UUID, Instant> cooldowns = new ConcurrentHashMap<>(); // Player, cooldown expiration
-	private Map<UUID, Triple<Integer, String, ScheduledFuture<?>>> pending = new ConcurrentHashMap<>();
+	private Map<UUID, List<Pair<String, Instant>>> pending = new ConcurrentHashMap<>();
 
 	public FriendSystem() {}
 
@@ -38,15 +44,40 @@ public final class FriendSystem {
 			return;
 		}
 
-		Instant cooldownExpiration = Instant.now().plusSeconds(5L);
+		Instant cooldownExpiration = Instant.now().plusSeconds(4L);
 		cooldowns.put(from.getUuid(), cooldownExpiration);
 
-		HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> { cooldowns.remove(from.getUuid()); }, 5L, TimeUnit.SECONDS);
-		final int id = Handler.createMessageSession((source, input) -> {
-			
-		}, () -> {
+		HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> { cooldowns.remove(from.getUuid()); }, 4L, TimeUnit.SECONDS);
+		var listPendings = pending.get(from.getUuid());
 
-		}, 31L);
+		if (listPendings != null) {
+			final var entry = Utils.findList(listPendings, pair -> pair.first.equalsIgnoreCase(target));
+
+			if (entry.isPresent()) {
+				callback.accept(Result.err(lang.mCooldown.buildMessage().param("seconds", entry.get().second.getEpochSecond() - Instant.now().getEpochSecond())));
+				return;
+			}
+		} else pending.put(from.getUuid(), Collections.synchronizedList(new ArrayList<>()));
+
+		final var targetPlayer = Universe.get().getPlayerByUsername(target, NameMatching.EXACT_IGNORE_CASE);
+		final var list = listPendings == null ? pending.get(from.getUuid()) : listPendings;
+		list.add(new Pair<>(target, Instant.now().plusSeconds(30L)));
+
+		// TODO: Move to friend command honestly
+		if (targetPlayer != null) {
+			
+		} else {
+			final int id = Handler.createMessageSession((source, input) -> {
+				
+			}, () -> {
+
+			}, 30000L);
+		}
+		HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+			list.removeIf(pair -> pair.first.equalsIgnoreCase(target));
+			if (list.isEmpty())
+				pending.remove(from.getUuid());
+		}, 30L, TimeUnit.SECONDS);
 	}
 
 	switch (strings[0]) {

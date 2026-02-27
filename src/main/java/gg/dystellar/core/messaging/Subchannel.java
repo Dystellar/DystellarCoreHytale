@@ -16,17 +16,8 @@ public enum Subchannel {
 	* If you need to register additional types, append them at the end.
 	*/
 
-	SESSION((s, in) -> {
-		final var session = Handler.SESSIONS.remove(in.readInt());
-
-		if (session != null) {
-			session.first.cancel(false);
-			session.second.receive(s, in);
-		}
-	}),
+	SESSION((s, in) -> Handler.handleSession(s, in)),
 	DEMAND_FIND_PLAYER((s, in) -> Handler.handleDemFindPlayer(s, in)),
-	DEMAND_FIND_PLAYER_RES((s, in) -> Handler.handleDemFindPlayerRes(s, in)),
-	DEMAND_FIND_PLAYER_NOT_ONLINE((s, in) -> Handler.handleDemPlayerNotOnline(s, in)),
 	REMOVE_PUNISHMENT_BY_ID((s, in) -> Handler.handleRemovePunishmentById(s, in)),
 	PUNISHMENT_ADD_PROXY(null),
 	PUNISHMENT_ADD_SERVER((s, in) -> Handler.handlePunishmentAddServer(s, in))
