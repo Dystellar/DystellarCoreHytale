@@ -6,12 +6,12 @@ It allows reading and writing JSON files in a type-safe way.
 
 - `T` is your configuration class.
 - Gson is used under the hood (`Config.getGson()` for access).
-- `Config#load()` creates a new instance of `T` using the no-args constructor if the file is missing.
+- `Config#load()` creates a new instance of `T` loaded from the file provided. If the file doesn't exist, it tries to generate defaults using the no-args constructor, it will also create the file and fill it with these defaults.
 - Fields not meant to be saved can be marked `transient`.
 
 ## Creating a Config
 ```java
-Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
+Config<Messages> config = new Config<>(this, "messages.json", Messages.class);
 ```
 - `filename` must be JSON.
 - `plugin` is the JavaPlugin instance.
@@ -19,10 +19,10 @@ Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
 
 ## Loading and Saving
 ```java
-lang_en.load(); // load or create defaults
-Messages messages = lang_en.get(); // access safely
-messages.pms_enabled = "<Green>You are now accepting messages.";
-lang_en.save(); // save changes
+config.load(); // load or create defaults
+Messages messages = config.get(); // access safely
+messages.welcomeMessage = "You are now accepting messages.";
+config.save(); // save changes
 ```
 Note: Calling `get()` before `load()` throws `IllegalStateException`.
 
@@ -33,7 +33,6 @@ public class Messages {
     public transient int runtimeCounter; // not saved
 
     public Messages() {
-        this.welcomeMessage = "Welcome!";
         this.runtimeCounter = 0;
     }
 
@@ -48,12 +47,5 @@ public class Messages {
 
 ## Tips
 - Always have a no-args constructor for `T`.
-- Gson serializes public or non-transient fields.
+- Gson serializes all non-transient fields, no matter the visibility.
 - Keep defaults initialized in the constructor.
-
-## Advanced
-Access the internal Gson instance for custom serialization:
-```java
-Gson gson = Config.getGson();
-```
-

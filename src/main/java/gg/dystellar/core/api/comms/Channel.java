@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 
@@ -44,10 +45,11 @@ public final class Channel {
 		this.sendMessage(buf);
 	}
 
-	public ByteBufferOutputStream createCacheWriteMessageStream(int capacity, int cacheId) throws IOException {
+	public ByteBufferOutputStream createCacheWriteMessageStream(int capacity, int cacheId, Optional<Long> expirationMillis) throws IOException {
 		final var out = new ByteBufferOutputStream(capacity);
 		out.write(MessageType.CACHE_WRITE.id);
 		out.writeInt(cacheId);
+		out.writeLong(expirationMillis.orElse(-1L));
 
 		return out;
 	}
