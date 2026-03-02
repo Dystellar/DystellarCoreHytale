@@ -26,16 +26,14 @@ import gg.dystellar.core.utils.Utils;
  */
 public class Handler {
 	public static void handle(String source, ByteBufferInputStream in) {
-		try {
-			Subchannel.values()[in.read()].callback.ifPresent(f -> f.receive(source, in));
-		} catch (Exception ignored) {}
+		Subchannel.values()[in.readByte()].callback.ifPresent(f -> f.receive(source, in));
 	}
 
 	private static final Random RAND = new Random();
 	public static final Map<Integer, Pair<ScheduledFuture<?>, Receiver>> SESSIONS = new ConcurrentHashMap<>();
 
 	public static int createMessageSession(Receiver callback, Runnable failed, long expirationMillis) {
-		final int id = -RAND.nextInt(Integer.MAX_VALUE);
+		final int id = RAND.nextInt();
 
 		final var task = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
 			SESSIONS.remove(id);

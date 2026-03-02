@@ -21,18 +21,34 @@ public final class Channel {
 
 	public ByteBufferOutputStream createTargetedMessageStream(String targetServer, int capacity) throws IOException {
 		final var out = new ByteBufferOutputStream(capacity);
-
-		out.write(MessageType.TARGETED.id);
+		out.write(MessageType.TARGET.id);
 		out.writePrefixedUTF8(targetServer);
 		out.writePrefixedUTF8(this.name);
+
 		return out;
 	}
 
 	public ByteBufferOutputStream createPropagatedMessageStream(int capacity) throws IOException {
 		final var out = new ByteBufferOutputStream(capacity);
-
 		out.write(MessageType.PROPAGATE.id);
 		out.writePrefixedUTF8(this.name);
+
+		return out;
+	}
+
+	public void readCacheRequest(int cacheId) {
+		final var buf = ByteBuffer.allocate(5);
+		buf.put((byte)MessageType.CACHE_READ.id);
+		buf.putInt(cacheId);
+
+		this.sendMessage(buf);
+	}
+
+	public ByteBufferOutputStream createCacheWriteMessageStream(int capacity, int cacheId) throws IOException {
+		final var out = new ByteBufferOutputStream(capacity);
+		out.write(MessageType.CACHE_WRITE.id);
+		out.writeInt(cacheId);
+
 		return out;
 	}
 
@@ -73,6 +89,14 @@ public final class Channel {
 
 		public double readDouble() {
 			return this.buf.getDouble();
+		}
+
+		public boolean readBool() {
+			return this.buf.get() != 0 ? true : false;
+		}
+
+		public byte readByte() {
+			return this.buf.get();
 		}
 
 		@Override
@@ -170,6 +194,15 @@ public final class Channel {
 		public void writeDouble(double d) {
 			this.ensureCapacity(8);
 			this.buf.putDouble(d);
+		}
+
+		public void writeBool(boolean b) {
+			this.ensureCapacity(1);
+			this.buf.put(b ? (byte)1 : 0);
+		}
+
+		public void writeByte(byte b) {
+			this.buf.put((byte)b);
 		}
 
 		@Override

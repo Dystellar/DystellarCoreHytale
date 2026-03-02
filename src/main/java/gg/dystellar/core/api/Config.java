@@ -24,17 +24,6 @@ public final class Config<T> implements Supplier<T> {
 
 	private static final Gson GSON = new GsonBuilder()
 		.setPrettyPrinting()
-		.registerTypeAdapter(Boolean.class, new TypeAdapter<Boolean>() {
-			@Override
-			public Boolean read(JsonReader arg0) throws IOException { return arg0.nextBoolean(); }
-
-			@Override
-			public void write(JsonWriter arg0, Boolean arg1) throws IOException {
-				if (Boolean.TRUE.equals(arg1))
-					arg0.value(true);
-				else arg0.nullValue();
-			}
-		})
 		.create();
 	
 	public static Gson getGson() { return GSON; }
@@ -42,7 +31,14 @@ public final class Config<T> implements Supplier<T> {
 	private T value;
 
 	private final Class<T> clazz;
+	private final Gson parser;
 	public final File file;
+
+	public Config(JavaPlugin plugin, String filename, Class<T> type, Gson parser) {
+		this.file = new File(plugin.getDataDirectory().toFile(), filename);
+		this.clazz = type;
+		this.parser = parser;
+	}
 
 	/**
 	 * Create a managed configuration instance.
@@ -53,8 +49,7 @@ public final class Config<T> implements Supplier<T> {
 	 * @param type configuration type class e.g. MyAwesomeConfig.class
 	 */
 	public Config(JavaPlugin plugin, String filename, Class<T> type) {
-		this.file = new File(plugin.getDataDirectory().toFile(), filename);
-		this.clazz = type;
+		this(plugin, filename, type, GSON);
 	}
 
 	/**
@@ -74,7 +69,7 @@ public final class Config<T> implements Supplier<T> {
 		} else {
 			FileReader r = new FileReader(this.file);
 
-			this.value = GSON.fromJson(r, this.clazz);
+			this.value = parser.fromJson(r, this.clazz);
 			r.close();
 		}
 	}
@@ -86,7 +81,7 @@ public final class Config<T> implements Supplier<T> {
 		if (this.value != null) {
 			FileWriter w = new FileWriter(this.file);
 
-			w.write(GSON.toJson(this.value));
+			w.write(parser.toJson(this.value));
 			w.close();
 		}
 	}

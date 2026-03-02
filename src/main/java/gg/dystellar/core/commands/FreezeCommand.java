@@ -70,8 +70,8 @@ public class FreezeCommand extends AbstractTargetPlayerCommand {
 		if (removed == null) {
 			final ScheduledFuture<?> task =  HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
 				if (target.isValid()) {
-					for (Message msg : lang.freezeMessage)
-					target.sendMessage(msg);
+					for (final var msg : lang.freezeMessage)
+						target.sendMessage(msg.buildMessage());
 				}
 			}, 0, 2, TimeUnit.SECONDS);
 
@@ -79,7 +79,7 @@ public class FreezeCommand extends AbstractTargetPlayerCommand {
 			ctx.sender().sendMessage(Message.raw("Player frozen!").color(Color.GREEN));
 		} else {
 			removed.third.cancel(false);
-			target.sendMessage(lang.unfreezeMessage);
+			target.sendMessage(lang.unfreezeMessage.buildMessage());
 			ctx.sender().sendMessage(Message.raw("Player unfrozen!").color(Color.YELLOW));
 		}
 	}

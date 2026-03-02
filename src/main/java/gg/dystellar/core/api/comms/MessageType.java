@@ -2,11 +2,13 @@ package gg.dystellar.core.api.comms;
 
 public enum MessageType {
 	PROPAGATE((byte)0),
-	TARGETED((byte)1);
+	TARGET((byte)1),
+	CACHE_READ((byte)2),
+	CACHE_WRITE((byte)3);
 
-	final byte id;
+	final int id;
 
-	MessageType(byte id) {
+	MessageType(int id) {
 		this.id = id;
 	}
 }

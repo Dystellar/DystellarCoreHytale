@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.ShutdownReason;
@@ -17,7 +20,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.utils.Hooks;
-import gg.dystellar.core.utils.ByteBufferStreams.ByteBufferInputStream;
+import gg.dystellar.core.api.comms.Channel.ByteBufferOutputStream;
 import gg.dystellar.core.common.PacketListener;
 import gg.dystellar.core.common.Suffix;
 import gg.dystellar.core.common.UserComponent;
@@ -27,7 +30,7 @@ import gg.dystellar.core.config.Setup;
 import gg.dystellar.core.listeners.*;
 import gg.dystellar.core.perms.CustomPermProvider;
 import gg.dystellar.core.perms.Group;
-import gg.dystellar.core.services.messaging.Handler;
+import gg.dystellar.core.messaging.Handler;
 import gg.dystellar.core.arenasapi.AbstractArena;
 import gg.dystellar.core.commands.*;
 import gg.dystellar.core.api.API;
@@ -46,6 +49,21 @@ public final class DystellarCore extends JavaPlugin {
 	public static Channel getChannel() { return CHANNEL; }
 
 	private final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+
+	private static final Gson GSON_SKIP_FALSE_BOOLS = new GsonBuilder()
+		.setPrettyPrinting()
+		.registerTypeAdapter(Boolean.class, new TypeAdapter<Boolean>() {
+			@Override
+			public Boolean read(JsonReader arg0) throws IOException { return arg0.nextBoolean(); }
+
+			@Override
+			public void write(JsonWriter arg0, Boolean arg1) throws IOException {
+				if (Boolean.TRUE.equals(arg1))
+					arg0.value(true);
+				else arg0.nullValue();
+			}
+		})
+		.create();
 
 	/**
 	 * Initialize plugin
@@ -105,8 +123,8 @@ public final class DystellarCore extends JavaPlugin {
 	}
 
 	public final Config<Setup> config = new Config<>(this, "setup.json", Setup.class);
-	public final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class);
-	public final Config<Messages> lang_es = new Config<>(this, "lang_es.json", Messages.class);
+	public final Config<Messages> lang_en = new Config<>(this, "lang_en.json", Messages.class, GSON_SKIP_FALSE_BOOLS);
+	public final Config<Messages> lang_es = new Config<>(this, "lang_es.json", Messages.class, GSON_SKIP_FALSE_BOOLS);
 
 	public void loadConfig() {
 		try {
