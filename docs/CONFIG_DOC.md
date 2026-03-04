@@ -11,7 +11,7 @@ It allows reading and writing JSON files in a type-safe way.
 
 ## Creating a Config
 ```java
-Config<Messages> config = new Config<>(this, "messages.json", Messages.class);
+Config<Messages> config = new Config<>(yourPluginInstance, "messages.json", Messages.class);
 ```
 - `filename` must be JSON.
 - `plugin` is the JavaPlugin instance.
