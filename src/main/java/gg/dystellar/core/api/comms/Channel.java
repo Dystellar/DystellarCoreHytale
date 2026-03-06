@@ -5,19 +5,23 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 
 public final class Channel {
+	public static final byte REGULAR = 0;
+	public static final byte CACHE = 1;
+
 	final String name;
 	final WsClient handle;
 	final Receiver callback;
+	final CacheReadReceiver cacheCallback;
 
-	Channel(String name, WsClient handle, Receiver callback) {
+	Channel(String name, WsClient handle, Receiver callback, CacheReadReceiver cacheCallback) {
 		this.name = name;
 		this.handle = handle;
 		this.callback = callback;
+		this.cacheCallback = cacheCallback;
 	}
 
 	public ByteBufferOutputStream createTargetedMessageStream(String targetServer, int capacity) throws IOException {
@@ -38,18 +42,25 @@ public final class Channel {
 	}
 
 	public void readCacheRequest(int cacheId) {
-		final var buf = ByteBuffer.allocate(5);
+		final var buf = ByteBuffer.allocate(7 + this.name.length());
 		buf.put((byte)MessageType.CACHE_READ.id);
 		buf.putInt(cacheId);
+		buf.putShort((short)this.name.length());
+		buf.put(this.name.getBytes(StandardCharsets.UTF_8));
 
 		this.sendMessage(buf);
 	}
 
-	public ByteBufferOutputStream createCacheWriteMessageStream(int capacity, int cacheId, Optional<Long> expirationMillis) throws IOException {
+	public ByteBufferOutputStream createCacheWriteMessageStream(int capacity, int cacheId) throws IOException {
+		return this.createCacheWriteMessageStream(capacity, cacheId, -1);
+	}
+
+	public ByteBufferOutputStream createCacheWriteMessageStream(int capacity, int cacheId, long expirationMillis) throws IOException {
 		final var out = new ByteBufferOutputStream(capacity);
 		out.write(MessageType.CACHE_WRITE.id);
 		out.writeInt(cacheId);
-		out.writeLong(expirationMillis.orElse(-1L));
+		out.writeLong(expirationMillis);
+		out.writePrefixedUTF8(this.name);
 
 		return out;
 	}

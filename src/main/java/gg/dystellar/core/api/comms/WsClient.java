@@ -33,25 +33,44 @@ public final class WsClient {
 			.get();
 	}
 
-	public Channel registerChannel(String channelId, Receiver callback) {
-		final var channel = new Channel(channelId, this, callback);
+	public Channel registerChannel(String channelId, Receiver callback, CacheReadReceiver cacheCallback) {
+		final var channel = new Channel(channelId, this, callback, cacheCallback);
 
 		channels.put(channelId, channel);
 		return channel;
 	}
 
+	private static final byte REGULAR_MESSAGE = 0;
+	private static final byte CACHE_RESPONSE = 1;
+
 	private final class WsListener implements Listener {
 		@Override
 		public CompletionStage<?> onBinary(WebSocket socket, ByteBuffer data, boolean last) {
 			final var inputStream = new Channel.ByteBufferInputStream(data);
-			final var source = inputStream.readPrefixedUTF8();
-			final var channelName = inputStream.readPrefixedUTF8();
+			final byte type = inputStream.readByte();
+			switch (type) {
+				case CACHE_RESPONSE -> {
+					final int cacheId = inputStream.readInt();
+					final boolean found = inputStream.readBool();
+					final var channelName = inputStream.readPrefixedUTF8();
 
-			final var channel = channels.get(channelName);
-			if (channel == null)
-				DystellarCore.getLog().atWarning().log("Received a ws message for a channel that doesn't exist");
-			else
-				channel.callback.receive(source, inputStream);
+					final var channel = channels.get(channelName);
+					if (channel == null)
+						DystellarCore.getLog().atWarning().log("Received a ws message for a channel that doesn't exist");
+					else
+						channel.cacheCallback.receive(cacheId, found, inputStream);
+				}
+				case REGULAR_MESSAGE -> {
+					final var source = inputStream.readPrefixedUTF8();
+					final var channelName = inputStream.readPrefixedUTF8();
+
+					final var channel = channels.get(channelName);
+					if (channel == null)
+						DystellarCore.getLog().atWarning().log("Received a ws message for a channel that doesn't exist");
+					else
+						channel.callback.receive(source, inputStream);
+				}
+			}
 			socket.request(1L);
 			return CompletableFuture.completedFuture(null);
 		}
