@@ -40,9 +40,12 @@ public class Messages {
 		new ColorDeclaration("MaterialEmerald", "#47A036"),
 		new ColorDeclaration("DarkerRed", "#971607"),
 		new ColorDeclaration("Danger", "#AA0000", true, false, false, false),
+		new ColorDeclaration("StrongGreen", "#55FF55", true, false, false, false),
+		new ColorDeclaration("StrongRed", "#FF5555", true, false, false, false),
 		new ColorDeclaration("Test", "#000000", true, true, true, true)
 	};
 
+	private String command_hint = "<Gray>-> <MaterialEmerald>Hint<White>: <Blue>Use command <Orange>{command}";
 	private String pms_enabled = "<Green>You are now accepting all private messages.";
 	private String pms_enabled_blocking = "<Yellow>You are now blocking messages from unwanted players.";
 	private String pms_enabled_friends_only = "<Gold>You are now only accepting messages from friends.";
@@ -100,6 +103,24 @@ public class Messages {
 		"Test"
 	};
 
+	private String friend_request_sent = "<Green>Friend request sent!";
+	private String friend_request_received = "<DarkAqua>Incoming friend request from <Gold>{player}";
+	private String friend_request_accepted_sender = "<DarkAqua>{player} <Green>has accepted your friend request!";
+	private String friend_request_rejected_sender = "<DarkAqua>{player} <Red>has rejected your friend request.";
+	private String friend_request_accepted_receiver = "<Green>Friend request accepted!";
+	private String friend_request_rejected_receiver = "<Red>Friend request rejected.";
+	private String player_not_on_friends_list = "<Red>This player is not in your friends list.";
+	private String player_already_on_friends_list = "<Red>This player is already in your friends list.";
+	private String target_requests_disabled = "<Red>This player has their friend requests disabled.";
+	private String friend_removed_sender = "<Red><player> has been removed from your friends list.";
+	private String friend_removed_receiver = "<Red><player> has removed you from their friends list. (They removed you)";
+	private String find_same_server_as_sender = "<DarkAqua>{player} <Green>is in your same server!";
+	private String friend_request_expired = "<Red>You don't have any pending friend requests. (Or it has expired)";
+	private String friend_requests_enabled = "<DarkAqua>You are now able to receive friend requests.";
+	private String friend_requests_disabled = "<Red>You are no longer able to receive friend requests.";
+	private String friend_accept_button = "<StrongGreen>ACCEPT"; // TODO: Not available within the hytale api yet
+	private String friend_reject_button = "<StrongRed>REJECT"; // TODO: Not available within the hytale api yet
+
 	private CompiledMessage compileMsg(String msg) {
 		StringBuilder builder = new StringBuilder(msg);
 		final var compiled = new CompiledMessage();
@@ -130,6 +151,7 @@ public class Messages {
 	}
 
 	public void compile() {
+		this.commandHint = compileMsg(command_hint);
 		this.pmsEnabled = compileMsg(pms_enabled);
 		this.pmsEnabledBlocking = compileMsg(pms_enabled_blocking);
 		this.pmsEnabledFriendsOnly = compileMsg(pms_enabled_friends_only);
@@ -168,8 +190,26 @@ public class Messages {
 		this.staffMessageFreeze = compileMsg(staff_message_freeze);
 		this.staffMessageUnfreeze = compileMsg(staff_message_unfreeze);
 		this.automatedMessages = Arrays.stream(automated_messages).map(s -> compileMsg(s)).toArray(CompiledMessage[]::new);
+		this.friendRequestSent = compileMsg(friend_request_sent);
+		this.friendRequestReceived = compileMsg(friend_request_received);
+		this.friendRequestAcceptedSender = compileMsg(friend_request_accepted_sender);
+		this.friendRequestRejectedSender = compileMsg(friend_request_rejected_sender);
+		this.friendRequestAcceptedReceiver = compileMsg(friend_request_accepted_receiver);
+		this.friendRequestRejectedReceiver = compileMsg(friend_request_rejected_receiver);
+		this.targetRequestsDisabled = compileMsg(target_requests_disabled);
+		this.playerNotOnFriendsList = compileMsg(player_not_on_friends_list);
+		this.playerAlreadyOnFriendsList = compileMsg(player_already_on_friends_list);
+		this.friendRemovedSender = compileMsg(friend_removed_sender);
+		this.friendRemovedReceiver = compileMsg(friend_removed_receiver);
+		this.findSameServerAsSender = compileMsg(find_same_server_as_sender);
+		this.friendRequestExpired = compileMsg(friend_request_expired);
+		this.friendRequestsEnabled = compileMsg(friend_requests_enabled);
+		this.friendRequestsDisabled = compileMsg(friend_requests_disabled);
+		this.friendAcceptButton = compileMsg(friend_accept_button);
+		this.friendRejectButton = compileMsg(friend_reject_button);
 	}
 
+	public transient CompiledMessage commandHint;
 	public transient CompiledMessage pmsEnabled;
 	public transient CompiledMessage pmsEnabledBlocking;
 	public transient CompiledMessage pmsEnabledFriendsOnly;
@@ -208,6 +248,23 @@ public class Messages {
 	public transient CompiledMessage staffMessageFreeze;
 	public transient CompiledMessage staffMessageUnfreeze;
 	public transient CompiledMessage[] automatedMessages;
+	public transient CompiledMessage friendRequestSent;
+	public transient CompiledMessage friendRequestReceived;
+	public transient CompiledMessage friendRequestAcceptedSender;
+	public transient CompiledMessage friendRequestRejectedSender;
+	public transient CompiledMessage friendRequestAcceptedReceiver;
+	public transient CompiledMessage friendRequestRejectedReceiver;
+	public transient CompiledMessage targetRequestsDisabled;
+	public transient CompiledMessage playerNotOnFriendsList;
+	public transient CompiledMessage playerAlreadyOnFriendsList;
+	public transient CompiledMessage friendRemovedSender;
+	public transient CompiledMessage friendRemovedReceiver;
+	public transient CompiledMessage findSameServerAsSender;
+	public transient CompiledMessage friendRequestExpired;
+	public transient CompiledMessage friendRequestsEnabled;
+	public transient CompiledMessage friendRequestsDisabled;
+	public transient CompiledMessage friendAcceptButton;
+	public transient CompiledMessage friendRejectButton;
 
 	private static class ColorDeclaration {
 		private String name;

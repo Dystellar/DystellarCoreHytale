@@ -3,6 +3,7 @@ package gg.dystellar.core.commands;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.hypixel.hytale.component.Ref;
@@ -21,6 +22,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.utils.Pair;
+import gg.dystellar.core.utils.Triple;
 import gg.dystellar.core.utils.Utils;
 
 // TODO: Test this
@@ -32,7 +34,7 @@ import gg.dystellar.core.utils.Utils;
 public class FriendCommand extends AbstractCommandCollection {
 
 	private static final Map<UUID, Instant> cooldowns = new ConcurrentHashMap<>(); // Player, cooldown expiration
-	private static final Map<UUID, List<Pair<String, Instant>>> pending = new ConcurrentHashMap<>();
+	private static final Map<UUID, List<Triple<PlayerRef, Instant, ScheduledFuture<?>>>> pending = new ConcurrentHashMap<>();
 
     public FriendCommand() {
 		super("friend", "Friends system base command");
@@ -49,7 +51,7 @@ public class FriendCommand extends AbstractCommandCollection {
     }
 
 	private static final class AddCommand extends AbstractPlayerCommand {
-		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "The player that receives the request", ArgTypes.STRING);
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player that receives the request", ArgTypes.PLAYER_REF);
 
 		AddCommand() {
 			super("add", "Friend add command");
@@ -60,6 +62,7 @@ public class FriendCommand extends AbstractCommandCollection {
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
 			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var target = ctx.get(targetArg);
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 			final var cooldown = cooldowns.get(p.getUuid());
 
@@ -71,37 +74,43 @@ public class FriendCommand extends AbstractCommandCollection {
 			Instant cooldownExpiration = Instant.now().plusSeconds(4L);
 			cooldowns.put(p.getUuid(), cooldownExpiration);
 
-			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> { cooldowns.remove(p.getUuid()); }, 4L, TimeUnit.SECONDS);
+			if (user.friends.contains(target.getUuid())) {
+				p.sendMessage(lang.playerAlreadyOnFriendsList.buildMessage());
+				return;
+			}
+			final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+			if (!targetUser.friendRequests) {
+				p.sendMessage(lang.targetRequestsDisabled.buildMessage());
+				return;
+			}
+			final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
+
+			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> cooldowns.remove(p.getUuid()), 4L, TimeUnit.SECONDS);
 			var listPendings = pending.get(p.getUuid());
 
 			if (listPendings != null) {
-				final var entry = Utils.findList(listPendings, pair -> pair.first.equalsIgnoreCase(target));
+				final var entry = Utils.findList(listPendings, pair -> pair.first.getUsername().equalsIgnoreCase(target.getUsername()));
 
 				if (entry.isPresent()) {
 					p.sendMessage(lang.mCooldown.buildMessage().param("seconds", entry.get().second.getEpochSecond() - Instant.now().getEpochSecond()));
 					return;
 				}
-			} else pending.put(p.getUuid(), Collections.synchronizedList(new ArrayList<>()));
-
-			final var targetPlayer = Universe.get().getPlayerByUsername(target, NameMatching.EXACT_IGNORE_CASE);
-			final var list = listPendings == null ? pending.get(p.getUuid()) : listPendings;
-			list.add(new Pair<>(target, Instant.now().plusSeconds(30L)));
-
-			// TODO: Move to friend command honestly
-			if (targetPlayer != null) {
-
 			} else {
-				final int id = Handler.createMessageSession((source, input) -> {
-
-				}, () -> {
-
-					}, 30000L);
+				listPendings = Collections.synchronizedList(new ArrayList<>());
+				pending.put(p.getUuid(), listPendings);
 			}
-			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-				list.removeIf(pair -> pair.first.equalsIgnoreCase(target));
-				if (list.isEmpty())
-				pending.remove(p.getUuid());
+
+			final var list = listPendings == null ? pending.get(p.getUuid()) : listPendings;
+			final var future = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+				listPendings.removeIf(pair -> pair.first.getUuid().equals(target.getUuid()));
+				if (listPendings.isEmpty())
+					pending.remove(p.getUuid());
 			}, 30L, TimeUnit.SECONDS);
+			listPendings.add(new Triple<>(target, Instant.now().plusSeconds(30L), future));
+
+			p.sendMessage(lang.friendRequestSent.buildMessage());
+			target.sendMessage(targetLang.friendRequestReceived.buildMessage().param("player", p.getUsername()));
+			target.sendMessage(targetLang.commandHint.buildMessage().param("command", "/f accept " + p.getUsername()));
 		}
 	}
 

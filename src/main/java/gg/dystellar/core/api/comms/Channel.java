@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 
+import gg.dystellar.core.DystellarCore;
+
 public final class Channel {
 	public static final byte REGULAR = 0;
 	public static final byte CACHE = 1;
@@ -27,6 +29,7 @@ public final class Channel {
 	public ByteBufferOutputStream createTargetedMessageStream(String targetServer, int capacity) throws IOException {
 		final var out = new ByteBufferOutputStream(capacity);
 		out.write(MessageType.TARGET.id);
+		out.writePrefixedUTF8(DystellarCore.getInstance().config.get().server_name);
 		out.writePrefixedUTF8(targetServer);
 		out.writePrefixedUTF8(this.name);
 
@@ -36,6 +39,7 @@ public final class Channel {
 	public ByteBufferOutputStream createPropagatedMessageStream(int capacity) throws IOException {
 		final var out = new ByteBufferOutputStream(capacity);
 		out.write(MessageType.PROPAGATE.id);
+		out.writePrefixedUTF8(DystellarCore.getInstance().config.get().server_name);
 		out.writePrefixedUTF8(this.name);
 
 		return out;
@@ -58,6 +62,7 @@ public final class Channel {
 	public ByteBufferOutputStream createCacheWriteMessageStream(int capacity, int cacheId, long expirationMillis) throws IOException {
 		final var out = new ByteBufferOutputStream(capacity);
 		out.write(MessageType.CACHE_WRITE.id);
+		out.writePrefixedUTF8(DystellarCore.getInstance().config.get().server_name);
 		out.writeInt(cacheId);
 		out.writeLong(expirationMillis);
 		out.writePrefixedUTF8(this.name);
