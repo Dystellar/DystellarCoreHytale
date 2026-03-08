@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import gg.dystellar.core.common.Suffix;
 import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.UserComponent.UserMapping;
 import gg.dystellar.core.common.punishments.Punishment;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
@@ -108,8 +109,8 @@ public final class Protocol {
 		public long coins;
 		public boolean friend_reqs;
 		public long created_at;
-		public String[] friends;
-		public String[] ignores;
+		public UserMapping[] friends;
+		public UserMapping[] ignores;
 		public RawPunishment[] punishments;
 		public Permission[] perms;
 		public String group;
@@ -124,8 +125,8 @@ public final class Protocol {
 			user.scoreboardEnabled = scoreboard;
 			user.coins = coins;
 			user.friendRequests = friend_reqs;
-			Collections.addAll(user.friends, Arrays.stream(friends).map(f -> UUID.fromString(f)).toArray(l -> new UUID[l]));
-			Collections.addAll(user.ignoreList, Arrays.stream(ignores).map(i -> UUID.fromString(i)).toArray(l -> new UUID[l]));
+			Collections.addAll(user.friends, friends);
+			Collections.addAll(user.ignoreList, ignores);
 			Collections.addAll(user.punishments, Arrays.stream(punishments).map(p -> p.toPunishment()).toArray(l -> new Punishment[l]));
 			for (Permission perm : perms) user.perms.put(perm.getPerm(), perm);
 			user.creationDate = LocalDateTime.from(Instant.ofEpochMilli(created_at).atZone(ZoneId.of("UTC")));
@@ -147,8 +148,8 @@ public final class Protocol {
 			raw.coins = user.coins;
 			raw.friend_reqs = user.friendRequests;
 			raw.created_at = user.creationDate.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
-			raw.friends = user.friends.stream().map(f -> f.toString()).toArray(len -> new String[len]);
-			raw.ignores = user.ignoreList.stream().map(i -> i.toString()).toArray(len -> new String[len]);
+			raw.friends = user.friends.toArray(UserMapping[]::new);
+			raw.ignores = user.ignoreList.toArray(UserMapping[]::new);
 			raw.punishments = user.punishments.stream().map(pun -> RawPunishment.fromPunishment(pun)).toArray(len -> new RawPunishment[len]);
 			raw.perms = user.perms.values().toArray(len -> new Permission[len]);
 			raw.group = user.group.map(g -> g.getName()).orElse(null);

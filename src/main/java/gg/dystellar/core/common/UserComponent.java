@@ -56,8 +56,8 @@ public class UserComponent implements Component<EntityStore> {
 	public Optional<Group> group = Group.DEFAULT_GROUP;
 	public LocalDateTime creationDate = LocalDateTime.now();
 
-	public final List<UUID> friends = new ArrayList<>();
-    public final List<UUID> ignoreList = new ArrayList<>();
+	public final List<UserMapping> friends = new ArrayList<>();
+    public final List<UserMapping> ignoreList = new ArrayList<>();
 	public final Map<String, Permission> perms = new HashMap<>();
 
 	public transient boolean isInGame = false;
@@ -160,4 +160,6 @@ public class UserComponent implements Component<EntityStore> {
 
 		return null;
 	}
+
+	public static final record UserMapping(UUID uuid, String name) {}
 }
