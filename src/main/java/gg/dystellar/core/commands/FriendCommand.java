@@ -115,7 +115,7 @@ public class FriendCommand extends AbstractCommandCollection {
 	}
 
 	private static final class RemoveCommand extends AbstractPlayerCommand {
-		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "The player to remove", ArgTypes.STRING);
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to remove", ArgTypes.PLAYER_REF);
 
 		RemoveCommand() {
 			super("remove", "Friend remove command");
@@ -124,7 +124,19 @@ public class FriendCommand extends AbstractCommandCollection {
 		}
 
 		@Override
-		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+			final var target = ctx.get(targetArg);
+			if (!user.friends.removeIf(map -> map.uuid().equals(target.getUuid()))) {
+				p.sendMessage(lang.playerNotOnFriendsList.buildMessage());
+				return;
+			}
+			p.sendMessage(lang.friendRemovedSender.buildMessage().param("player", target.getUsername()));
+
+			final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+			final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
+			target.sendMessage(targetLang.friendRemovedReceiver.buildMessage().param("player", p.getUsername()));
 		}
 	}
 

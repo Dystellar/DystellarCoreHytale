@@ -112,8 +112,8 @@ public class Messages {
 	private String player_not_on_friends_list = "<Red>This player is not in your friends list.";
 	private String player_already_on_friends_list = "<Red>This player is already in your friends list.";
 	private String target_requests_disabled = "<Red>This player has their friend requests disabled.";
-	private String friend_removed_sender = "<Red><player> has been removed from your friends list.";
-	private String friend_removed_receiver = "<Red><player> has removed you from their friends list. (They removed you)";
+	private String friend_removed_sender = "<Red>{player} has been removed from your friends list.";
+	private String friend_removed_receiver = "<Red>{player} has removed you from their friends list. (They removed you)";
 	private String find_same_server_as_sender = "<DarkAqua>{player} <Green>is in your same server!";
 	private String friend_request_expired = "<Red>You don't have any pending friend requests. (Or it has expired)";
 	private String friend_requests_enabled = "<DarkAqua>You are now able to receive friend requests.";
