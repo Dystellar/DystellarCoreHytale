@@ -120,6 +120,7 @@ public class Messages {
 	private String friend_requests_disabled = "<Red>You are no longer able to receive friend requests.";
 	private String friend_accept_button = "<StrongGreen>ACCEPT"; // TODO: Not available within the hytale api yet
 	private String friend_reject_button = "<StrongRed>REJECT"; // TODO: Not available within the hytale api yet
+	private String error_friend_add_yourself = "<Red>You can't send a friend request to yourself.";
 
 	private CompiledMessage compileMsg(String msg) {
 		StringBuilder builder = new StringBuilder(msg);
@@ -207,6 +208,7 @@ public class Messages {
 		this.friendRequestsDisabled = compileMsg(friend_requests_disabled);
 		this.friendAcceptButton = compileMsg(friend_accept_button);
 		this.friendRejectButton = compileMsg(friend_reject_button);
+		this.errorFriendAddYourself = compileMsg(error_friend_add_yourself);
 	}
 
 	public transient CompiledMessage commandHint;
@@ -265,6 +267,7 @@ public class Messages {
 	public transient CompiledMessage friendRequestsDisabled;
 	public transient CompiledMessage friendAcceptButton;
 	public transient CompiledMessage friendRejectButton;
+	public transient CompiledMessage errorFriendAddYourself;
 
 	private static class ColorDeclaration {
 		private String name;

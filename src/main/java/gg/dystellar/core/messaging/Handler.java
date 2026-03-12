@@ -16,8 +16,10 @@ import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
+import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.api.comms.Receiver;
 import gg.dystellar.core.api.comms.Channel.ByteBufferInputStream;
+import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Utils;
 
@@ -131,7 +133,22 @@ public class Handler {
 
 	}
 
-	public static void handleFriendRemove() {}
+	public static void handleFriendRemove(String s, ByteBufferInputStream in) {
+		final var senderUuid = in.readPrefixedUTF8();
+		final var receiverUuid = in.readPrefixedUTF8();
+		final var receiver = Universe.get().getPlayer(UUID.fromString(receiverUuid));
+
+		if (receiver != null && receiver.isValid()) {
+			final var user = receiver.getHolder().getComponent(UserComponent.getComponentType());
+			final var found = Utils.find(user.friends, map -> map.uuid().toString().equals(senderUuid));
+			if (found.isPresent()) {
+				final var lang = DystellarCore.getInstance().getLang(user.language);
+				user.friends.removeIf(map -> map.uuid().equals(found.get().uuid()));
+
+				receiver.sendMessage(lang.friendRemovedReceiver.buildMessage().param("player", found.get().name()));
+			}
+		}
+	}
 
 	public static void handleDemFindPlayer(String source, ByteBufferInputStream in) {
 		final var playerName = in.readPrefixedUTF8();

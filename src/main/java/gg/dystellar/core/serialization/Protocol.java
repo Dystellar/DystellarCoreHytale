@@ -157,4 +157,7 @@ public final class Protocol {
 			return raw;
 		}
 	}
+
+	public static final record UuidPair(UUID sender, UUID receiver) {}
+	public static final record BackendError(boolean ok, String error) {}
 }

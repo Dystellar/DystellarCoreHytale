@@ -20,7 +20,8 @@ public enum Subchannel {
 	DEMAND_FIND_PLAYER((s, in) -> Handler.handleDemFindPlayer(s, in)),
 	REMOVE_PUNISHMENT_BY_ID((s, in) -> Handler.handleRemovePunishmentById(s, in)),
 	PUNISHMENT_ADD_PROXY(null),
-	PUNISHMENT_ADD_SERVER((s, in) -> Handler.handlePunishmentAddServer(s, in))
+	PUNISHMENT_ADD_SERVER((s, in) -> Handler.handlePunishmentAddServer(s, in)),
+	FRIEND_REMOVE((s, in) -> Handler.handleFriendRemove(s, in))
 	//TODO: INBOX_UPDATE((s, in) -> Handler.handleInboxUpdate(s, in)),
 	//TODO: INBOX_SEND((s, in) -> Handler.handleInboxSend(s, in)),
 	//TODO: INBOX_MANAGER_UPDATE((s, in) -> InboxCommand.get().init());

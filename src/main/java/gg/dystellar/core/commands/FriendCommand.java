@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
@@ -16,11 +17,13 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractComman
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.messaging.Subchannel;
 import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Triple;
 import gg.dystellar.core.utils.Utils;
@@ -69,6 +72,9 @@ public class FriendCommand extends AbstractCommandCollection {
 			if (cooldown != null) {
 				p.sendMessage(lang.mCooldown.buildMessage().param("seconds", cooldown.getEpochSecond() - Instant.now().getEpochSecond()));
 				return;
+			} else if (p.getUsername().equalsIgnoreCase(target.getUsername())) {
+				p.sendMessage(lang.errorFriendAddYourself.buildMessage());
+				return;
 			}
 
 			Instant cooldownExpiration = Instant.now().plusSeconds(4L);
@@ -89,7 +95,7 @@ public class FriendCommand extends AbstractCommandCollection {
 			var listPendings = pending.get(p.getUuid());
 
 			if (listPendings != null) {
-				final var entry = Utils.findList(listPendings, pair -> pair.first.getUsername().equalsIgnoreCase(target.getUsername()));
+				final var entry = Utils.find(listPendings, pair -> pair.first.getUsername().equalsIgnoreCase(target.getUsername()));
 
 				if (entry.isPresent()) {
 					p.sendMessage(lang.mCooldown.buildMessage().param("seconds", entry.get().second.getEpochSecond() - Instant.now().getEpochSecond()));
@@ -114,8 +120,9 @@ public class FriendCommand extends AbstractCommandCollection {
 		}
 	}
 
+	// TODO: Test all variables here
 	private static final class RemoveCommand extends AbstractPlayerCommand {
-		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to remove", ArgTypes.PLAYER_REF);
+		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "The player to remove", ArgTypes.STRING);
 
 		RemoveCommand() {
 			super("remove", "Friend remove command");
@@ -127,16 +134,26 @@ public class FriendCommand extends AbstractCommandCollection {
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
 			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
 			final var lang = DystellarCore.getInstance().getLang(user.language);
-			final var target = ctx.get(targetArg);
-			if (!user.friends.removeIf(map -> map.uuid().equals(target.getUuid()))) {
+			final var targetName = ctx.get(targetArg);
+			final var mapping = Utils.removeFirst(user.friends, map -> map.name().equalsIgnoreCase(targetName));
+			if (!mapping.isPresent()) {
 				p.sendMessage(lang.playerNotOnFriendsList.buildMessage());
 				return;
 			}
-			p.sendMessage(lang.friendRemovedSender.buildMessage().param("player", target.getUsername()));
 
-			final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
-			final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
-			target.sendMessage(targetLang.friendRemovedReceiver.buildMessage().param("player", p.getUsername()));
+			p.sendMessage(lang.friendRemovedSender.buildMessage().param("player", target.getUsername()));
+			final var target = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
+			if (target != null && target.isValid()) {
+				final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+				final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
+				target.sendMessage(targetLang.friendRemovedReceiver.buildMessage().param("player", p.getUsername()));
+			} else {
+				Utils.sendPropagatedOutputStream(Subchannel.FRIEND_REMOVE, 70, out -> {
+					out.writePrefixedUTF8(p.getUuid().toString());
+					out.writePrefixedUTF8(mapping.get().uuid().toString());
+				});
+				HytaleServer.SCHEDULED_EXECUTOR.execute(() -> DystellarCore.getApi().playerFriendRemove(p.getUuid(), mapping.get().uuid()));
+			}
 		}
 	}
 
@@ -189,18 +206,6 @@ public class FriendCommand extends AbstractCommandCollection {
 		@Override
 		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
 		}
-	}
-
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (!(commandSender instanceof Player)) return true;
-        if (strings.length < 1) {
-            commandSender.sendMessage(help);
-            return true;
-        }
-        Player p = (Player) commandSender;
-        
-        return true;
 	}
 
 	switch (strings[0]) {

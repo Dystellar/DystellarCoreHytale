@@ -5,8 +5,11 @@ import gg.dystellar.core.api.comms.WsClient;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.punishments.Punishment;
 import gg.dystellar.core.serialization.Protocol;
+import gg.dystellar.core.serialization.Protocol.BackendError;
 import gg.dystellar.core.serialization.Protocol.RawGroupsData;
 import gg.dystellar.core.serialization.Protocol.RawUser;
+import gg.dystellar.core.serialization.Protocol.UuidPair;
+import gg.dystellar.core.utils.Result;
 
 import com.google.gson.Gson;
 
@@ -105,6 +108,17 @@ public final class API {
 			throw new IOException("Failed fetch user on connection request");
 
 		return gson.fromJson(res.json, RawUser.class).toUserComponent(address);
+	}
+
+	public Result<Void, String> playerFriendRemove(UUID sender, UUID receiver) throws IOException, InterruptedException {
+		final var res = this.requestJson("/api/privileged/user_friend_remove", "PUT", gson.toJson(new UuidPair(sender, receiver)));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+
+		return Result.ok(null);
 	}
 
 	public void saveUser(UserComponent user) throws IOException, InterruptedException {
