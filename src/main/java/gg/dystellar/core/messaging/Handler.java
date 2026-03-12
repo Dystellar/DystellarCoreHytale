@@ -152,11 +152,14 @@ public class Handler {
 
 	public static void handleDemFindPlayer(String source, ByteBufferInputStream in) {
 		final var playerName = in.readPrefixedUTF8();
-		final var playerRef = Universe.get().getPlayerByUsername(playerName, NameMatching.EXACT);
+		final var playerRef = Universe.get().getPlayerByUsername(playerName, NameMatching.EXACT_IGNORE_CASE);
 
 		if (playerRef != null) {
 			final var id = in.readInt();
-			Utils.sendTargetedOutputStream(source, Subchannel.SESSION, 50, out -> out.writeInt(id));
+			Utils.sendTargetedOutputStream(source, Subchannel.SESSION, 50, out -> {
+				out.writeInt(id);
+				out.writePrefixedUTF8(playerRef.getUsername());
+			});
 		}
 	}
 

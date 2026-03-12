@@ -23,6 +23,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.UserComponent.UserMapping;
+import gg.dystellar.core.messaging.Handler;
 import gg.dystellar.core.messaging.Subchannel;
 import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Triple;
@@ -141,7 +143,7 @@ public class FriendCommand extends AbstractCommandCollection {
 				return;
 			}
 
-			p.sendMessage(lang.friendRemovedSender.buildMessage().param("player", target.getUsername()));
+			p.sendMessage(lang.friendRemovedSender.buildMessage().param("player", mapping.get().name()));
 			final var target = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
 			if (target != null && target.isValid()) {
 				final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
@@ -167,7 +169,22 @@ public class FriendCommand extends AbstractCommandCollection {
 		}
 
 		@Override
-		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+			final var targetName = ctx.get(targetArg);
+			final var target = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
+
+			if (target != null && target.isValid())
+				p.sendMessage(lang.findSameServerAsSender.buildMessage());
+			else {
+				Handler.createMessageSession((source, payload) -> {
+					final var realName = payload.readPrefixedUTF8();
+					p.sendMessage(lang.findFound.buildMessage().param("player", realName).param("server", source));
+				}, () -> {
+					p.sendMessage(lang.findNotFound.buildMessage().param("player", targetName));
+				});
+			}
 		}
 	}
 
@@ -179,7 +196,13 @@ public class FriendCommand extends AbstractCommandCollection {
 		}
 
 		@Override
-		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+
+			p.sendMessage(lang.listFriendsTitle.buildMessage());
+			for (UserMapping map : user.friends)
+				p.sendMessage(lang.listFriendsEntry.buildMessage().param("player", map.name()));
 		}
 	}
 
@@ -209,101 +232,6 @@ public class FriendCommand extends AbstractCommandCollection {
 	}
 
 	switch (strings[0]) {
-            case "add": {
-                if (strings.length < 2) {
-                    p.sendMessage(ChatColor.RED + "Usage: /f add <player>");
-                    return true;
-                }
-                if (cooldowns.contains(p.getUniqueId())) {
-                    p.sendMessage(Msgs.ON_COOLDOWN.replace("<seconds>", "20"));
-                    return true;
-                }
-                requestsCache.add(p.getUniqueId());
-                DystellarCore.getInstance().sendPluginMessage(p, DystellarCore.FRIEND_ADD_REQUEST, strings[1]);
-                break;
-            }
-            case "remove": {
-                if (strings.length < 2) {
-                    p.sendMessage(ChatColor.RED + "Usage: /f remove <player>");
-                    return true;
-                }
-                Player pInt = Bukkit.getPlayer(strings[1]);
-                User u = User.get(p);
-                if (pInt != null && pInt.isOnline()) {
-                    if (!u.friends.remove(pInt.getUniqueId())) {
-                        p.sendMessage(Msgs.PLAYER_NOT_ON_FRIENDS_LIST);
-                        return true;
-                    }
-                    User uInt = User.get(pInt);
-                    uInt.friends.remove(u.getUUID());
-                    p.sendMessage(Msgs.FRIEND_REMOVED_SENDER.replace("<player>", pInt.getName()));
-                    pInt.sendMessage(Msgs.FRIEND_REMOVED_RECEIVER.replace("<player>", p.getName()));
-                } else {
-                    DystellarCore.getAsyncManager().submit(() -> {
-                        UUID uuid;
-                        if (uuidsCache.containsKey(p)) {
-                            uuid = uuidsCache.get(p).get(strings[1]);
-                        } else {
-                            uuid = MariaDB.loadUUID(strings[1]);
-                            Map<String, UUID> map = new HashMap<>();
-                            map.put(strings[1], uuid);
-                            uuidsCache.put(p, map);
-                        }
-                        if (uuid == null) {
-                            p.sendMessage(Msgs.ERROR_PLAYER_NOT_FOUND);
-                            return;
-                        }
-                        if (!u.friends.remove(uuid)) {
-                            p.sendMessage(Msgs.PLAYER_NOT_ON_FRIENDS_LIST);
-                            return;
-                        }
-                        DystellarCore.getInstance().sendPluginMessage(p, DystellarCore.REMOVE_FRIEND, uuid.toString());
-                    });
-                }
-                break;
-            }
-            case "find": {
-                if (strings.length < 2) {
-                    p.sendMessage(ChatColor.RED + "Usage: /f find <player>");
-                    return true;
-                }
-                Player pInt = Bukkit.getPlayer(strings[1]);
-                if (pInt != null && pInt.isOnline()) {
-                    p.sendMessage(Msgs.FIND_SAME_SERVER_AS_SENDER.replace("<player>", pInt.getName()));
-                    return true;
-                } else {
-                    DystellarCore.getInstance().sendPluginMessage(p, DystellarCore.DEMAND_FIND_PLAYER, strings[1]);
-                }
-                break;
-            }
-            case "list": {
-                if (cooldowns.contains(p.getUniqueId())) {
-                    p.sendMessage(Msgs.ON_COOLDOWN.replace("<seconds>", "20"));
-                    return true;
-                }
-                cooldowns.add(p.getUniqueId());
-                Bukkit.getScheduler().runTaskLater(DystellarCore.getInstance(), () -> cooldowns.remove(p.getUniqueId()), 400L);
-                User u = User.get(p);
-                DystellarCore.getAsyncManager().submit(() -> {
-                    List<String> friends = new ArrayList<>();
-                    synchronized (u.friends) {
-                        for (UUID uuid : u.friends) {
-                            User us = User.get(uuid);
-                            if (us == null) {
-                                String name = MariaDB.loadName(uuid.toString());
-                                if (name != null) friends.add(name);
-                            } else {
-                                friends.add(us.getName());
-                            }
-                        }
-                    }
-                    p.sendMessage(ChatColor.DARK_GREEN + "Friends list:");
-                    for (String st : friends) {
-                        p.sendMessage(" - " + ChatColor.DARK_AQUA + st);
-                    }
-                });
-                break;
-            }
             case "accept": {
                 if (!DystellarCore.getInstance().requests.containsKey(p.getUniqueId())) {
                     p.sendMessage(Msgs.FRIEND_REQUEST_EXPIRED);

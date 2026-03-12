@@ -114,13 +114,18 @@ public class Messages {
 	private String target_requests_disabled = "<Red>This player has their friend requests disabled.";
 	private String friend_removed_sender = "<Red>{player} has been removed from your friends list.";
 	private String friend_removed_receiver = "<Red>{player} has removed you from their friends list. (They removed you)";
-	private String find_same_server_as_sender = "<DarkAqua>{player} <Green>is in your same server!";
 	private String friend_request_expired = "<Red>You don't have any pending friend requests. (Or it has expired)";
 	private String friend_requests_enabled = "<DarkAqua>You are now able to receive friend requests.";
 	private String friend_requests_disabled = "<Red>You are no longer able to receive friend requests.";
 	private String friend_accept_button = "<StrongGreen>ACCEPT"; // TODO: Not available within the hytale api yet
 	private String friend_reject_button = "<StrongRed>REJECT"; // TODO: Not available within the hytale api yet
 	private String error_friend_add_yourself = "<Red>You can't send a friend request to yourself.";
+	private String list_friends_title = "<DarkGreen>Friends list:";
+	private String list_friends_entry = "<White> - <DarkAqua>{player}";
+
+	private String find_same_server_as_sender = "<DarkAqua>{player} <Green>is in your same server!";
+	private String find_not_found = "<Red>{player} is not within the network.";
+	private String find_found = "<Aqua>{player} <White>is playing at <Green>{server}";
 
 	private CompiledMessage compileMsg(String msg) {
 		StringBuilder builder = new StringBuilder(msg);
@@ -209,6 +214,10 @@ public class Messages {
 		this.friendAcceptButton = compileMsg(friend_accept_button);
 		this.friendRejectButton = compileMsg(friend_reject_button);
 		this.errorFriendAddYourself = compileMsg(error_friend_add_yourself);
+		this.findNotFound = compileMsg(find_not_found);
+		this.findFound = compileMsg(find_found);
+		this.listFriendsTitle = compileMsg(list_friends_title);
+		this.listFriendsEntry = compileMsg(list_friends_entry);
 	}
 
 	public transient CompiledMessage commandHint;
@@ -268,6 +277,10 @@ public class Messages {
 	public transient CompiledMessage friendAcceptButton;
 	public transient CompiledMessage friendRejectButton;
 	public transient CompiledMessage errorFriendAddYourself;
+	public transient CompiledMessage listFriendsTitle;
+	public transient CompiledMessage listFriendsEntry;
+	public transient CompiledMessage findNotFound;
+	public transient CompiledMessage findFound;
 
 	private static class ColorDeclaration {
 		private String name;
