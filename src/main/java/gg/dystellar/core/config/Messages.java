@@ -114,7 +114,7 @@ public class Messages {
 	private String target_requests_disabled = "<Red>This player has their friend requests disabled.";
 	private String friend_removed_sender = "<Red>{player} has been removed from your friends list.";
 	private String friend_removed_receiver = "<Red>{player} has removed you from their friends list. (They removed you)";
-	private String friend_request_expired = "<Red>You don't have any pending friend requests. (Or it has expired)";
+	private String friend_request_expired = "<Red>You don't have a friend request from this player. (Or it has expired)";
 	private String friend_requests_enabled = "<DarkAqua>You are now able to receive friend requests.";
 	private String friend_requests_disabled = "<Red>You are no longer able to receive friend requests.";
 	private String friend_accept_button = "<StrongGreen>ACCEPT"; // TODO: Not available within the hytale api yet

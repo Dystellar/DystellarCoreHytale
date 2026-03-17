@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -53,6 +54,20 @@ public class FriendCommand extends AbstractCommandCollection {
 		this.addSubCommand(new AcceptCommand());
 		this.addSubCommand(new RejectCommand());
 		this.addSubCommand(new ToggleCommand());
+
+		// Handle cleanup on disconnect
+		final var plugin = DystellarCore.getInstance();
+		plugin.getEventRegistry().register(PlayerDisconnectEvent.class, e -> {
+			final var rem = pending.remove(e.getPlayerRef().getUuid());
+			if (rem != null) {
+				for (final var t : rem)
+					t.third.cancel(false);
+			}
+			for (final var value : pending.values()) {
+				final var entry = Utils.removeFirst(value, triple -> triple.first.getUuid().equals(e.getPlayerRef().getUuid()));
+				entry.ifPresent(en -> en.third.cancel(true));
+			}
+		});
     }
 
 	private static final class AddCommand extends AbstractPlayerCommand {
@@ -108,7 +123,6 @@ public class FriendCommand extends AbstractCommandCollection {
 				pending.put(p.getUuid(), listPendings);
 			}
 
-			final var list = listPendings == null ? pending.get(p.getUuid()) : listPendings;
 			final var future = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
 				listPendings.removeIf(pair -> pair.first.getUuid().equals(target.getUuid()));
 				if (listPendings.isEmpty())
@@ -178,11 +192,15 @@ public class FriendCommand extends AbstractCommandCollection {
 			if (target != null && target.isValid())
 				p.sendMessage(lang.findSameServerAsSender.buildMessage());
 			else {
-				Handler.createMessageSession((source, payload) -> {
+				int id = Handler.createMessageSession((source, payload) -> {
 					final var realName = payload.readPrefixedUTF8();
 					p.sendMessage(lang.findFound.buildMessage().param("player", realName).param("server", source));
 				}, () -> {
 					p.sendMessage(lang.findNotFound.buildMessage().param("player", targetName));
+				});
+				Utils.sendPropagatedOutputStream(Subchannel.DEMAND_FIND_PLAYER, 26, out -> {
+					out.writePrefixedUTF8(targetName);
+					out.writeInt(id);
 				});
 			}
 		}
@@ -207,7 +225,7 @@ public class FriendCommand extends AbstractCommandCollection {
 	}
 
 	private static final class AcceptCommand extends AbstractPlayerCommand {
-		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "The player to find", ArgTypes.STRING);
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to accept", ArgTypes.PLAYER_REF);
 
 		AcceptCommand() {
 			super("accept", "Friend accept command");
@@ -215,19 +233,43 @@ public class FriendCommand extends AbstractCommandCollection {
 		}
 
 		@Override
-		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+			final var target = ctx.get(targetArg);
+
+			final var pend = pending.get(target.getUuid());
+			final Optional<Triple<PlayerRef, Instant, ScheduledFuture<?>>> entry;
+
+			// Assign and check presence in one step if pend != null
+			if (pend == null || !(entry = Utils.removeFirst(pend, t -> t.first.getUuid().equals(p.getUuid()))).isPresent()) {
+				p.sendMessage(lang.friendRequestExpired.buildMessage());
+				return;
+			}
+			entry.get().third.cancel(true);
+
+			final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+			final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
+
+			targetUser.friends.add(new UserMapping(p.getUuid(), p.getUsername()));
+			user.friends.add(new UserMapping(target.getUuid(), target.getUsername()));
+			target.sendMessage(targetLang.friendRequestAcceptedSender.buildMessage().param("player", p.getUsername()));
+			p.sendMessage(lang.friendRequestAcceptedReceiver.buildMessage());
+
+			if (pend.isEmpty())
+				pending.remove(target.getUuid());
 		}
 	}
 
 	private static final class RejectCommand extends AbstractPlayerCommand {
 		@Override
-		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
 		}
 	}
 
 	private static final class ToggleCommand extends AbstractPlayerCommand {
 		@Override
-		protected void execute(CommandContext arg0, Store<EntityStore> arg1, Ref<EntityStore> arg2, PlayerRef arg3, World arg4) {
+		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
 		}
 	}
 
