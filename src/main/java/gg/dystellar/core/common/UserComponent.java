@@ -141,21 +141,13 @@ public class UserComponent implements Component<EntityStore> {
 		if (permission != null)
 			return permission;
 
-		String[] split = perm.split("\\.");
+		String[] parts = perm.split("\\.");
+		for (int i = 0; i < parts.length - 1; i++) {
+			final var test = parts[i] + ".*";
+			permission = perms.get(test);
 
-		for (Permission p : perms.values()) {
-			if (!p.getPerm().contains("*"))
-				continue;
-			String[] permSplit = p.getPerm().split("\\.");
-
-			int min = Math.min(split.length, permSplit.length);
-
-			for (int j = 0; j < min; j++) {
-				if (permSplit[j].equals("*"))
-					return p;
-				if (!permSplit[j].equalsIgnoreCase(split[j]))
-					break;
-			}
+			if (permission != null)
+				return permission;
 		}
 
 		return null;

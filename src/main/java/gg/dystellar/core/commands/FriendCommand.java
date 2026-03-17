@@ -262,8 +262,39 @@ public class FriendCommand extends AbstractCommandCollection {
 	}
 
 	private static final class RejectCommand extends AbstractPlayerCommand {
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to accept", ArgTypes.PLAYER_REF);
+
+		RejectCommand() {
+			super("reject", "Friend reject command");
+			this.requirePermission("dystellar.friend.reject");
+		}
+
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+			final var target = ctx.get(targetArg);
+
+			final var pend = pending.get(target.getUuid());
+			final Optional<Triple<PlayerRef, Instant, ScheduledFuture<?>>> entry;
+
+			// Assign and check presence in one step if pend != null
+			if (pend == null || !(entry = Utils.removeFirst(pend, t -> t.first.getUuid().equals(p.getUuid()))).isPresent()) {
+				p.sendMessage(lang.friendRequestExpired.buildMessage());
+				return;
+			}
+			entry.get().third.cancel(true);
+
+			final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+			final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
+
+			targetUser.friends.add(new UserMapping(p.getUuid(), p.getUsername()));
+			user.friends.add(new UserMapping(target.getUuid(), target.getUsername()));
+			target.sendMessage(targetLang.friendRequestAcceptedSender.buildMessage().param("player", p.getUsername()));
+			p.sendMessage(lang.friendRequestAcceptedReceiver.buildMessage());
+
+			if (pend.isEmpty())
+				pending.remove(target.getUuid());
 		}
 	}
 
