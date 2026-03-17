@@ -142,12 +142,17 @@ public class UserComponent implements Component<EntityStore> {
 			return permission;
 
 		String[] parts = perm.split("\\.");
-		for (int i = 0; i < parts.length - 1; i++) {
-			final var test = parts[i] + ".*";
-			permission = perms.get(test);
+		StringBuilder lookup = new StringBuilder(perm);
+		lookup.delete(perm.length() - 1 - parts[parts.length - 1].length(), perm.length());
+		lookup.append('*');
+
+		for (int i = parts.length - 1; i > 0; i--) {
+			permission = perms.get(lookup.toString());
 
 			if (permission != null)
 				return permission;
+
+			lookup.insert(lookup.length() - 1, parts[i] + '.');
 		}
 
 		return null;
