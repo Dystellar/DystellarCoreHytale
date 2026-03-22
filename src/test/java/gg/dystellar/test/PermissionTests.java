@@ -14,7 +14,7 @@ import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
 
-public final class DystellarTests {
+public final class PermissionTests {
 
 	private UserComponent user;
 

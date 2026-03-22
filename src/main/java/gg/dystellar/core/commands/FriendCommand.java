@@ -1,5 +1,6 @@
 package gg.dystellar.core.commands;
 
+import java.awt.Color;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,13 +10,13 @@ import java.util.concurrent.TimeUnit;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
-import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -27,7 +28,6 @@ import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.UserComponent.UserMapping;
 import gg.dystellar.core.messaging.Handler;
 import gg.dystellar.core.messaging.Subchannel;
-import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Triple;
 import gg.dystellar.core.utils.Utils;
 
@@ -97,7 +97,7 @@ public class FriendCommand extends AbstractCommandCollection {
 			Instant cooldownExpiration = Instant.now().plusSeconds(4L);
 			cooldowns.put(p.getUuid(), cooldownExpiration);
 
-			if (user.friends.contains(target.getUuid())) {
+			if (Utils.find(user.friends, m -> m.uuid().equals(target.getUuid())).isPresent()) {
 				p.sendMessage(lang.playerAlreadyOnFriendsList.buildMessage());
 				return;
 			}
@@ -123,9 +123,10 @@ public class FriendCommand extends AbstractCommandCollection {
 				pending.put(p.getUuid(), listPendings);
 			}
 
+			final var finalPendings = listPendings;
 			final var future = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-				listPendings.removeIf(pair -> pair.first.getUuid().equals(target.getUuid()));
-				if (listPendings.isEmpty())
+				finalPendings.removeIf(pair -> pair.first.getUuid().equals(target.getUuid()));
+				if (finalPendings.isEmpty())
 					pending.remove(p.getUuid());
 			}, 30L, TimeUnit.SECONDS);
 			listPendings.add(new Triple<>(target, Instant.now().plusSeconds(30L), future));
@@ -168,7 +169,14 @@ public class FriendCommand extends AbstractCommandCollection {
 					out.writePrefixedUTF8(p.getUuid().toString());
 					out.writePrefixedUTF8(mapping.get().uuid().toString());
 				});
-				HytaleServer.SCHEDULED_EXECUTOR.execute(() -> DystellarCore.getApi().playerFriendRemove(p.getUuid(), mapping.get().uuid()));
+				HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+					try {
+						DystellarCore.getApi().playerFriendRemove(p.getUuid(), mapping.get().uuid());
+					} catch (Exception e) {
+						p.sendMessage(Message.raw("A fatal error occurred during this request. Check logs if you're an admin").color(new Color(0xFF0000)));
+						e.printStackTrace();
+					}
+				});
 			}
 		}
 	}
@@ -299,51 +307,21 @@ public class FriendCommand extends AbstractCommandCollection {
 	}
 
 	private static final class ToggleCommand extends AbstractPlayerCommand {
+		ToggleCommand() {
+			super("toggle", "Toggle friend requests");
+			this.requirePermission("dystellar.friend.toggle");
+		}
+
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+
+			user.friendRequests = !user.friendRequests;
+			if (user.friendRequests)
+				p.sendMessage(lang.friendRequestsEnabled.buildMessage());
+			else
+				p.sendMessage(lang.friendRequestsDisabled.buildMessage());
 		}
 	}
-
-	switch (strings[0]) {
-            case "accept": {
-                if (!DystellarCore.getInstance().requests.containsKey(p.getUniqueId())) {
-                    p.sendMessage(Msgs.FRIEND_REQUEST_EXPIRED);
-                    return true;
-                }
-                User u = User.get(p);
-                boolean sendTip = false;
-                if (u.friends.isEmpty() && u.tipsSent[Consts.FIRST_FRIEND_TIP_POS] == Consts.BYTE_FALSE) {
-                    u.tipsSent[Consts.FIRST_FRIEND_TIP_POS] = Consts.BYTE_TRUE;
-                    sendTip = true;
-                }
-                UUID uuid = DystellarCore.getInstance().requests.remove(p.getUniqueId());
-                u.friends.add(uuid);
-                p.sendMessage(Msgs.FRIEND_REQUEST_ACCEPTED_RECEIVER);
-                if (sendTip) p.sendMessage(Consts.FIRST_FRIEND_TIP_MSG);
-                DystellarCore.getInstance().sendPluginMessage(p, DystellarCore.FRIEND_ADD_REQUEST_ACCEPT, uuid.toString());
-                break;
-            }
-            case "reject": {
-                if (!DystellarCore.getInstance().requests.containsKey(p.getUniqueId())) {
-                    p.sendMessage(Msgs.FRIEND_REQUEST_EXPIRED);
-                    return true;
-                }
-                UUID uuid = DystellarCore.getInstance().requests.remove(p.getUniqueId());
-                p.sendMessage(Msgs.FRIEND_REQUEST_REJECTED_RECEIVER);
-                DystellarCore.getInstance().sendPluginMessage(p, DystellarCore.FRIEND_ADD_REQUEST_REJECT, uuid.toString());
-                break;
-            }
-            case "togglerequests": {
-                User u = User.get(p);
-                byte setting = u.extraOptions[Consts.EXTRA_OPTION_FRIEND_REQUESTS_ENABLED_POS];
-                if (setting == Consts.BYTE_FALSE) {
-                    u.extraOptions[Consts.EXTRA_OPTION_FRIEND_REQUESTS_ENABLED_POS] = Consts.BYTE_TRUE;
-                    p.sendMessage(Msgs.FRIEND_REQUESTS_ENABLED);
-                } else {
-                    u.extraOptions[Consts.EXTRA_OPTION_FRIEND_REQUESTS_ENABLED_POS] = Consts.BYTE_FALSE;
-                    p.sendMessage(Msgs.FRIEND_REQUESTS_DISABLED);
-                }
-                break;
-            }
-        }
 }

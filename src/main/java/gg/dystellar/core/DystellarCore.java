@@ -31,7 +31,6 @@ import gg.dystellar.core.listeners.*;
 import gg.dystellar.core.perms.CustomPermProvider;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.messaging.Handler;
-import gg.dystellar.core.messaging.HandlerCache;
 import gg.dystellar.core.arenasapi.AbstractArena;
 import gg.dystellar.core.commands.*;
 import gg.dystellar.core.api.API;
@@ -90,7 +89,7 @@ public final class DystellarCore extends JavaPlugin {
 		new NoteCommand(); new PunishmentsCommand(); new NotesCommand();
 		new GiveItemCommand(); new ItemMetaCommand(); new PingCommand();
 		new ToggleChatCommand(); new TogglePrivateMessagesCommand();
-		new ToggleGlobalTabComplete(); new IgnoreCommand(); new IgnoreListCommand();
+		new IgnoreCommand(); new IgnoreListCommand();
 		new InboxCommand(); new FriendCommand(); new SuffixCommand();
 		new WandCommand(); new UnpunishCommand();
 	}
@@ -113,6 +112,7 @@ public final class DystellarCore extends JavaPlugin {
 		this.getCommandRegistry().registerCommand(new BroadcastCommand());
 		this.getCommandRegistry().registerCommand(new FlyCommand());
 		this.getCommandRegistry().registerCommand(new FreezeCommand());
+		this.getCommandRegistry().registerCommand(new FriendCommand());
 
 		// Register provider
 		PermissionsModule.get().addProvider(new CustomPermProvider());
@@ -133,7 +133,7 @@ public final class DystellarCore extends JavaPlugin {
 			config.load();
 
 			API = new API(config.get().api, config.get().websocket_endpoint, config.get().server_name, config.get().api_key);
-			CHANNEL = API.wsClient.registerChannel("core", Handler::handle, HandlerCache::handle);
+			CHANNEL = API.wsClient.registerChannel("core", Handler::handle, (_,_,_) -> {});
 
 			lang_en.load();
 			lang_es.load();
