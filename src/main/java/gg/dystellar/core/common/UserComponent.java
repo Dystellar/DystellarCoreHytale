@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.hypixel.hytale.component.Component;
@@ -117,7 +118,7 @@ public class UserComponent implements Component<EntityStore> {
         }
     }
 
-	public boolean hasPermission(String perm) {
+	public boolean hasPermission(@Nonnull String perm) {
 		var permission = lookupPermission(perm, this.perms);
 		if (permission != null)
 			return permission.get();
@@ -132,7 +133,7 @@ public class UserComponent implements Component<EntityStore> {
 	}
 
 	@Nullable
-	private static Permission lookupPermission(String perm, Map<String, Permission> perms) {
+	private static Permission lookupPermission(@Nonnull String perm, @Nonnull Map<String, Permission> perms) {
 		var permission = perms.get(perm);
 		if (permission != null)
 			return permission;
@@ -146,13 +147,16 @@ public class UserComponent implements Component<EntityStore> {
 		lookup.delete(perm.length() - 1 - parts[parts.length - 1].length(), perm.length());
 		lookup.append('*');
 
-		for (int i = parts.length - 1; i > 0; i--) {
+		for (int i = parts.length - 2; i >= 0; --i) {
 			permission = perms.get(lookup.toString());
 
 			if (permission != null)
 				return permission;
 
-			lookup.insert(lookup.length() - 1, parts[i] + '.');
+			if (i == 0)
+				break;
+			lookup.delete(lookup.length() - 2 - parts[i].length(), lookup.length());
+			lookup.append('*');
 		}
 
 		return null;
