@@ -1,46 +1,44 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.core.Msgs;
-import net.zylesh.dystellarcore.core.User;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.UserComponent.UserMapping;
+import gg.dystellar.core.utils.Utils;
 
 /**
  * This lets you block a player from messaging you, useful for obnoxious and toxic people.
  */
-public class IgnoreCommand implements CommandExecutor {
+public class IgnoreCommand extends AbstractPlayerCommand {
+
+	private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player you want to block", ArgTypes.PLAYER_REF);
 
     public IgnoreCommand() {
-        Bukkit.getPluginCommand("ignore").setExecutor(this);
-        Bukkit.getPluginCommand("block").setExecutor(this);
+		super("ignore", "Ignore a player");
+		this.addAliases("noreply", "dismiss", "snub", "nopm");
     }
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (!(commandSender instanceof Player)) return true;
-        Player p = (Player) commandSender;
-        if (strings.length < 1) {
-            p.sendMessage(ChatColor.RED + "Usage: /block <player>");
-            return true;
-        }
-        Player pInt = Bukkit.getPlayer(strings[0]);
-        if (pInt == null || !pInt.isOnline()) {
-            p.sendMessage(Msgs.ERROR_PLAYER_DOES_NOT_EXIST);
-            return true;
-        }
-        User u = User.get(p);
-        if (u.getIgnoreList().add(pInt.getUniqueId())) {
-            p.sendMessage(Msgs.PLAYER_BLOCKED.replace("<player>", pInt.getName()));
-            if (u.getPrivateMessagesMode() == User.PMS_ENABLED) {
-                p.sendMessage(Msgs.BLOCKING_POINTLESS_HINT);
-            }
-        } else {
-            p.sendMessage(Msgs.ERROR_PLAYER_ALREADY_BLOCKED);
-        }
-        return true;
-    }
+	@Override
+	protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+		final var target = ctx.get(targetArg);
+		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		final var lang = DystellarCore.getInstance().getLang(user.language);
+
+		if (Utils.find(user.ignoreList, m -> m.uuid().equals(target.getUuid())).isPresent()) {
+			p.sendMessage(lang.errorPlayerAlreadyBlocked.buildMessage());
+			return;
+		}
+
+		user.ignoreList.add(new UserMapping(target.getUuid(), target.getUsername()));
+		p.sendMessage(lang.playerBlocked.buildMessage().param("player", target.getUsername()));
+	}
 }

@@ -16,12 +16,7 @@ config-version: 1.1
 # Block/Ignore command messages.
 # ===============================================================================
 #
-player-blocked: "§3You blocked §f<player>§3."
-error-player-already-blocked: "§cThis player is already in your blocked players list."
-blacklist-empty: "§3Your blocked players list is empty."
-blacklist-player-removed: "§aYou've removed §3<player> §afrom your blocked players list."
-error-player-not-on-blacklist: "§cThis player is not in your blocked players list."
-blocking-pointless-hint: "§cWarning: §3You are blocking someone while not blocking ANY message! You may want to change that using §e/pms§3."
+
 
 #
 # ===============================================================================

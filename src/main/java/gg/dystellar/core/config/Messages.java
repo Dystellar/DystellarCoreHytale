@@ -127,6 +127,12 @@ public class Messages {
 	private String find_not_found = "<Red>{player} is not within the network.";
 	private String find_found = "<Aqua>{player} <White>is playing at <Green>{server}";
 
+	private String player_blocked = "<DarkAqua>You blocked <White>{player}<DarkAqua>.";
+	private String error_player_already_blocked = "<Red>This player is already in your blocked players list.";
+	private String blacklist_empty = "<DarkAqua>Your blocked players list is empty.";
+	private String blacklist_player_removed = "<Green>You've removed <DarkAqua>{player} <Green>from your blocked players list.";
+	private String error_player_not_on_blocklist = "<Red>This player is not in your blocked players list.";
+
 	private CompiledMessage compileMsg(String msg) {
 		StringBuilder builder = new StringBuilder(msg);
 		final var compiled = new CompiledMessage();
@@ -218,6 +224,11 @@ public class Messages {
 		this.findFound = compileMsg(find_found);
 		this.listFriendsTitle = compileMsg(list_friends_title);
 		this.listFriendsEntry = compileMsg(list_friends_entry);
+		this.playerBlocked = compileMsg(player_blocked);
+		this.errorPlayerAlreadyBlocked = compileMsg(error_player_already_blocked);
+		this.blacklistEmpty = compileMsg(blacklist_empty);
+		this.blacklistPlayerRemoved = compileMsg(blacklist_player_removed);
+		this.errorPlayerNotOnBlocklist = compileMsg(error_player_not_on_blocklist);
 	}
 
 	public transient CompiledMessage commandHint;
@@ -281,6 +292,12 @@ public class Messages {
 	public transient CompiledMessage listFriendsEntry;
 	public transient CompiledMessage findNotFound;
 	public transient CompiledMessage findFound;
+
+	public transient CompiledMessage playerBlocked;
+	public transient CompiledMessage errorPlayerAlreadyBlocked;
+	public transient CompiledMessage blacklistEmpty;
+	public transient CompiledMessage blacklistPlayerRemoved;
+	public transient CompiledMessage errorPlayerNotOnBlocklist;
 
 	private static class ColorDeclaration {
 		private String name;

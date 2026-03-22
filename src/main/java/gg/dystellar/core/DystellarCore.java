@@ -83,11 +83,11 @@ public final class DystellarCore extends JavaPlugin {
 		// Listeners end
 
 		// Commands start
-		new SetSpawnCommand(); new GameModeCommand();
+		new SetSpawnCommand();
 		new JoinCommand(); new MSGCommand(); new ReplyCommand();
 		new MuteCommand();
 		new NoteCommand(); new PunishmentsCommand(); new NotesCommand();
-		new GiveItemCommand(); new ItemMetaCommand(); new PingCommand();
+		new ItemMetaCommand();
 		new ToggleChatCommand(); new TogglePrivateMessagesCommand();
 		new IgnoreCommand(); new IgnoreListCommand();
 		new InboxCommand(); new FriendCommand(); new SuffixCommand();
