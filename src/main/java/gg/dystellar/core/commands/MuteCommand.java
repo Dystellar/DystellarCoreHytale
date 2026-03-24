@@ -1,105 +1,77 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.Msgs;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.core.punishments.Mute;
-import net.zylesh.dystellarcore.serialization.Mapping;
-import net.zylesh.dystellarcore.serialization.MariaDB;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
+import java.awt.Color;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+
+import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.UserComponent;
 
 /**
  * Moderator command to mute a player
  */
-public class MuteCommand implements CommandExecutor {
+public class MuteCommand extends AbstractAsyncCommand {
+
+	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF);
+	private final RequiredArg<String> reasonArg = this.withRequiredArg("reason", "Why punishing this player", ArgTypes.STRING);
+	private final RequiredArg<String> timeArg = this.withRequiredArg("time", "Duration of the punishment e.g. 30m, 30d, 2y", ArgTypes.STRING);
 
     public MuteCommand() {
-        Bukkit.getPluginCommand("mute").setExecutor(this);
+		super("mute", "Dystellar's custom mute command");
+		this.requirePermission("dystellar.punish");
     }
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (!commandSender.hasPermission("dystellar.admin")) {
-            commandSender.sendMessage(ChatColor.RED + "No permission.");
-            return true;
-        }
-        if (strings.length < 3) {
-            commandSender.sendMessage(ChatColor.RED + "Usage: /mute <player> <time> <reason>");
-            return true;
-        }
-        Player playerInt = Bukkit.getPlayer(strings[0]);
-        if (playerInt != null && playerInt.isOnline()) {
-            User userInt = User.get(playerInt);
-            LocalDateTime time;
-            if (strings[1].equalsIgnoreCase("null")) {
-                time = null;
-            } else {
-                time = LocalDateTime.now();
-                for (String e : strings[1].split(",")) {
-                    if (!e.matches("[0-9]+[dhm]")) {
-                        commandSender.sendMessage(ChatColor.RED + "The format is incorrect.");
-                        return true;
-                    }
-                    int integer = Integer.parseInt(e.substring(0, e.length() - 1));
-                    switch (e.charAt(e.length() - 1)) {
-                        case 'd': time = time.plusDays(integer); break;
-                        case 'h': time = time.plusHours(integer); break;
-                        case 'm': time = time.plusMinutes(integer); break;
-                    }
-                }
-            }
-            StringBuilder reason = new StringBuilder();
-            for (int i = 2; i < strings.length; i++) {
-                if (i == 2) reason.append(strings[i]);
-                else reason.append(" ").append(strings[i]);
-            }
-            Mute ban = new Mute(time, reason.toString());
-            userInt.punish(ban);
-        } else {
-            DystellarCore.getAsyncManager().execute(() -> {
-                Mapping mapping = MariaDB.loadMapping(strings[1]);
-                if (mapping == null) {
-                    commandSender.sendMessage(Msgs.ERROR_PLAYER_NOT_FOUND);
-                } else {
-                    User user = MariaDB.loadPlayerFromDatabase(mapping.getUUID(), mapping.getIP(), mapping.getName());
-                    LocalDateTime time;
-                    if (strings[1].equalsIgnoreCase("null")) {
-                        time = null;
-                    } else {
-                        time = LocalDateTime.now();
-                        for (String e : strings[1].split(",")) {
-                            if (!e.matches("[0-9]+[dhm]")) {
-                                commandSender.sendMessage(ChatColor.RED + "The format is incorrect.");
-                                return;
-                            }
-                            int integer = Integer.parseInt(e.substring(0, e.length() - 1));
-                            switch (e.charAt(e.length() - 1)) {
-                                case 'd': time = time.plusDays(integer); break;
-                                case 'h': time = time.plusHours(integer); break;
-                                case 'm': time = time.plusMinutes(integer); break;
-                            }
-                        }
-                    }
-                    StringBuilder reason = new StringBuilder();
-                    for (int i = 2; i < strings.length; i++) {
-                        if (i == 2) reason.append(strings[i]);
-                        else reason.append(" ").append(strings[i]);
-                    }
-                    Mute ban = new Mute(time, reason.toString());
-                    user.addPunishment(ban);
-                    MariaDB.savePlayerToDatabase(user);
-                }
-            });
-        }
+	@Override
+	protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
+		final var sender = ctx.sender();
 
-        return true;
-    }
+		final var player = ctx.get(playerArg);
+		final var reason = ctx.get(reasonArg);
+		final var time = ctx.get(timeArg);
+
+		if (!time.matches("^[0-9]+[ydhm]$")) {
+			sender.sendMessage(Message.raw("Time format incorrect, regex is '^[0-9]+[ydhm]$'").color(new Color(0xFF0000)));
+			return CompletableFuture.completedFuture(null);
+		}
+
+		LocalDateTime expirationDate = LocalDateTime.now(ZoneId.of("UTC"));
+		int integer = Integer.parseInt(time.substring(0, time.length() - 1));
+		switch (time.charAt(time.length() - 1)) {
+			case 'y': expirationDate = expirationDate.plusYears(integer); break;
+			case 'd': expirationDate = expirationDate.plusDays(integer); break;
+			case 'h': expirationDate = expirationDate.plusHours(integer); break;
+			case 'm': expirationDate = expirationDate.plusMinutes(integer); break;
+		}
+
+		try {
+			final var punishment = DystellarCore.getApi().punish(
+				player.getUuid(), "YOU HAVE BEEN MUTED", "mute",
+				LocalDateTime.now(ZoneId.of("UTC")), Optional.ofNullable(expirationDate),
+				reason, false, false, false, false, false
+			);
+
+			punishment.ifPresentOrElse(p -> {
+				UserComponent user = player.getHolder().getComponent(UserComponent.getComponentType());
+				if (user != null)
+					user.punish(p);
+			}, () -> sender.sendMessage(
+				Message.raw("Failed to create punishment, this player probably doesn't exist. Check logs for further information").color(new Color(0xFF0000))
+			));
+		} catch (Exception e) {
+			e.printStackTrace();
+			sender.sendMessage(Message.raw("Failed to create punishment: " + e.getMessage()).color(new Color(0xFF0000)));
+		}
+
+		return CompletableFuture.completedFuture(null);
+	}
 }
 
