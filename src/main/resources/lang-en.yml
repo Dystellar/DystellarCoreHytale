@@ -23,7 +23,7 @@ config-version: 1.1
 # MSG/Reply command messages.
 # ===============================================================================
 #
-cant-send-pms-disabled: "§cYou can't send messages while blocking all private messages. Enable them with §e/pms§c."
+cant-send-pms-disabled: "§cYou can't send messages while blocking private messages. Enable them with §e/pms§c."
 player-in-dnd-mode: "§c<player> is playing ranked and thus not receiving private messages due to Do Not Disturb mode."
 error-you-are-blocked: "§cThis player has blocked you."
 error-no-reply-cache: "§cYou don't have anyone to reply to."

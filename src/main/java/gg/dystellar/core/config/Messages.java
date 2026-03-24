@@ -132,6 +132,8 @@ public class Messages {
 	private String blacklist_empty = "<DarkAqua>Your blocked players list is empty.";
 	private String blacklist_player_removed = "<Green>You've removed <DarkAqua>{player} <Green>from your blocked players list.";
 	private String error_player_not_on_blocklist = "<Red>This player is not in your blocked players list.";
+	private String blocked_players_list_title = "<DarkGreen>Blocked players:";
+	private String blocked_players_list_entry = "<White> - <DarkAqua>{player}";
 
 	private CompiledMessage compileMsg(String msg) {
 		StringBuilder builder = new StringBuilder(msg);
@@ -229,6 +231,8 @@ public class Messages {
 		this.blacklistEmpty = compileMsg(blacklist_empty);
 		this.blacklistPlayerRemoved = compileMsg(blacklist_player_removed);
 		this.errorPlayerNotOnBlocklist = compileMsg(error_player_not_on_blocklist);
+		this.blockedPlayersListTitle = compileMsg(blocked_players_list_title);
+		this.blockedPlayersListEntry = compileMsg(blocked_players_list_entry);
 	}
 
 	public transient CompiledMessage commandHint;
@@ -298,6 +302,8 @@ public class Messages {
 	public transient CompiledMessage blacklistEmpty;
 	public transient CompiledMessage blacklistPlayerRemoved;
 	public transient CompiledMessage errorPlayerNotOnBlocklist;
+	public transient CompiledMessage blockedPlayersListTitle;
+	public transient CompiledMessage blockedPlayersListEntry;
 
 	private static class ColorDeclaration {
 		private String name;

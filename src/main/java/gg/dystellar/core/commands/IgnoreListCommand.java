@@ -1,97 +1,68 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.Msgs;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.serialization.Mapping;
-import net.zylesh.dystellarcore.serialization.MariaDB;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import java.util.Set;
-import java.util.UUID;
+import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.utils.Utils;
 
 /**
  * This command lets you manage your ignored players list.
  */
-public class IgnoreListCommand implements CommandExecutor {
-
-    private static final String[] help = {
-            ChatColor.DARK_AQUA + "/blockslist list",
-            ChatColor.DARK_AQUA + "/blockslist remove <player>"
-    };
+public class IgnoreListCommand extends AbstractCommandCollection {
 
     public IgnoreListCommand() {
-        Bukkit.getPluginCommand("ignorelist").setExecutor(this);
-        Bukkit.getPluginCommand("blockslist").setExecutor(this);
+		super("ignorelist", "Manage you ignores list");
+		this.addAliases("blockslist");
+
+		this.addSubCommand(new RemoveCommand());
+		this.addSubCommand(new ListCommand());
     }
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (!(commandSender instanceof Player)) return true;
-        Player p = (Player) commandSender;
-        if (strings.length < 1) {
-            p.sendMessage(help);
-            return true;
-        }
-        User user = User.get(p);
-        switch (strings[0]) {
-            case "list": {
-                DystellarCore.getAsyncManager().submit(() -> {
-                    Set<Mapping> mappings = MariaDB.getUUIDMappings(user.getIgnoreList().toArray(new UUID[0]));
-                    if (mappings.isEmpty()) {
-                        p.sendMessage(Msgs.BLACKLIST_EMPTY);
-                        return;
-                    }
-                    String[] message = new String[mappings.size() + 3];
-                    message[0] = ChatColor.DARK_AQUA + "Black list:";
-                    message[1] = ChatColor.WHITE.toString() + ChatColor.STRIKETHROUGH + "----------------------------------";
-                    message[message.length - 1] = ChatColor.WHITE.toString() + ChatColor.STRIKETHROUGH + "----------------------------------";
-                    int pos = 2;
-                    for (Mapping m : mappings) {
-                        if (message[pos] != null || pos >= message.length-1) {
-                            Bukkit.getLogger().warning("Algorithm error.");
-                            break;
-                        }
-                        message[pos] = ChatColor.DARK_AQUA + m.getName();
-                        pos++;
-                    }
-                    p.sendMessage(message);
-                });
-                break;
-            }
-            case "remove": {
-                if (strings.length < 2) {
-                    p.sendMessage(ChatColor.RED + "Usage: /blockslist remove <player>");
-                    return true;
-                }
-                Player pInt = Bukkit.getPlayer(strings[1]);
-                if (pInt == null || !pInt.isOnline()) {
-                    DystellarCore.getAsyncManager().submit(() -> {
-                        UUID uuid = MariaDB.loadUUID(strings[1]);
-                        if (uuid == null) {
-                            p.sendMessage(Msgs.ERROR_PLAYER_NOT_FOUND);
-                            return;
-                        }
-                        if (user.getIgnoreList().remove(uuid)) {
-                            p.sendMessage(Msgs.BLACKLIST_PLAYER_REMOVED.replace("<player>", strings[1]));
-                        } else {
-                            p.sendMessage(Msgs.ERROR_NOT_ON_BLACKLIST);
-                        }
-                    });
-                } else {
-                    if (user.getIgnoreList().remove(pInt.getUniqueId())) {
-                        p.sendMessage(Msgs.BLACKLIST_PLAYER_REMOVED.replace("<player>", strings[1]));
-                    } else {
-                        p.sendMessage(Msgs.ERROR_NOT_ON_BLACKLIST);
-                    }
-                }
-            }
-        }
-        return true;
-    }
+	private final static class RemoveCommand extends AbstractPlayerCommand {
+		private final RequiredArg<String> playerArg = this.withRequiredArg("player", "The player to remove", ArgTypes.STRING);
+
+		public RemoveCommand() {
+			super("remove", "Remove blocked player");
+			this.addAliases("delete", "rm", "del", "d");
+		}
+
+		@Override
+		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+			final var name = ctx.get(playerArg);
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+
+			if (Utils.removeFirst(user.ignoreList, m -> m.name().equalsIgnoreCase(name)).isPresent())
+				p.sendMessage(lang.blacklistPlayerRemoved.buildMessage().param("player", name));
+			else
+				p.sendMessage(lang.errorPlayerNotOnBlocklist.buildMessage());
+		}
+	}
+
+	private final static class ListCommand extends AbstractPlayerCommand {
+		public ListCommand() {
+			super("list", "List blocked players");
+			this.addAliases("l", "ls");
+		}
+
+		@Override
+		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var lang = DystellarCore.getInstance().getLang(user.language);
+
+			p.sendMessage(lang.blockedPlayersListTitle.buildMessage());
+			for (final var map : user.ignoreList)
+				p.sendMessage(lang.blockedPlayersListEntry.buildMessage().param("player", map.name()));
+		}
+	}
 }
