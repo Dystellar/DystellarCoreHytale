@@ -1,65 +1,37 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.Msgs;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.serialization.Mapping;
-import net.zylesh.dystellarcore.serialization.MariaDB;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import java.awt.Color;
+
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractTargetPlayerCommand;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+import gg.dystellar.core.common.UserComponent;
 
 /**
  * This command on itself doesn't do anything, it just lets you annotate something useful about a player,
  * like an explanation or an observation, only the staff and the affected player will see them.
  */
-public class NoteCommand implements CommandExecutor {
+public class NoteCommand extends AbstractTargetPlayerCommand {
+	private final RequiredArg<String> noteArg = this.withRequiredArg("note", "Note to add", ArgTypes.STRING);
 
     public NoteCommand() {
-        Bukkit.getPluginCommand("note").setExecutor(this);
+		super("note", "Add a note to a user");
+		this.requirePermission("dystellar.notes");
     }
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (!commandSender.hasPermission("dystellar.staff")) {
-            commandSender.sendMessage(ChatColor.RED + "No permission.");
-            return true;
-        }
-        if (strings.length < 2) {
-            commandSender.sendMessage(ChatColor.RED + "Usage: /note <player> <message-note>");
-            return true;
-        }
-        Player playerInt = Bukkit.getPlayer(strings[0]);
-        if (playerInt != null && playerInt.isOnline()) {
-            User userInt = User.get(playerInt);
-            StringBuilder reason = new StringBuilder();
-            for (int i = 1; i < strings.length; i++) {
-                if (i == 1) reason.append(strings[i]);
-                else reason.append(" ").append(strings[i]);
-            }
-            userInt.addNote(reason.toString());
-            commandSender.sendMessage(ChatColor.DARK_AQUA + "Note added!");
-        } else {
-            DystellarCore.getAsyncManager().submit(() -> {
-                Mapping mapping = MariaDB.loadMapping(strings[1]);
-                if (mapping == null) {
-                    commandSender.sendMessage(Msgs.ERROR_PLAYER_NOT_FOUND);
-                } else {
-                    User user = MariaDB.loadPlayerFromDatabase(mapping.getUUID(), mapping.getIP(), mapping.getName());
-                    StringBuilder reason = new StringBuilder();
-                    for (int i = 2; i < strings.length; i++) {
-                        if (i == 2) reason.append(strings[i]);
-                        else reason.append(" ").append(strings[i]);
-                    }
-                    user.addNote(reason.toString());
-                    MariaDB.savePlayerToDatabase(user);
-                    commandSender.sendMessage(ChatColor.DARK_AQUA + "Note added!");
-                }
-            });
-        }
-        return true;
-    }
+	@Override
+	protected void execute(CommandContext ctx, Ref<EntityStore> ref, Ref<EntityStore> ref2, PlayerRef p, World w, Store<EntityStore> store) {
+		final var note = ctx.get(noteArg);
+		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		user.notes.add(note);
+		ctx.sender().sendMessage(Message.raw("Note added!").color(new Color(0x00FF00)));
+	}
 }
