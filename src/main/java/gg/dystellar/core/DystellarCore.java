@@ -77,18 +77,17 @@ public final class DystellarCore extends JavaPlugin {
 			startAutomatedMessages();
 
 		// Listeners start
-		new Inbox.SenderListener(); new Punish();
+		new Inbox.SenderListener();
 		new PacketListener(); new GeneralListeners();
 		// Listeners end
 
 		// Commands start
 		new SetSpawnCommand();
-		new JoinCommand(); new MSGCommand(); new ReplyCommand();
-		new MuteCommand();
-		new NoteCommand(); new PunishmentsCommand(); new NotesCommand();
+		new ReplyCommand();
+		new PunishmentsCommand();
 		new ToggleChatCommand(); new TogglePrivateMessagesCommand();
 		new FriendCommand(); new SuffixCommand();
-		new WandCommand(); new UnpunishCommand();
+		new UnpunishCommand();
 	}
 
 	/**
@@ -111,6 +110,11 @@ public final class DystellarCore extends JavaPlugin {
 		this.getCommandRegistry().registerCommand(new FriendCommand());
 		this.getCommandRegistry().registerCommand(new IgnoreCommand());
 		this.getCommandRegistry().registerCommand(new IgnoreListCommand());
+		this.getCommandRegistry().registerCommand(new JoinCommand());
+		this.getCommandRegistry().registerCommand(new MSGCommand());
+		this.getCommandRegistry().registerCommand(new MuteCommand());
+		this.getCommandRegistry().registerCommand(new NoteCommand());
+		this.getCommandRegistry().registerCommand(new NotesCommand());
 
 		// Register provider
 		PermissionsModule.get().addProvider(new CustomPermProvider());
