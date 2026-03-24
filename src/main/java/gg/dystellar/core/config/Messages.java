@@ -135,6 +135,12 @@ public class Messages {
 	private String blocked_players_list_title = "<DarkGreen>Blocked players:";
 	private String blocked_players_list_entry = "<White> - <DarkAqua>{player}";
 
+	private String cant_send_pms_disabled = "<Red>You can't send messages while blocking private messages. Enable them with <Yellow>/pms<Red>.";
+	private String player_in_dnd_mode = "<Red>{player} is playing ranked and thus not receiving private messages due to Do Not Disturb mode.";
+	private String error_you_are_blocked = "<Red>This player has blocked you.";
+	private String error_no_reply_cache = "<Red>You don't have anyone to reply to.";
+	private String error_player_has_pms_disabled = "<Red>This player has disabled their private messages.";
+
 	private CompiledMessage compileMsg(String msg) {
 		StringBuilder builder = new StringBuilder(msg);
 		final var compiled = new CompiledMessage();
@@ -233,6 +239,11 @@ public class Messages {
 		this.errorPlayerNotOnBlocklist = compileMsg(error_player_not_on_blocklist);
 		this.blockedPlayersListTitle = compileMsg(blocked_players_list_title);
 		this.blockedPlayersListEntry = compileMsg(blocked_players_list_entry);
+		this.cantSendPmsDisabled = compileMsg(cant_send_pms_disabled);
+		this.playerInDndMode = compileMsg(player_in_dnd_mode);
+		this.errorYouAreBlocked = compileMsg(error_you_are_blocked);
+		this.errorNoReplyCache = compileMsg(error_no_reply_cache);
+		this.errorPlayerHasPmsDisabled = compileMsg(error_player_has_pms_disabled);
 	}
 
 	public transient CompiledMessage commandHint;
@@ -304,6 +315,12 @@ public class Messages {
 	public transient CompiledMessage errorPlayerNotOnBlocklist;
 	public transient CompiledMessage blockedPlayersListTitle;
 	public transient CompiledMessage blockedPlayersListEntry;
+
+	public transient CompiledMessage cantSendPmsDisabled;
+	public transient CompiledMessage playerInDndMode;
+	public transient CompiledMessage errorYouAreBlocked;
+	public transient CompiledMessage errorNoReplyCache;
+	public transient CompiledMessage errorPlayerHasPmsDisabled;
 
 	private static class ColorDeclaration {
 		private String name;

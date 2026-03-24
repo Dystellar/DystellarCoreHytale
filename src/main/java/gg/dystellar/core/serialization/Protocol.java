@@ -108,6 +108,7 @@ public final class Protocol {
 		public boolean scoreboard;
 		public long coins;
 		public boolean friend_reqs;
+		public boolean dnd;
 		public long created_at;
 		public UserMapping[] friends;
 		public UserMapping[] ignores;
@@ -125,6 +126,7 @@ public final class Protocol {
 			user.scoreboardEnabled = scoreboard;
 			user.coins = coins;
 			user.friendRequests = friend_reqs;
+			user.dnd = dnd;
 			Collections.addAll(user.friends, friends);
 			Collections.addAll(user.ignoreList, ignores);
 			Collections.addAll(user.punishments, Arrays.stream(punishments).map(p -> p.toPunishment()).toArray(l -> new Punishment[l]));
@@ -147,6 +149,7 @@ public final class Protocol {
 			raw.scoreboard = user.scoreboardEnabled;
 			raw.coins = user.coins;
 			raw.friend_reqs = user.friendRequests;
+			raw.dnd = user.dnd;
 			raw.created_at = user.creationDate.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
 			raw.friends = user.friends.toArray(UserMapping[]::new);
 			raw.ignores = user.ignoreList.toArray(UserMapping[]::new);

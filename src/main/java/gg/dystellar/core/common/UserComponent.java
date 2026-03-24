@@ -53,6 +53,7 @@ public class UserComponent implements Component<EntityStore> {
     public boolean globalChatEnabled = true;
     public boolean scoreboardEnabled = true;
 	public boolean friendRequests = true;
+	public boolean dnd = false;
     public byte privateMessagesMode = PMS_ENABLED;
 	public Optional<Group> group = Group.DEFAULT_GROUP;
 	public LocalDateTime creationDate = LocalDateTime.now();
@@ -62,6 +63,7 @@ public class UserComponent implements Component<EntityStore> {
 	public final Map<String, Permission> perms = new HashMap<>();
 
 	public transient boolean isInGame = false;
+	public transient boolean isInRanked = false;
 
     public UserComponent(UUID id, String ip, String name) {
         this.uuid = id;
