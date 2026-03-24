@@ -21,7 +21,8 @@ import gg.dystellar.core.utils.Utils;
 public class IgnoreListCommand extends AbstractCommandCollection {
 
     public IgnoreListCommand() {
-		super("ignorelist", "Manage you ignores list");
+		super("ignorelist", "Manage your ignores list");
+		this.requirePermission("dystellar.ignore");
 		this.addAliases("blockslist");
 
 		this.addSubCommand(new RemoveCommand());

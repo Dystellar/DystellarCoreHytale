@@ -31,7 +31,6 @@ import gg.dystellar.core.listeners.*;
 import gg.dystellar.core.perms.CustomPermProvider;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.messaging.Handler;
-import gg.dystellar.core.arenasapi.AbstractArena;
 import gg.dystellar.core.commands.*;
 import gg.dystellar.core.api.API;
 import gg.dystellar.core.api.Config;
@@ -87,10 +86,8 @@ public final class DystellarCore extends JavaPlugin {
 		new JoinCommand(); new MSGCommand(); new ReplyCommand();
 		new MuteCommand();
 		new NoteCommand(); new PunishmentsCommand(); new NotesCommand();
-		new ItemMetaCommand();
 		new ToggleChatCommand(); new TogglePrivateMessagesCommand();
-		new IgnoreListCommand();
-		new InboxCommand(); new FriendCommand(); new SuffixCommand();
+		new FriendCommand(); new SuffixCommand();
 		new WandCommand(); new UnpunishCommand();
 	}
 
@@ -100,7 +97,6 @@ public final class DystellarCore extends JavaPlugin {
 	@Override
 	protected void setup() {
 		initialize();
-		AbstractArena.init();
 
 		// Listeners
 		JoinsListener.register(this);
@@ -114,6 +110,7 @@ public final class DystellarCore extends JavaPlugin {
 		this.getCommandRegistry().registerCommand(new FreezeCommand());
 		this.getCommandRegistry().registerCommand(new FriendCommand());
 		this.getCommandRegistry().registerCommand(new IgnoreCommand());
+		this.getCommandRegistry().registerCommand(new IgnoreListCommand());
 
 		// Register provider
 		PermissionsModule.get().addProvider(new CustomPermProvider());

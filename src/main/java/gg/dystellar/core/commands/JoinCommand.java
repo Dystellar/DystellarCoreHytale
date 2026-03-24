@@ -1,45 +1,57 @@
 package gg.dystellar.core.commands;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.Msgs;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import java.awt.Color;
+
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+import gg.dystellar.core.DystellarCore;
 
 /**
  * This command lets you switch between servers, it tries to send a plugin message and the proxy handles the rest.
  * Useful because with this you can join players in an automatized way, as /server can't be used from the servers.
  */
-public class JoinCommand implements CommandExecutor {
+public class JoinCommand extends AbstractPlayerCommand {
+
+	private static final String IP_REGEX = "((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])";
+	private static final String PORT_REGEX = "(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{0,3}|0)";
+
+	private final RequiredArg<String> serverArg = this.withRequiredArg("server", "The server to connect to", ArgTypes.STRING);
 
     public JoinCommand() {
-        Bukkit.getPluginCommand("join").setExecutor(this);
-        Bukkit.getPluginCommand("j").setExecutor(this);
+		super("join", "Join another server");
+		this.addAliases("j");
+		this.requirePermission("dystellar.referral");
     }
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (!(commandSender instanceof Player)) return true;
-        Player p = (Player)commandSender;
-        if (strings.length < 1) {
-            p.sendMessage(ChatColor.RED + "Usage: /join <server>");
-            return true;
-        }
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("Connect");
-        out.writeUTF(strings[0]);
-        p.sendMessage(ChatColor.GREEN + "Connecting...");
-        p.sendPluginMessage(DystellarCore.getInstance(), "BungeeCord", out.toByteArray());
-        Bukkit.getScheduler().runTaskLater(DystellarCore.getInstance(), () -> {
-            if (p.isOnline()) {
-                p.sendMessage(Msgs.SERVER_CONNECTION_ERROR);
-            }
-        }, 30L);
-        return true;
-    }
+	@Override
+	protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+		final var server = ctx.get(serverArg);
+
+		if (server.matches(IP_REGEX + ':' + PORT_REGEX)) {
+			final var parts = server.split(":");
+
+			p.sendMessage(Message.raw("Connecting...").color(new Color(0x00FF00)));
+			p.referToServer(parts[0], Integer.parseInt(parts[1]));
+		} else if (server.matches(IP_REGEX)) {
+			p.sendMessage(Message.raw("Connecting...").color(new Color(0x00FF00)));
+			p.referToServer(server, 5520);
+		} else if (server.matches(PORT_REGEX)) {
+			final var config = DystellarCore.getInstance().config.get();
+
+			p.sendMessage(Message.raw("Connecting...").color(new Color(0x00FF00)));
+			p.referToServer(config.public_ip, Integer.parseInt(server));
+		} else {
+			int port = HytaleServer.get().getConfig()
+		}
+	}
 }

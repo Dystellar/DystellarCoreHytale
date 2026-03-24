@@ -25,6 +25,7 @@ public class IgnoreCommand extends AbstractPlayerCommand {
     public IgnoreCommand() {
 		super("ignore", "Ignore a player");
 		this.addAliases("noreply", "dismiss", "snub", "nopm");
+		this.requirePermission("dystellar.ignore");
     }
 
 	@Override
