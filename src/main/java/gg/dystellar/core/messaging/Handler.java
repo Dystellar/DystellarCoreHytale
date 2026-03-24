@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.NameMatching;
+import com.hypixel.hytale.server.core.Options;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
@@ -115,6 +116,18 @@ public class Handler {
 			session.first.cancel(false);
 			session.second.receive(source, in);
 		}
+	}
+
+	public static void handleAddressRequest(String s, ByteBufferInputStream in) {
+		final int id = in.readInt();
+		final var host = DystellarCore.getInstance().config.get().public_ip;
+		final var port = Options.getOptionSet().valueOf(Options.BIND).getPort();
+
+		Utils.sendTargetedOutputStream(s, Subchannel.SESSION, 36, out -> {
+			out.writeInt(id);
+			out.writePrefixedUTF8(host);
+			out.writeInt(port);
+		});
 	}
 
 	public static void handleInboxManagerUpdate() {}

@@ -21,7 +21,8 @@ public enum Subchannel {
 	REMOVE_PUNISHMENT_BY_ID((s, in) -> Handler.handleRemovePunishmentById(s, in)),
 	PUNISHMENT_ADD_PROXY(null),
 	PUNISHMENT_ADD_SERVER((s, in) -> Handler.handlePunishmentAddServer(s, in)),
-	FRIEND_REMOVE((s, in) -> Handler.handleFriendRemove(s, in))
+	FRIEND_REMOVE((s, in) -> Handler.handleFriendRemove(s, in)),
+	REQUEST_ADDRESS((s, in) -> Handler.handleAddressRequest(s, in))
 	//TODO: INBOX_UPDATE((s, in) -> Handler.handleInboxUpdate(s, in)),
 	//TODO: INBOX_SEND((s, in) -> Handler.handleInboxSend(s, in)),
 	//TODO: INBOX_MANAGER_UPDATE((s, in) -> InboxCommand.get().init());

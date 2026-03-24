@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
@@ -15,6 +14,9 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.messaging.Handler;
+import gg.dystellar.core.messaging.Subchannel;
+import gg.dystellar.core.utils.Utils;
 
 /**
  * This command lets you switch between servers, it tries to send a plugin message and the proxy handles the rest.
@@ -51,7 +53,17 @@ public class JoinCommand extends AbstractPlayerCommand {
 			p.sendMessage(Message.raw("Connecting...").color(new Color(0x00FF00)));
 			p.referToServer(config.public_ip, Integer.parseInt(server));
 		} else {
-			int port = HytaleServer.get().getConfig()
+			p.sendMessage(Message.raw("Connecting...").color(new Color(0x00FF00)));
+			int id = Handler.createMessageSession((s, in) -> {
+				final var host = in.readPrefixedUTF8();
+				final var port = in.readInt();
+
+				p.referToServer(host, port);
+			}, () -> p.sendMessage(Message.raw("Server not found").color(new Color(0xFF0000))));
+
+			Utils.sendTargetedOutputStream(server, Subchannel.REQUEST_ADDRESS, 10, out -> {
+				out.writeInt(id);
+			});
 		}
 	}
 }
