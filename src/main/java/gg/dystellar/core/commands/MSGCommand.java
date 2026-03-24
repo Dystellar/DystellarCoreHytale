@@ -64,5 +64,8 @@ public class MSGCommand extends AbstractPlayerCommand {
 		final var message = ctx.get(messageArg);
 		target.sendMessage(targetLang.msgReceiveFormat.buildMessage().param("sender", p.getUsername()).param("message", message));
 		p.sendMessage(lang.msgSendFormat.buildMessage().param("receiver", target.getUsername()).param("message", message));
+
+		user.lastMessagedPlayer = target;
+		targetUser.lastMessagedPlayer = p;
 	}
 }
