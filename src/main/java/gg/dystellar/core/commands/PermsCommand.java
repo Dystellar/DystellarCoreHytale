@@ -1,10 +1,7 @@
 package gg.dystellar.core.commands;
 
 import java.awt.Color;
-import java.util.Optional;
 
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.NameMatching;
@@ -12,12 +9,8 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractTargetPlayerCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
-import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
@@ -34,6 +27,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 		this.addAliases("p");
 		this.addSubCommand(new SetDefaultCommand());
 		this.addSubCommand(new SetGroupCommand());
+		this.addSubCommand(new ListGroupsCommand());
 	}
 
 	private static final class SetDefaultCommand extends CommandBase {
@@ -113,6 +107,20 @@ public final class PermsCommand extends AbstractCommandCollection {
 					}
 				});
 			}
+		}
+	}
+
+	private static final class ListGroupsCommand extends CommandBase {
+		ListGroupsCommand() {
+			super("listgroups", "List active groups");
+			this.requirePermission("dystellar.admin");
+		}
+
+		@Override
+		protected void executeSync(CommandContext ctx) {
+			ctx.sender().sendMessage(Message.raw("Active groups:").color(Color.MAGENTA));
+			for (final var group : Group.groups.keySet())
+				ctx.sender().sendMessage(Message.join(Message.raw(" - "), Message.raw(group).color(Color.GREEN)));
 		}
 	}
 }
