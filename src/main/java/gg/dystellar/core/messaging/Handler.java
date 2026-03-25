@@ -110,6 +110,34 @@ public class Handler {
 		Group.setDefaultGroup(group.get());
 	}
 
+	public static void handleUserGroupUpdate(String source, ByteBufferInputStream in) {
+		final var username = in.readPrefixedUTF8();
+		final var groupName = in.readPrefixedUTF8();
+
+		final var target = Universe.get().getPlayerByUsername(username, NameMatching.EXACT_IGNORE_CASE);
+		if (target == null) return;
+		final var group = Group.getGroup(groupName);
+
+		if (group.isEmpty()) {
+			DystellarCore.getLog().atWarning().log("Received a default group update for a group " + name + " that doesn't exist");
+			return;
+		}
+		final var user = target.getHolder().getComponent(UserComponent.getComponentType());
+		user.group = group;
+	}
+
+	public static void handleGroupUpdate(String source, ByteBufferInputStream in) {
+		final var name = in.readPrefixedUTF8();
+		final var group = Group.getGroup(name);
+
+		if (group.isEmpty()) {
+			DystellarCore.getLog().atWarning().log("Received a default group update for a group " + name + " that doesn't exist");
+			return;
+		}
+
+		DystellarCore.getApi().
+	}
+
 	public static void handleInboxManagerUpdate() {}
 
 	/* TODO: Implement inboxes stuff

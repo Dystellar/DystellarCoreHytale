@@ -1,16 +1,26 @@
 package gg.dystellar.core.commands;
 
 import java.awt.Color;
+import java.util.Optional;
 
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractTargetPlayerCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.messaging.Subchannel;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.utils.Utils;
@@ -23,6 +33,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		this.addAliases("p");
 		this.addSubCommand(new SetDefaultCommand());
+		this.addSubCommand(new SetGroupCommand());
 	}
 
 	private static final class SetDefaultCommand extends CommandBase {
@@ -57,6 +68,38 @@ public final class PermsCommand extends AbstractCommandCollection {
 					ctx.sender().sendMessage(Message.raw("Exception thrown: " + e.getMessage()).color(Color.RED));
 				}
 			});
+		}
+	}
+
+	private static final class SetGroupCommand extends CommandBase {
+		private final RequiredArg<String> userArg = this.withRequiredArg("user", "The user to set the group to", ArgTypes.STRING);
+		private final RequiredArg<String> groupArg = this.withRequiredArg("group", "The group to set", ArgTypes.STRING);
+
+		SetGroupCommand() {
+			super("setgroup", "Set a group to a user");
+			this.requirePermission("dystellar.admin");
+		}
+
+		@Override
+		protected void executeSync(CommandContext ctx) {
+			final var username = ctx.get(userArg);
+			final var groupName = ctx.get(groupArg);
+
+			final var group = Group.getGroup(groupName);
+			if (group.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("This group does not exist").color(Color.RED));
+				return;
+			}
+
+			final var target = Universe.get().getPlayerByUsername(username, NameMatching.EXACT_IGNORE_CASE);
+
+			if (target != null) {
+				final var user = target.getHolder().getComponent(UserComponent.getComponentType());
+				user.group = group;
+				ctx.sender().sendMessage(Message.raw("Group updated!").color(Color.GREEN));
+			} else {
+				
+			}
 		}
 	}
 }

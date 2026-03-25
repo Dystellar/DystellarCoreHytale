@@ -21,6 +21,8 @@ public enum Subchannel {
 	FRIEND_REMOVE(Handler::handleFriendRemove),
 	REQUEST_ADDRESS(Handler::handleAddressRequest),
 	DEFAULT_GROUP_UPDATE(Handler::handleDefaultGroupUpdate),
+	USER_GROUP_UPDATE(Handler::handleUserGroupUpdate),
+	GROUP_UPDATE(Handler::handleGroupUpdate)
 	//TODO: INBOX_UPDATE((s, in) -> Handler.handleInboxUpdate(s, in)),
 	//TODO: INBOX_SEND((s, in) -> Handler.handleInboxSend(s, in)),
 	//TODO: INBOX_MANAGER_UPDATE((s, in) -> InboxCommand.get().init());

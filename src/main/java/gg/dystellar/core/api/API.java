@@ -4,12 +4,7 @@ import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.api.comms.WsClient;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.punishments.Punishment;
-import gg.dystellar.core.serialization.Protocol;
-import gg.dystellar.core.serialization.Protocol.BackendError;
-import gg.dystellar.core.serialization.Protocol.RawGroupsData;
-import gg.dystellar.core.serialization.Protocol.RawUser;
-import gg.dystellar.core.serialization.Protocol.SimpleName;
-import gg.dystellar.core.serialization.Protocol.UuidPair;
+import gg.dystellar.core.serialization.Protocol.*;
 import gg.dystellar.core.utils.Result;
 
 import com.google.gson.Gson;
@@ -22,7 +17,6 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -30,7 +24,6 @@ import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 
 /**
  * Database storage, should use the backend instead.
@@ -130,7 +123,7 @@ public final class API {
 	}
 
 	public Optional<Punishment> punish(UUID uuid, String title, String type, LocalDateTime creation_date, Optional<LocalDateTime> expiration_date, String reason, boolean alsoip, boolean allow_chat, boolean allow_ranked, boolean allow_unranked, boolean allow_join_minigames) throws IOException, InterruptedException {
-		Protocol.PunishParams params = new Protocol.PunishParams();
+		PunishParams params = new PunishParams();
 		params.user_uuid = uuid.toString();
 		params.title = title;
 		params.type = type;
@@ -148,7 +141,7 @@ public final class API {
 		if (res.status != 200)
 			return Optional.empty();
 
-		return Optional.of(gson.fromJson(res.json, Protocol.RawPunishment.class).toPunishment());
+		return Optional.of(gson.fromJson(res.json, RawPunishment.class).toPunishment());
 	}
 
 	public Optional<RawGroupsData> getGroupsData() throws IOException, InterruptedException {
@@ -160,6 +153,15 @@ public final class API {
 		return Optional.of(gson.fromJson(res.json, RawGroupsData.class));
 	}
 
+	public Optional<RawGroup> getGroup(String name) throws IOException, InterruptedException {
+		final var res = this.getJson("/api/privileged/get_groups?name=" +  name);
+
+		if (res.status != 200)
+			return Optional.empty();
+
+		return Optional.of(gson.fromJson(res.json, RawGroup.class));
+	}
+
 	public Result<Void, String> setDefaultGroup(String name) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/privileged/set_group_default", "PUT", this.gson.toJson(new SimpleName(name)));
 
@@ -168,6 +170,30 @@ public final class API {
 			return Result.err(err.error());
 		}
 		
+		return Result.ok(null);
+	}
+
+	public Result<Void, String> setGroupToUser(String group, UUID uuid) throws IOException, InterruptedException {
+		final var data = new UserGroup(uuid, group);
+		final var res = this.requestJson("/api/privileged/set_user_group", "PUT", this.gson.toJson(data));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+
+		return Result.ok(null);
+	}
+
+	public Result<Void, String> setGroupToUserByName(String group, String username) throws IOException, InterruptedException {
+		final var data = new UserGroupByName(username, group);
+		final var res = this.requestJson("/api/privileged/set_user_group", "PUT", this.gson.toJson(data));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+
 		return Result.ok(null);
 	}
 
