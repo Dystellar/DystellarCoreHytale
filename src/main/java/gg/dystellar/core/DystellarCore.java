@@ -75,7 +75,7 @@ public final class DystellarCore extends JavaPlugin {
 
 		// Listeners start
 		new Inbox.SenderListener();
-		new PacketListener(); new GeneralListeners();
+		new PacketListener();
 		// Listeners end
 
 		// Commands start
@@ -112,6 +112,7 @@ public final class DystellarCore extends JavaPlugin {
 		this.getCommandRegistry().registerCommand(new MuteCommand());
 		this.getCommandRegistry().registerCommand(new NoteCommand());
 		this.getCommandRegistry().registerCommand(new NotesCommand());
+		this.getCommandRegistry().registerCommand(new PermsCommand());
 
 		// Register provider
 		PermissionsModule.get().addProvider(new CustomPermProvider());

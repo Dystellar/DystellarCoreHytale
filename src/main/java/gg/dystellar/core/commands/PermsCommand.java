@@ -98,7 +98,20 @@ public final class PermsCommand extends AbstractCommandCollection {
 				user.group = group;
 				ctx.sender().sendMessage(Message.raw("Group updated!").color(Color.GREEN));
 			} else {
-				
+				HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+					Utils.sendPropagatedOutputStream(Subchannel.USER_GROUP_UPDATE, 40, out -> {
+						out.writePrefixedUTF8(username);
+						out.writePrefixedUTF8(groupName);
+					});
+					try {
+						DystellarCore.getApi().setGroupToUserByName(groupName, username)
+							.ifOk(_ -> ctx.sender().sendMessage(Message.raw("Group updated!").color(Color.GREEN)))
+							.ifErr(s -> ctx.sender().sendMessage(Message.raw("Failed to set user group: " + s).color(Color.RED)));
+					} catch (Exception e) {
+						e.printStackTrace();
+						ctx.sender().sendMessage(Message.raw("Exception thrown: " + e.getMessage()).color(Color.RED));
+					}
+				});
 			}
 		}
 	}
