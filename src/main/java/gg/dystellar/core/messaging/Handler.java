@@ -17,6 +17,7 @@ import gg.dystellar.core.api.comms.Receiver;
 import gg.dystellar.core.api.comms.Channel.ByteBufferInputStream;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.perms.Group;
+import gg.dystellar.core.perms.Permission;
 import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Utils;
 
@@ -119,7 +120,7 @@ public class Handler {
 		final var group = Group.getGroup(groupName);
 
 		if (group.isEmpty()) {
-			DystellarCore.getLog().atWarning().log("Received a default group update for a group " + name + " that doesn't exist");
+			DystellarCore.getLog().atWarning().log("Received a user group update with group " + groupName + " that doesn't exist");
 			return;
 		}
 		final var user = target.getHolder().getComponent(UserComponent.getComponentType());
@@ -131,11 +132,28 @@ public class Handler {
 		final var group = Group.getGroup(name);
 
 		if (group.isEmpty()) {
-			DystellarCore.getLog().atWarning().log("Received a default group update for a group " + name + " that doesn't exist");
+			DystellarCore.getLog().atWarning().log("Received a group update for a group " + name + " that doesn't exist");
 			return;
 		}
 
-		DystellarCore.getApi().
+		try {
+			final var remoteGroup = DystellarCore.getApi().getGroup(name);
+			if (remoteGroup.isEmpty()) {
+				DystellarCore.getLog().atSevere().log("Group update for " + name + " exists internally but not remotely... wtf? Something nasty happened, it would be wise to check it out.");
+				return;
+			}
+
+			final var g = group.get();
+			final var gr = remoteGroup.get();
+			g.setPrefix(gr.prefix);
+			g.setSuffix(gr.suffix);
+			g.getPermissions().clear();
+
+			for (final Permission p : gr.perms)
+				g.getPermissions().put(p.getPerm(), p);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void handleInboxManagerUpdate() {}
