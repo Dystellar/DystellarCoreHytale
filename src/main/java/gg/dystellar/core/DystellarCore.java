@@ -1,26 +1,23 @@
 package gg.dystellar.core;
 
 import java.io.*;
-import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.hypixel.hytale.builtin.weather.resources.WeatherResource;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.ShutdownReason;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.permissions.PermissionsModule;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.utils.Hooks;
-import gg.dystellar.core.api.comms.Channel.ByteBufferOutputStream;
 import gg.dystellar.core.common.PacketListener;
 import gg.dystellar.core.common.Suffix;
 import gg.dystellar.core.common.UserComponent;
@@ -118,11 +115,15 @@ public final class DystellarCore extends JavaPlugin {
 
 		// Register provider
 		PermissionsModule.get().addProvider(new CustomPermProvider());
-	}
 
-	@Override
-	protected void shutdown() {
-	    super.shutdown();
+		if (config.get().prevent_weather) {
+			for (final var w : Universe.get().getWorlds().values()) {
+				final var store = w.getEntityStore().getStore();
+				final var resource = store.getResource(WeatherResource.getResourceType());
+
+				resource.setForcedWeather(config.get().forced_weather);
+			}
+		}
 	}
 
 	public final Config<Setup> config = new Config<>(this, "setup.json", Setup.class);
@@ -195,36 +196,5 @@ public final class DystellarCore extends JavaPlugin {
 				e.printStackTrace();
 			}
 		}, config.get().automated_messages_rate, config.get().automated_messages_rate, TimeUnit.SECONDS);
-	}
-
-	public void addInboxMessage(UUID target, Sendable sender, Player issuer) {
-		if (User.getUsers().containsKey(target)) {
-			User.get(target).getInbox().addSender(sender);
-		} else sendInbox(sender, issuer, target);
-	}
-
-	private void sendInbox(Sendable sender, Player player, UUID target) {
-		Utils.sendPluginMessage(player, Types.INBOX_UPDATE, sender.encode(target));
-		/*if (sender instanceof PKillEffectReward) {
-			PKillEffectReward reward = (PKillEffectReward) sender;
-			String effect = reward.getKillEffect().name();
-			String title = reward.getTitle();
-			String msg = reward.getSerializedMessage();
-			String from = reward.getFrom();
-			Boolean claimed = reward.isClaimed();
-			Boolean deleted = reward.isDeleted();
-			Collections.addAll(obj, target.toString(), PKILL_EFFECT, id, submission, effect, title, msg, from, claimed, deleted);
-		} else if (sender instanceof EloGainNotifier) {
-			EloGainNotifier reward = (EloGainNotifier) sender;
-			Integer elo = reward.getElo();
-			byte compatibility = reward.getCompatibilityType();
-			String ladder = reward.getLadder();
-			String msg = reward.getSerializedMessage();
-			String from = reward.getFrom();
-			Boolean claimed = reward.isClaimed();
-			Boolean deleted = reward.isDeleted();
-			if (compatibility == EloGainNotifier.PRACTICE) Collections.addAll(obj, target.toString(), ELO_GAIN_NOTIFIER, id, submission, elo, compatibility, ladder, msg, from, claimed, deleted);
-			else if (compatibility == EloGainNotifier.SKYWARS) Collections.addAll(obj, target.toString(), ELO_GAIN_NOTIFIER, id, submission, elo, compatibility, msg, from, claimed, deleted);
-		}*/
 	}
 }

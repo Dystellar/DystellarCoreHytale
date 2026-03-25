@@ -13,6 +13,7 @@ public class Setup {
 	public boolean automated_messages = false;
 	public int automated_messages_rate = 240; // In seconds
 	public boolean prevent_weather = true;
+	public String forced_weather = "Zone1_Sunny";
 	public String public_ip = "53.63.213.73"; // IP that clients use to connect
 	public String api = "http://localhost"; // Backend url
 	public String websocket_endpoint = "ws://localhost/api/privileged/create_ws";

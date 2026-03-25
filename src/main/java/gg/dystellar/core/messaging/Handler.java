@@ -1,11 +1,7 @@
 package gg.dystellar.core.messaging;
 
-import java.time.format.DateTimeFormatter;
-import java.util.AbstractMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -14,13 +10,13 @@ import java.util.concurrent.TimeUnit;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.Options;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.api.comms.Receiver;
 import gg.dystellar.core.api.comms.Channel.ByteBufferInputStream;
 import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.utils.Pair;
 import gg.dystellar.core.utils.Utils;
 
@@ -51,28 +47,83 @@ public class Handler {
 		return createMessageSession(callback, failed, 2000L);
 	}
 
-	public static void handlePunData(String source, ByteBufferInputStream in) {
-		String string = in.readUTF();
-		Player player = Bukkit.getPlayer(string);
+	public static void handleSession(String source, ByteBufferInputStream in) {
+		final var session = SESSIONS.remove(in.readInt());
 
-		if (player == null) return;
-		User user = User.get(player);
-		Utils.sendPluginMessage(player, Types.PUNISHMENTS_DATA_RESPONSE, Punishments.serializePunishments(user.getPunishments()));
+		if (session != null) {
+			session.first.cancel(false);
+			session.second.receive(source, in);
+		}
 	}
 
-	public static void handlePunDataRes(String source, ByteBufferInputStream in) {
-		String string = in.readUTF();
-		Player player = Bukkit.getPlayer(string);
+	public static void handleAddressRequest(String s, ByteBufferInputStream in) {
+		final int id = in.readInt();
+		final var host = DystellarCore.getInstance().config.get().public_ip;
+		final var port = Options.getOptionSet().valueOf(Options.BIND).getPort();
 
-		if (player == null)
+		Utils.sendTargetedOutputStream(s, Subchannel.SESSION, 36, out -> {
+			out.writeInt(id);
+			out.writePrefixedUTF8(host);
+			out.writeInt(port);
+		});
+	}
+
+	public static void handleFriendRemove(String s, ByteBufferInputStream in) {
+		final var senderUuid = in.readPrefixedUTF8();
+		final var receiverUuid = in.readPrefixedUTF8();
+		final var receiver = Universe.get().getPlayer(UUID.fromString(receiverUuid));
+
+		if (receiver != null && receiver.isValid()) {
+			final var user = receiver.getHolder().getComponent(UserComponent.getComponentType());
+			final var found = Utils.find(user.friends, map -> map.uuid().toString().equals(senderUuid));
+			if (found.isPresent()) {
+				final var lang = DystellarCore.getInstance().getLang(user.language);
+				user.friends.removeIf(map -> map.uuid().equals(found.get().uuid()));
+
+				receiver.sendMessage(lang.friendRemovedReceiver.buildMessage().param("player", found.get().name()));
+			}
+		}
+	}
+
+	public static void handleDemFindPlayer(String source, ByteBufferInputStream in) {
+		final var playerName = in.readPrefixedUTF8();
+		final var playerRef = Universe.get().getPlayerByUsername(playerName, NameMatching.EXACT_IGNORE_CASE);
+
+		if (playerRef != null) {
+			final var id = in.readInt();
+			Utils.sendTargetedOutputStream(source, Subchannel.SESSION, 50, out -> {
+				out.writeInt(id);
+				out.writePrefixedUTF8(playerRef.getUsername());
+			});
+		}
+	}
+
+	public static void handleDefaultGroupUpdate(String source, ByteBufferInputStream in) {
+		final var name = in.readPrefixedUTF8();
+		final var group = Group.getGroup(name);
+
+		if (group.isEmpty()) {
+			DystellarCore.getLog().atWarning().log("Received a default group update for a group " + name + " that doesn't exist");
 			return;
-		UUID target = UUID.fromString(in.readUTF());
-		Set<Punishment> punishments = Punishments.deserializePunishments(in.readUTF(), new HashSet<>());
+		}
 
-		invs.put(p.getUniqueId(), new AbstractMap.SimpleImmutableEntry<>(target, new Punishment[27]));
-		Inventory inv = InventoryBuilder.punishmentsInv(p, punishments);
-		p.openInventory(inv);
+		Group.setDefaultGroup(group.get());
 	}
+
+	public static void handleInboxManagerUpdate() {}
+
+	/* TODO: Implement inboxes stuff
+	public static void handleInboxSend(String source, ByteBufferInputStream in) {
+		String unsafe = in.readUTF();
+		Player player = Bukkit.getPlayer(unsafe);
+		if (player == null || !player.isOnline()) {
+			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
+			return;
+		}
+		User user = User.get(player);
+		Sendable sender = InboxSerialization.stringToSender(in.readUTF(), user.getInbox());
+		user.getInbox().addSender(sender);
+	}*/
 
 	/* TODO:
 	public static void handleInboxUpdate(String source, ByteBufferInputStream in) {
@@ -108,132 +159,4 @@ public class Handler {
 			}
 		}
 	}*/
-
-	public static void handleSession(String source, ByteBufferInputStream in) {
-		final var session = SESSIONS.remove(in.readInt());
-
-		if (session != null) {
-			session.first.cancel(false);
-			session.second.receive(source, in);
-		}
-	}
-
-	public static void handleAddressRequest(String s, ByteBufferInputStream in) {
-		final int id = in.readInt();
-		final var host = DystellarCore.getInstance().config.get().public_ip;
-		final var port = Options.getOptionSet().valueOf(Options.BIND).getPort();
-
-		Utils.sendTargetedOutputStream(s, Subchannel.SESSION, 36, out -> {
-			out.writeInt(id);
-			out.writePrefixedUTF8(host);
-			out.writeInt(port);
-		});
-	}
-
-	public static void handleInboxManagerUpdate() {}
-
-	public static void handleFriendReqApprove() {}
-
-	public static void handleFriendReqDeny() {}
-
-	public static void handleFriendReqDisabled() {}
-
-	public static void handleFriendAddReq() {}
-
-	public static void handleDemIsPlayerAcceptingReqs() {}
-
-	public static void handleDemIsPlayerWithinNetwork(String source, ByteBufferInputStream in) {
-
-	}
-
-	public static void handleFriendRemove(String s, ByteBufferInputStream in) {
-		final var senderUuid = in.readPrefixedUTF8();
-		final var receiverUuid = in.readPrefixedUTF8();
-		final var receiver = Universe.get().getPlayer(UUID.fromString(receiverUuid));
-
-		if (receiver != null && receiver.isValid()) {
-			final var user = receiver.getHolder().getComponent(UserComponent.getComponentType());
-			final var found = Utils.find(user.friends, map -> map.uuid().toString().equals(senderUuid));
-			if (found.isPresent()) {
-				final var lang = DystellarCore.getInstance().getLang(user.language);
-				user.friends.removeIf(map -> map.uuid().equals(found.get().uuid()));
-
-				receiver.sendMessage(lang.friendRemovedReceiver.buildMessage().param("player", found.get().name()));
-			}
-		}
-	}
-
-	public static void handleDemFindPlayer(String source, ByteBufferInputStream in) {
-		final var playerName = in.readPrefixedUTF8();
-		final var playerRef = Universe.get().getPlayerByUsername(playerName, NameMatching.EXACT_IGNORE_CASE);
-
-		if (playerRef != null) {
-			final var id = in.readInt();
-			Utils.sendTargetedOutputStream(source, Subchannel.SESSION, 50, out -> {
-				out.writeInt(id);
-				out.writePrefixedUTF8(playerRef.getUsername());
-			});
-		}
-	}
-
-	public static void handleFriendReqAccept() {}
-
-	public static void handleFriendReqReject() {}
-
-	/* TODO: Implement inboxes stuff
-	public static void handleInboxSend(String source, ByteBufferInputStream in) {
-		String unsafe = in.readUTF();
-		Player player = Bukkit.getPlayer(unsafe);
-		if (player == null || !player.isOnline()) {
-			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
-			return;
-		}
-		User user = User.get(player);
-		Sendable sender = InboxSerialization.stringToSender(in.readUTF(), user.getInbox());
-		user.getInbox().addSender(sender);
-	}*/
-
-	public static void handleShouldSendPackRes() {}
-
-	public static void handlePunishmentAddServer(String source, ByteBufferInputStream in) {
-		String unsafe = in.readUTF();
-		Player player = Bukkit.getPlayer(unsafe);
-		if (player == null || !player.isOnline()) {
-			Bukkit.getLogger().warning("Received a packet but the player who's supposed to affect is not online.");
-			return;
-		}
-		String serialized = in.readUTF();
-		Punishment punishment = Punishments.deserialize(serialized);
-		User user = User.get(player);
-		user.punish(punishment);
-	}
-
-	public static void handleRemovePunishmentById(String source, ByteBufferInputStream in) {
-		String unsafe = in.readUTF();
-		int pId = in.readInt();
-		Player player = Bukkit.getPlayer(unsafe);
-		if (player == null || !player.isOnline()) return;
-		User user = User.get(player);
-		Punishment punishmentToRemove = null;
-		for (Punishment pun : user.getPunishments()) {
-			if (pun.hashCode() == pId) {
-				punishmentToRemove = pun;
-				break;
-			}
-		}
-
-		if (punishmentToRemove == null || !user.getPunishments().remove(punishmentToRemove)) return;
-
-		player.sendMessage(ChatColor.GREEN + "The punishment with ID " + pId + " was removed from your punishments list!");
-		String[] details = new String[] {
-			ChatColor.DARK_GREEN + "Punishment details:",
-			"===============================",
-			ChatColor.DARK_AQUA + "Type" + ChatColor.WHITE + ": " + ChatColor.GRAY + p.getClass().getSimpleName(),
-			ChatColor.DARK_AQUA + "Creation Date" + ChatColor.WHITE + ": " + ChatColor.GRAY + punishmentToRemove.getCreationDate().format(DateTimeFormatter.ISO_DATE_TIME),
-			ChatColor.DARK_AQUA + "Expiration Date" + ChatColor.WHITE + ": " + ChatColor.GRAY + (punishmentToRemove.getExpirationDate() == null ? "Never" : punishmentToRemove.getExpirationDate().format(DateTimeFormatter.ISO_DATE_TIME)),
-			ChatColor.DARK_AQUA + "Reason" + ChatColor.WHITE + ": " + ChatColor.GRAY + punishmentToRemove.getReason(),
-			"==============================="
-		};
-		player.sendMessage(details);
-	}
 }

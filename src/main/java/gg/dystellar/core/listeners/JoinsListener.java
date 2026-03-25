@@ -5,7 +5,6 @@ import java.util.concurrent.CompletableFuture;
 
 import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.server.core.HytaleServer;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
@@ -37,7 +36,6 @@ public final class JoinsListener {
 
 	private static void onConnect(PlayerConnectEvent e) {
 		final var p = e.getPlayerRef();
-		p.getReference().getStore().getComponent(null, Player.getComponentType()).hasPermission(id)
 		final var holder = e.getHolder();
 
 		CompletableFuture.supplyAsync(() -> {

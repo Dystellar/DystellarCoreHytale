@@ -220,7 +220,7 @@ public final class Channel {
 		}
 
 		public void writeByte(byte b) {
-			this.buf.put((byte)b);
+			this.buf.put(b);
 		}
 
 		@Override

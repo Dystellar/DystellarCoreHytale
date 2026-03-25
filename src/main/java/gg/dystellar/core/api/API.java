@@ -8,6 +8,7 @@ import gg.dystellar.core.serialization.Protocol;
 import gg.dystellar.core.serialization.Protocol.BackendError;
 import gg.dystellar.core.serialization.Protocol.RawGroupsData;
 import gg.dystellar.core.serialization.Protocol.RawUser;
+import gg.dystellar.core.serialization.Protocol.SimpleName;
 import gg.dystellar.core.serialization.Protocol.UuidPair;
 import gg.dystellar.core.utils.Result;
 
@@ -157,6 +158,17 @@ public final class API {
 			return Optional.empty();
 
 		return Optional.of(gson.fromJson(res.json, RawGroupsData.class));
+	}
+
+	public Result<Void, String> setDefaultGroup(String name) throws IOException, InterruptedException {
+		final var res = this.requestJson("/api/privileged/set_group_default", "PUT", this.gson.toJson(new SimpleName(name)));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+		
+		return Result.ok(null);
 	}
 
 	private static final class Response {

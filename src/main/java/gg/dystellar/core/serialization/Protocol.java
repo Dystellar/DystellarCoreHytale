@@ -161,6 +161,7 @@ public final class Protocol {
 		}
 	}
 
+	public static final record SimpleName(String name) {}
 	public static final record UuidPair(UUID sender, UUID receiver) {}
 	public static final record BackendError(boolean ok, String error) {}
 }

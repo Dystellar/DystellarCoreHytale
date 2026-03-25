@@ -55,7 +55,7 @@ public class UserComponent implements Component<EntityStore> {
 	public boolean friendRequests = true;
 	public boolean dnd = false;
     public byte privateMessagesMode = PMS_ENABLED;
-	public Optional<Group> group = Group.DEFAULT_GROUP;
+	public volatile Optional<Group> group = Group.getDefaultGroup();
 	public LocalDateTime creationDate = LocalDateTime.now();
 
 	public final List<UserMapping> friends = new ArrayList<>();
@@ -80,6 +80,22 @@ public class UserComponent implements Component<EntityStore> {
 	public Component<EntityStore> clone() {
 		System.out.println("UserComponent was cloned (resource loss)");
 		return new UserComponent(uuid, ip, name);
+	}
+
+	public boolean isChatAllowed() {
+		return Utils.find(punishments, p -> !p.allowChat()).isEmpty();
+	}
+
+	public boolean isUnrankedAllowed() {
+		return Utils.find(punishments, p -> !p.allowUnranked()).isEmpty();
+	}
+
+	public boolean isRankedAllowed() {
+		return Utils.find(punishments, p -> !p.allowRanked()).isEmpty();
+	}
+
+	public boolean isMinigamesAllowed() {
+		return Utils.find(punishments, p -> !p.allowJoinMinigames()).isEmpty();
 	}
 
     public void punish(Punishment punishment) {

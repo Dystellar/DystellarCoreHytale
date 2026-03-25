@@ -2,7 +2,6 @@ package gg.dystellar.core.utils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -30,7 +29,7 @@ public class Utils {
 	public static <T> Optional<T> find(final Iterable<T> items, Predicate<T> predicate) {
 		for (T t : items) {
 			if (predicate.test(t))
-			return Optional.ofNullable(t);
+				return Optional.ofNullable(t);
 		}
 
 		return Optional.empty();
