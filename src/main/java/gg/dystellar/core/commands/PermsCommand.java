@@ -231,6 +231,9 @@ public final class PermsCommand extends AbstractCommandCollection {
 		public CreateCommand() {
 			super("create", "Create group");
 		}
+
+		@Override
+		protected void executeSync(CommandContext ctx) {}
 	}
 
 	private static final class DeleteCommand extends CommandBase {
@@ -238,6 +241,15 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public DeleteCommand() {
 			super("delete", "Delete group");
+		}
+
+		protected void executeSync(CommandContext ctx) {
+			final var groupName = ctx.get(nameArg);
+			final var group = Group.getGroup(groupName);
+			if (group.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
+				return;
+			}
 		}
 	}
 
@@ -247,6 +259,15 @@ public final class PermsCommand extends AbstractCommandCollection {
 		public ListPermsCommand() {
 			super("listperms", "List permissions for a group");
 		}
+
+		protected void executeSync(CommandContext ctx) {
+			final var groupName = ctx.get(nameArg);
+			final var group = Group.getGroup(groupName);
+			if (group.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
+				return;
+			}
+		}
 	}
 
 	private static final class SetPermCommand extends CommandBase {
@@ -255,6 +276,15 @@ public final class PermsCommand extends AbstractCommandCollection {
 		public SetPermCommand() {
 			super("setperm", "Set permission to group");
 		}
+
+		protected void executeSync(CommandContext ctx) {
+			final var groupName = ctx.get(nameArg);
+			final var group = Group.getGroup(groupName);
+			if (group.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
+				return;
+			}
+		}
 	}
 
 	private static final class UnsetPermCommand extends CommandBase {
@@ -262,6 +292,15 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public UnsetPermCommand() {
 			super("unsetperm", "Remove permission node");
+		}
+
+		protected void executeSync(CommandContext ctx) {
+			final var groupName = ctx.get(nameArg);
+			final var group = Group.getGroup(groupName);
+			if (group.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
+				return;
+			}
 		}
 	}
 
@@ -272,6 +311,15 @@ public final class PermsCommand extends AbstractCommandCollection {
 		public SetPrefixCommand() {
 			super("setprefix", "Set group prefix");
 		}
+
+		protected void executeSync(CommandContext ctx) {
+			final var groupName = ctx.get(nameArg);
+			final var group = Group.getGroup(groupName);
+			if (group.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
+				return;
+			}
+		}
 	}
 
 	private static final class SetSuffixCommand extends CommandBase {
@@ -280,6 +328,15 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public SetSuffixCommand() {
 			super("setsuffix", "Set group suffix");
+		}
+
+		protected void executeSync(CommandContext ctx) {
+			final var groupName = ctx.get(nameArg);
+			final var group = Group.getGroup(groupName);
+			if (group.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
+				return;
+			}
 		}
 	}
 }
