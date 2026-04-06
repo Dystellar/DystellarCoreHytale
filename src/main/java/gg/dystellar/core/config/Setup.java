@@ -16,6 +16,6 @@ public class Setup {
 	public String forced_weather = "Zone1_Sunny";
 	public String public_ip = "53.63.213.73"; // IP that clients use to connect
 	public String api = "http://localhost"; // Backend url
-	public String websocket_endpoint = "ws://localhost/api/privileged/create_ws";
+	public String websocket_endpoint = "ws://localhost/api/core/create_ws";
 	public String api_key = "secretkey"; // Provided by the backend
 }

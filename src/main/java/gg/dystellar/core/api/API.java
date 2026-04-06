@@ -4,6 +4,8 @@ import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.api.comms.WsClient;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.common.punishments.Punishment;
+import gg.dystellar.core.perms.Group;
+import gg.dystellar.core.perms.Permission;
 import gg.dystellar.core.serialization.Protocol.*;
 import gg.dystellar.core.utils.Result;
 
@@ -50,7 +52,7 @@ public final class API {
 	public final WsClient wsClient;
 
 	public Response getJson(String path) throws IOException, InterruptedException {
-		final var request = HttpRequest.newBuilder(URI.create(this.url + path))
+		final var request = HttpRequest.newBuilder(URI.create(this.url + '/' + path))
 			.method("GET", BodyPublishers.noBody())
 			.header("Authorization", this.token)
 			.header("Content-Type", "application/json")
@@ -87,7 +89,7 @@ public final class API {
 	}
 
     public Optional<UserComponent> getPlayer(UUID uuid) throws IOException, InterruptedException {
-		final var res = this.getJson("/api/privileged/player_data?uuid=" + uuid.toString());
+		final var res = this.getJson("/api/core/player_data?uuid=" + uuid.toString());
 		
 		if (res.status != 200)
 			return Optional.empty();
@@ -96,7 +98,7 @@ public final class API {
     }
 
 	public UserComponent playerConnected(String uuid, String name, String address) throws IOException, InterruptedException {
-		final var res = this.getJson("/api/privileged/user_connected?uuid=" + uuid + "&name=" + name + "&address=" + address);
+		final var res = this.getJson("/api/core/user_connected?uuid=" + uuid + "&name=" + name + "&address=" + address);
 
 		if (res.status != 200)
 			throw new IOException("Failed fetch user on connection request");
@@ -105,7 +107,7 @@ public final class API {
 	}
 
 	public Result<Void, String> playerFriendRemove(UUID sender, UUID receiver) throws IOException, InterruptedException {
-		final var res = this.requestJson("/api/privileged/user_friend_remove", "PUT", gson.toJson(new UuidPair(sender, receiver)));
+		final var res = this.requestJson("/api/core/user_friend_remove", "PUT", gson.toJson(new UuidPair(sender, receiver)));
 
 		if (res.status != 200) {
 			final var err = gson.fromJson(res.json, BackendError.class);
@@ -116,7 +118,7 @@ public final class API {
 	}
 
 	public void saveUser(UserComponent user) throws IOException, InterruptedException {
-		final var res = requestJson("/api/privileged/user_save", "PUT", gson.toJson(RawUser.fromUserComponent(user)));
+		final var res = requestJson("/api/core/user_save", "PUT", gson.toJson(RawUser.fromUserComponent(user)));
 
 		if (res.status != 200)
 			throw new IOException("Failed to save player. Json: " + res.json);
@@ -136,7 +138,7 @@ public final class API {
 		params.allow_unranked = allow_unranked;
 		params.allow_join_minigames = allow_join_minigames;
 
-		final var res = this.requestJson("/api/privileged/punish", "POST", this.gson.toJson(params));
+		final var res = this.requestJson("/api/core/punish", "POST", this.gson.toJson(params));
 
 		if (res.status != 200)
 			return Optional.empty();
@@ -145,7 +147,7 @@ public final class API {
 	}
 
 	public Optional<RawGroupsData> getGroupsData() throws IOException, InterruptedException {
-		final var res = this.getJson("/api/privileged/get_groups");
+		final var res = this.getJson("/api/core/get_groups");
 
 		if (res.status != 200)
 			return Optional.empty();
@@ -154,7 +156,7 @@ public final class API {
 	}
 
 	public Optional<RawGroup> getGroup(String name) throws IOException, InterruptedException {
-		final var res = this.getJson("/api/privileged/get_groups?name=" +  name);
+		final var res = this.getJson("/api/core/get_groups?name=" +  name);
 
 		if (res.status != 200)
 			return Optional.empty();
@@ -163,7 +165,7 @@ public final class API {
 	}
 
 	public Result<Void, String> setDefaultGroup(String name) throws IOException, InterruptedException {
-		final var res = this.requestJson("/api/privileged/set_group_default", "PUT", this.gson.toJson(new SimpleName(name)));
+		final var res = this.requestJson("/api/core/set_group_default", "PUT", this.gson.toJson(new SimpleName(name)));
 
 		if (res.status != 200) {
 			final var err = gson.fromJson(res.json, BackendError.class);
@@ -175,7 +177,7 @@ public final class API {
 
 	public Result<Void, String> setGroupToUser(String group, UUID uuid) throws IOException, InterruptedException {
 		final var data = new UserGroup(uuid, group);
-		final var res = this.requestJson("/api/privileged/set_user_group", "PUT", this.gson.toJson(data));
+		final var res = this.requestJson("/api/core/set_user_group", "PUT", this.gson.toJson(data));
 
 		if (res.status != 200) {
 			final var err = gson.fromJson(res.json, BackendError.class);
@@ -187,7 +189,7 @@ public final class API {
 
 	public Result<Void, String> setGroupToUserByName(String group, String username) throws IOException, InterruptedException {
 		final var data = new UserGroupByName(username, group);
-		final var res = this.requestJson("/api/privileged/set_user_group", "PUT", this.gson.toJson(data));
+		final var res = this.requestJson("/api/core/set_user_group", "PUT", this.gson.toJson(data));
 
 		if (res.status != 200) {
 			final var err = gson.fromJson(res.json, BackendError.class);
@@ -197,11 +199,44 @@ public final class API {
 		return Result.ok(null);
 	}
 
-	private static final class Response {
+	public Result<Void, String> updateGroup(Group group) throws IOException, InterruptedException {
+		final var res = this.requestJson("/api/core/update_group", "POST", gson.toJson(RawGroup.fromGroup(group)));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+
+		return Result.ok(null);
+	}
+
+	public Result<Void, String> removePermsAndupdateGroup(Group group) throws IOException, InterruptedException {
+		final var res = this.requestJson("/api/core/delete_perms_and_update_group", "PUT", gson.toJson(RawGroup.fromGroup(group)));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+
+		return Result.ok(null);
+	}
+
+	public Result<Void, String> addPermToGroup(String name, Permission perm) throws IOException, InterruptedException {
+		final var res = this.requestJson("/api/core/add_perm_to_group", "PUT", gson.toJson(new GroupPermission(name, perm)));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+
+		return Result.ok(null);
+	}
+
+	public static final class Response {
 		public final String json;
 		public final int status;
 
-		public Response(String json, int status) {
+		Response(String json, int status) {
 			this.json = json;
 			this.status = status;
 		}

@@ -90,6 +90,16 @@ public final class Protocol {
 
 			return new Group(name, prefix, suffix, permissions);
 		}
+
+		public static RawGroup fromGroup(final Group group) {
+			final var n = new RawGroup();
+			n.name = group.getName();
+			n.prefix = group.getPrefix();
+			n.suffix = group.getSuffix();
+			n.perms = group.getPermissions().values().toArray(g -> new Permission[g]);
+
+			return n;
+		}
 	}
 
 	public static final class RawGroupsData {
@@ -166,4 +176,5 @@ public final class Protocol {
 	public static final record UserGroupByName(String username, String group) {}
 	public static final record UuidPair(UUID sender, UUID receiver) {}
 	public static final record BackendError(boolean ok, String error) {}
+	public static final record GroupPermission(String group_name, Permission permission) {}
 }

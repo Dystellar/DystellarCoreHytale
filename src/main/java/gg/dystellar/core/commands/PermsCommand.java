@@ -123,4 +123,19 @@ public final class PermsCommand extends AbstractCommandCollection {
 				ctx.sender().sendMessage(Message.join(Message.raw(" - "), Message.raw(group).color(Color.GREEN)));
 		}
 	}
+
+	private static final class CopyPermsCommand extends CommandBase {
+		private final RequiredArg<String> sourceArg = this.withRequiredArg("source", "Source group", ArgTypes.STRING);
+		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "Target group", ArgTypes.STRING);
+
+		CopyPermsCommand() {
+			super("copyperms", "Delete all permissions on target, and set all permissions from source");
+			this.requirePermission("dystellar.admin");
+		}
+
+		@Override
+		protected void executeSync(CommandContext ctx) {
+		    
+		}
+	}
 }
