@@ -210,7 +210,7 @@ public final class API {
 		return Result.ok(null);
 	}
 
-	public Result<Void, String> removePermsAndupdateGroup(Group group) throws IOException, InterruptedException {
+	public Result<Void, String> removePermsAndUpdateGroup(Group group) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/delete_perms_and_update_group", "PUT", gson.toJson(RawGroup.fromGroup(group)));
 
 		if (res.status != 200) {

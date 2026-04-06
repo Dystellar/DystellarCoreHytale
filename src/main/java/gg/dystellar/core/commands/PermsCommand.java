@@ -135,7 +135,35 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void executeSync(CommandContext ctx) {
-		    
+		    final var sourceName = ctx.get(sourceArg);
+		    final var targetName = ctx.get(targetArg);
+			final var source = Group.getGroup(sourceName);
+			final var target = Group.getGroup(targetName);
+
+			if (source.isEmpty() || target.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("Make sure that both groups introduced exist").color(Color.RED));
+				return;
+			}
+
+			ctx.sender().sendMessage(Message.raw("Preparing operation...").color(Color.GREEN));
+			ctx.sender().sendMessage(Message.raw("Purging all permissions in " + targetName + "...").color(Color.GREEN));
+			target.get().getPermissions().clear();
+			ctx.sender().sendMessage(Message.raw("Applying all permissions from" + sourceName + "...").color(Color.GREEN));
+			target.get().getPermissions().putAll(source.get().getPermissions());
+			HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+				ctx.sender().sendMessage(Message.raw("Syncing...").color(Color.YELLOW));
+				try {
+					DystellarCore.getApi().removePermsAndUpdateGroup(target.get())
+						.ifOk(_ -> {
+							ctx.sender().sendMessage(Message.raw("Syncing with other servers...").color(Color.GREEN));
+							Utils.sendPropagatedOutputStream(Subchannel.GROUP_UPDATE, 30, out -> out.writePrefixedUTF8(targetName));
+							ctx.sender().sendMessage(Message.raw("Operation complete!").color(Color.GREEN));
+						}).ifErr(s -> ctx.sender().sendMessage(Message.raw("Operation failed: " + s).color(Color.RED)));
+				} catch (Exception e) {
+					e.printStackTrace();
+					ctx.sender().sendMessage(Message.raw("Internal error: " + e.getMessage()).color(Color.RED));
+				}
+			});
 		}
 	}
 }
