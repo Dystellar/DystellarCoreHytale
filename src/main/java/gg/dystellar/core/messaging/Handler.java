@@ -1,5 +1,7 @@
 package gg.dystellar.core.messaging;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -154,6 +156,17 @@ public class Handler {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void handleGroupCreate(String source, ByteBufferInputStream in) {
+		final var name = in.readPrefixedUTF8();
+
+		if (Group.getGroup(name).isPresent()) {
+			DystellarCore.getLog().atWarning().log("Received a group create for a group " + name + " that already exists");
+			return;
+		}
+
+		Group.registerGroup(new Group(name, "", "", List.of()));
 	}
 
 	public static void handleInboxManagerUpdate() {}

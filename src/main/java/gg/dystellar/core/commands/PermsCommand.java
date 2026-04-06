@@ -1,6 +1,7 @@
 package gg.dystellar.core.commands;
 
 import java.awt.Color;
+import java.util.List;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
@@ -233,7 +234,33 @@ public final class PermsCommand extends AbstractCommandCollection {
 		}
 
 		@Override
-		protected void executeSync(CommandContext ctx) {}
+		protected void executeSync(CommandContext ctx) {
+			final var groupName = ctx.get(nameArg);
+			if (Group.getGroup(groupName).isPresent()) {
+				ctx.sender().sendMessage(Message.raw("The group " + groupName + " already exists!").color(Color.RED));
+				return;
+			}
+
+
+			ctx.sender().sendMessage(Message.raw("Creating group...").color(Color.YELLOW));
+			final var newGroup = new Group(groupName, "", "", List.of());
+			Group.registerGroup(newGroup);
+
+			HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+				ctx.sender().sendMessage(Message.raw("Syncing...").color(Color.YELLOW));
+				try {
+					DystellarCore.getApi().updateGroup(newGroup)
+						.ifOk(_ -> {
+							ctx.sender().sendMessage(Message.raw("Syncing with other servers...").color(Color.GREEN));
+							Utils.sendPropagatedOutputStream(Subchannel.GROUP_CREATE, 30, out -> out.writePrefixedUTF8(groupName));
+							ctx.sender().sendMessage(Message.raw("Group created!").color(Color.GREEN));						
+						}).ifErr(s -> ctx.sender().sendMessage(Message.raw("Failed: " + s).color(Color.RED)));
+				} catch (Exception e) {
+					e.printStackTrace();
+					ctx.sender().sendMessage(Message.raw("Internal error: " + e.getMessage()).color(Color.RED));
+				}
+			});
+		}
 	}
 
 	private static final class DeleteCommand extends CommandBase {
@@ -250,6 +277,22 @@ public final class PermsCommand extends AbstractCommandCollection {
 				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
 				return;
 			}
+
+			// TODO
+			HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+				ctx.sender().sendMessage(Message.raw("Syncing...").color(Color.YELLOW));
+				try {
+					DystellarCore.getApi().updateGroup(newGroup)
+						.ifOk(_ -> {
+							ctx.sender().sendMessage(Message.raw("Syncing with other servers...").color(Color.GREEN));
+							Utils.sendPropagatedOutputStream(Subchannel.GROUP_CREATE, 30, out -> out.writePrefixedUTF8(groupName));
+							ctx.sender().sendMessage(Message.raw("Group created!").color(Color.GREEN));						
+						}).ifErr(s -> ctx.sender().sendMessage(Message.raw("Failed: " + s).color(Color.RED)));
+				} catch (Exception e) {
+					e.printStackTrace();
+					ctx.sender().sendMessage(Message.raw("Internal error: " + e.getMessage()).color(Color.RED));
+				}
+			});
 		}
 	}
 
