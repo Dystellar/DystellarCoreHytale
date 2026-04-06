@@ -28,6 +28,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 		this.addSubCommand(new SetDefaultCommand());
 		this.addSubCommand(new SetGroupCommand());
 		this.addSubCommand(new ListGroupsCommand());
+		this.addSubCommand(new CopyPermsCommand());
+		this.addSubCommand(new SetAllCommand());
 	}
 
 	private static final class SetDefaultCommand extends CommandBase {
@@ -154,6 +156,47 @@ public final class PermsCommand extends AbstractCommandCollection {
 				ctx.sender().sendMessage(Message.raw("Syncing...").color(Color.YELLOW));
 				try {
 					DystellarCore.getApi().removePermsAndUpdateGroup(target.get())
+						.ifOk(_ -> {
+							ctx.sender().sendMessage(Message.raw("Syncing with other servers...").color(Color.GREEN));
+							Utils.sendPropagatedOutputStream(Subchannel.GROUP_UPDATE, 30, out -> out.writePrefixedUTF8(targetName));
+							ctx.sender().sendMessage(Message.raw("Operation complete!").color(Color.GREEN));
+						}).ifErr(s -> ctx.sender().sendMessage(Message.raw("Operation failed: " + s).color(Color.RED)));
+				} catch (Exception e) {
+					e.printStackTrace();
+					ctx.sender().sendMessage(Message.raw("Internal error: " + e.getMessage()).color(Color.RED));
+				}
+			});
+		}
+	}
+
+	private static final class SetAllCommand extends CommandBase {
+		private final RequiredArg<String> sourceArg = this.withRequiredArg("source", "Source group", ArgTypes.STRING);
+		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "Target group", ArgTypes.STRING);
+
+		SetAllCommand() {
+			super("setall", "Set all permissions from source");
+			this.requirePermission("dystellar.admin");
+		}
+
+		@Override
+		protected void executeSync(CommandContext ctx) {
+		    final var sourceName = ctx.get(sourceArg);
+		    final var targetName = ctx.get(targetArg);
+			final var source = Group.getGroup(sourceName);
+			final var target = Group.getGroup(targetName);
+
+			if (source.isEmpty() || target.isEmpty()) {
+				ctx.sender().sendMessage(Message.raw("Make sure that both groups introduced exist").color(Color.RED));
+				return;
+			}
+
+			ctx.sender().sendMessage(Message.raw("Preparing operation...").color(Color.GREEN));
+			ctx.sender().sendMessage(Message.raw("Applying all permissions from" + sourceName + "...").color(Color.GREEN));
+			target.get().getPermissions().putAll(source.get().getPermissions());
+			HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+				ctx.sender().sendMessage(Message.raw("Syncing...").color(Color.YELLOW));
+				try {
+					DystellarCore.getApi().updateGroup(target.get())
 						.ifOk(_ -> {
 							ctx.sender().sendMessage(Message.raw("Syncing with other servers...").color(Color.GREEN));
 							Utils.sendPropagatedOutputStream(Subchannel.GROUP_UPDATE, 30, out -> out.writePrefixedUTF8(targetName));
