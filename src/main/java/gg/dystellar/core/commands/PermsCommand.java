@@ -26,6 +26,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		this.addAliases("p");
 		this.addSubCommand(new SetDefaultCommand());
+		this.addSubCommand(new GroupCommand());
 		this.addSubCommand(new SetGroupCommand());
 		this.addSubCommand(new ListGroupsCommand());
 		this.addSubCommand(new CopyPermsCommand());
@@ -207,6 +208,78 @@ public final class PermsCommand extends AbstractCommandCollection {
 					ctx.sender().sendMessage(Message.raw("Internal error: " + e.getMessage()).color(Color.RED));
 				}
 			});
+		}
+	}
+
+	private static final class GroupCommand extends AbstractCommandCollection {
+		GroupCommand() {
+			super("group", "Group management command");
+
+			this.addSubCommand(new CreateCommand());
+			this.addSubCommand(new DeleteCommand());
+			this.addSubCommand(new ListPermsCommand());
+			this.addSubCommand(new SetPermCommand());
+			this.addSubCommand(new UnsetPermCommand());
+			this.addSubCommand(new SetPrefixCommand());
+			this.addSubCommand(new SetSuffixCommand());
+		}
+	}
+
+	private static final class CreateCommand extends CommandBase {
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+
+		public CreateCommand() {
+			super("create", "Create group");
+		}
+	}
+
+	private static final class DeleteCommand extends CommandBase {
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+
+		public DeleteCommand() {
+			super("delete", "Delete group");
+		}
+	}
+
+	private static final class ListPermsCommand extends CommandBase {
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+
+		public ListPermsCommand() {
+			super("listperms", "List permissions for a group");
+		}
+	}
+
+	private static final class SetPermCommand extends CommandBase {
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+
+		public SetPermCommand() {
+			super("setperm", "Set permission to group");
+		}
+	}
+
+	private static final class UnsetPermCommand extends CommandBase {
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+
+		public UnsetPermCommand() {
+			super("unsetperm", "Remove permission node");
+		}
+	}
+
+	private static final class SetPrefixCommand extends CommandBase {
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> prefixArg = this.withRequiredArg("prefix", "Group's new prefix", ArgTypes.STRING);
+
+		public SetPrefixCommand() {
+			super("setprefix", "Set group prefix");
+		}
+	}
+
+	private static final class SetSuffixCommand extends CommandBase {
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> suffixArg = this.withRequiredArg("suffix", "Group's new suffix", ArgTypes.STRING);
+
+		public SetSuffixCommand() {
+			super("setsuffix", "Set group suffix");
 		}
 	}
 }
