@@ -177,4 +177,5 @@ public final class Protocol {
 	public static final record UuidPair(UUID sender, UUID receiver) {}
 	public static final record BackendError(boolean ok, String error) {}
 	public static final record GroupPermission(String group_name, Permission permission) {}
+	public static final record GroupPermissionName(String group_name, String permission) {}
 }

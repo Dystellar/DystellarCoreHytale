@@ -232,6 +232,17 @@ public final class API {
 		return Result.ok(null);
 	}
 
+	public Result<Void, String> removePermFromGroup(String name, String perm) throws IOException, InterruptedException {
+		final var res = this.requestJson("/api/core/add_perm_to_group", "DELETE", gson.toJson(new GroupPermissionName(name, perm)));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+
+		return Result.ok(null);
+	}
+
 	public Result<Void, String> deleteGroup(String name) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/delete_group", "DELETE", gson.toJson(new SimpleName(name)));
 
