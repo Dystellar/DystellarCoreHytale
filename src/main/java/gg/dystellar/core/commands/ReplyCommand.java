@@ -1,68 +1,74 @@
 package gg.dystellar.core.commands;
 
-import net.zylesh.dystellarcore.DystellarCore;
-import net.zylesh.dystellarcore.core.Msgs;
-import net.zylesh.dystellarcore.core.User;
-import net.zylesh.dystellarcore.utils.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+import gg.dystellar.core.DystellarCore;
+import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.utils.Utils;
 
 /**
  * Command to reply to the latest player that sent you a message.
  * Should be implemented in the proxy the same as msg command, not here.
  */
-public class ReplyCommand implements CommandExecutor {
+public class ReplyCommand extends AbstractPlayerCommand {
+	private final RequiredArg<String> messageArg = this.withRequiredArg("message", "Message to send", ArgTypes.STRING);
 
     public ReplyCommand() {
-        Bukkit.getPluginCommand("reply").setExecutor(this);
-        Bukkit.getPluginCommand("r").setExecutor(this);
+		super("reply", "Reply to a previously messaged user");
+		this.addAliases("r");
+		this.requirePermission("dystellar.message");
     }
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (commandSender instanceof Player) {
-            Player player = (Player) commandSender;
-            User playerUser = User.get(player);
-            if (playerUser.getPrivateMessagesMode() == User.PMS_DISABLED) {
-                player.sendMessage(Msgs.CANT_SEND_PMS_DISABLED);
-                return true;
-            }
-            if (strings.length - 1 >= 0) {
-                if (playerUser.getLastMessagedPlayer() != null) {
-                    Player lastMessaged = Bukkit.getPlayer(playerUser.getLastMessagedPlayer().getUUID());
-                    if (lastMessaged != null) {
-                        if (playerUser.getLastMessagedPlayer().getIgnoreList().contains(player.getUniqueId())) {
-                            player.sendMessage(Msgs.PLAYER_HAS_BLOCKED_YOU);
-                            return true;
-                        }
-                        StringBuilder message = new StringBuilder();
-                        for (String string : strings) {
-                            message.append(string).append(" ");
-                        }
-                        player.sendMessage(DystellarCore.MSG_SEND_FORMAT
-                                .replace("-sender", player.getPlayerListName())
-                                .replace("-receiver", lastMessaged.getPlayerListName())
-                                .replace("-message", message.toString()));
-                        lastMessaged.sendMessage(DystellarCore.MSG_RECEIVE_FORMAT
-                                .replace("-sender", player.getPlayerListName())
-                                .replace("-receiver", lastMessaged.getPlayerListName())
-                                .replace("-message", message.toString()));
-                    } else {
-                        player.sendMessage(Msgs.ERROR_PLAYER_NOT_ONLINE);
-                    }
-                } else {
-                    player.sendMessage(Msgs.ERROR_NO_REPLY_CACHE);
-                }
-            } else {
-                player.sendMessage(ChatColor.RED + "Usage: /r <message>");
-            }
-        } else {
-            commandSender.sendMessage(Msgs.ERROR_NOT_A_PLAYER);
-        }
-        return true;
-    }
+	@Override
+	protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
+		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		final var target = user.lastMessagedPlayer;
+		final var lang = DystellarCore.getInstance().getLang(user.language);
+
+		if (target == null || !target.isValid()) {
+			p.sendMessage(lang.errorNoReplyCache.buildMessage());
+			return;
+		}
+
+		if (user.privateMessagesMode == UserComponent.PMS_DISABLED ||
+			(user.privateMessagesMode == UserComponent.PMS_ENABLED_FRIENDS_ONLY &&
+				Utils.find(user.friends, map -> map.name().equalsIgnoreCase(target.getUsername())).isEmpty())
+		) {
+			p.sendMessage(lang.cantSendPmsDisabled.buildMessage());
+			return;
+		}
+
+		final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+		if (targetUser.privateMessagesMode == UserComponent.PMS_DISABLED ||
+			(targetUser.privateMessagesMode == UserComponent.PMS_ENABLED_FRIENDS_ONLY &&
+				Utils.find(targetUser.friends, map -> map.uuid().equals(p.getUuid())).isEmpty())
+		) {
+			p.sendMessage(lang.errorPlayerHasPmsDisabled.buildMessage());
+			return;
+		}
+
+		if (Utils.find(targetUser.ignoreList, map -> map.uuid().equals(p.getUuid())).isPresent()) {
+			p.sendMessage(lang.errorYouAreBlocked.buildMessage());
+			return;
+		}
+
+		if (targetUser.isInRanked && targetUser.dnd) {
+			p.sendMessage(lang.playerInDndMode.buildMessage().param("player", target.getUsername()));
+			return;
+		}
+
+		final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
+		final var message = ctx.get(messageArg);
+		target.sendMessage(targetLang.msgReceiveFormat.buildMessage().param("sender", p.getUsername()).param("message", message));
+		p.sendMessage(lang.msgSendFormat.buildMessage().param("receiver", target.getUsername()).param("message", message));
+	}
 }
