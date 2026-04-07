@@ -81,7 +81,6 @@ public final class DystellarCore extends JavaPlugin {
 		// Commands start
 		new SetSpawnCommand();
 		new ReplyCommand();
-		new PunishmentsCommand();
 		new ToggleChatCommand(); new TogglePrivateMessagesCommand();
 		new FriendCommand(); new SuffixCommand();
 		new UnpunishCommand();
@@ -113,6 +112,7 @@ public final class DystellarCore extends JavaPlugin {
 		this.getCommandRegistry().registerCommand(new NoteCommand());
 		this.getCommandRegistry().registerCommand(new NotesCommand());
 		this.getCommandRegistry().registerCommand(new PermsCommand());
+		this.getCommandRegistry().registerCommand(new PunishmentsCommand());
 
 		// Register provider
 		PermissionsModule.get().addProvider(new CustomPermProvider());
