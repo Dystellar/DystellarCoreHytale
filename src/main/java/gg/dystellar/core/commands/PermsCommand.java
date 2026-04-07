@@ -18,6 +18,7 @@ import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
 import gg.dystellar.core.messaging.Subchannel;
 import gg.dystellar.core.perms.Group;
+import gg.dystellar.core.perms.Permission;
 import gg.dystellar.core.utils.Utils;
 
 public final class PermsCommand extends AbstractCommandCollection {
@@ -338,6 +339,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 	private static final class SetPermCommand extends CommandBase {
 		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> permArg = this.withRequiredArg("[!]permission", "Permission to set", ArgTypes.STRING);
 
 		public SetPermCommand() {
 			super("setperm", "Set permission to group");
@@ -351,6 +353,36 @@ public final class PermsCommand extends AbstractCommandCollection {
 				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
 				return;
 			}
+
+			var perm = ctx.get(permArg);
+			var value = true;
+			if (!perm.matches("^!?(\\w+\\.)+\\w+$")) {
+				ctx.sender().sendMessage(Message.raw("Wrong permission node " + perm + ", regex is ^!?(\\w+\\.)+\\w+$").color(Color.RED));
+				return;
+			}
+
+			if (perm.startsWith("!")) {
+				perm = perm.substring(1);
+				value = false;
+			}
+
+			final var node = new Permission(perm, value);
+			group.get().getPermissions().put(perm, node);
+			HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+				ctx.sender().sendMessage(Message.raw("Syncing...").color(Color.YELLOW));
+				try {
+					DystellarCore.getApi().addPermToGroup(groupName, node)
+						.ifOk(_ -> {
+							ctx.sender().sendMessage(Message.raw("Syncing with other servers...").color(Color.GREEN));
+							Utils.sendPropagatedOutputStream(Subchannel.GROUP_UPDATE, 30, out -> out.writePrefixedUTF8(groupName));
+							ctx.sender().sendMessage(Message.raw("Permission added!").color(Color.GREEN));
+						})
+						.ifErr(s -> ctx.sender().sendMessage(Message.raw("Failed: " + s).color(Color.RED)));
+				} catch (Exception e) {
+					e.printStackTrace();
+					ctx.sender().sendMessage(Message.raw("Internal error: " + e.getMessage()).color(Color.RED));
+				}
+			});
 		}
 	}
 
