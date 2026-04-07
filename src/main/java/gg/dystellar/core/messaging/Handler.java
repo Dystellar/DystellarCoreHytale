@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.Options;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.DystellarCore;
@@ -167,6 +168,28 @@ public class Handler {
 		}
 
 		Group.registerGroup(new Group(name, "", "", List.of()));
+	}
+
+	public static void handleGroupDelete(String source, ByteBufferInputStream in) {
+		final var groupName = in.readPrefixedUTF8();
+		final var group = Group.getGroup(groupName);
+		if (group.isEmpty()) {
+			DystellarCore.getLog().atWarning().log("Received a group update for a group " + groupName + " that doesn't exist");
+			return;
+		}
+
+		Group.groups.remove(groupName);
+		if (Group.getDefaultGroup().isPresent() && Group.getDefaultGroup().get().getName().equals(groupName))
+			Group.setDefaultGroup(null);
+		else {
+			for (PlayerRef p : Universe.get().getPlayers()) {
+				final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+				if (!p.isValid() || user == null) continue;
+
+				if (user.group.isPresent() && user.group.get().getName().equals("groupName"))
+					user.group = Group.getDefaultGroup();
+			}
+		}
 	}
 
 	public static void handleInboxManagerUpdate() {}

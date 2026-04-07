@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredAr
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.DystellarCore;
@@ -215,6 +216,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 	private static final class GroupCommand extends AbstractCommandCollection {
 		GroupCommand() {
 			super("group", "Group management command");
+			this.requirePermission("dystellar.admin");
 
 			this.addSubCommand(new CreateCommand());
 			this.addSubCommand(new DeleteCommand());
@@ -231,6 +233,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public CreateCommand() {
 			super("create", "Create group");
+			this.requirePermission("dystellar.admin");
 		}
 
 		@Override
@@ -268,6 +271,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public DeleteCommand() {
 			super("delete", "Delete group");
+			this.requirePermission("dystellar.admin");
 		}
 
 		protected void executeSync(CommandContext ctx) {
@@ -278,15 +282,27 @@ public final class PermsCommand extends AbstractCommandCollection {
 				return;
 			}
 
-			// TODO
+			Group.groups.remove(groupName);
+			if (Group.getDefaultGroup().isPresent() && Group.getDefaultGroup().get().getName().equals(groupName))
+				Group.setDefaultGroup(null);
+			else {
+				for (PlayerRef p : Universe.get().getPlayers()) {
+					final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+					if (!p.isValid() || user == null) continue;
+
+					if (user.group.isPresent() && user.group.get().getName().equals("groupName"))
+						user.group = Group.getDefaultGroup();
+				}
+			}
+
 			HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
 				ctx.sender().sendMessage(Message.raw("Syncing...").color(Color.YELLOW));
 				try {
-					DystellarCore.getApi().updateGroup(newGroup)
+					DystellarCore.getApi().deleteGroup(groupName)
 						.ifOk(_ -> {
 							ctx.sender().sendMessage(Message.raw("Syncing with other servers...").color(Color.GREEN));
-							Utils.sendPropagatedOutputStream(Subchannel.GROUP_CREATE, 30, out -> out.writePrefixedUTF8(groupName));
-							ctx.sender().sendMessage(Message.raw("Group created!").color(Color.GREEN));						
+							Utils.sendPropagatedOutputStream(Subchannel.GROUP_DELETE, 30, out -> out.writePrefixedUTF8(groupName));
+							ctx.sender().sendMessage(Message.raw("Group deleted!").color(Color.GREEN));						
 						}).ifErr(s -> ctx.sender().sendMessage(Message.raw("Failed: " + s).color(Color.RED)));
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -301,6 +317,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public ListPermsCommand() {
 			super("listperms", "List permissions for a group");
+			this.requirePermission("dystellar.admin");
 		}
 
 		protected void executeSync(CommandContext ctx) {
@@ -310,6 +327,12 @@ public final class PermsCommand extends AbstractCommandCollection {
 				ctx.sender().sendMessage(Message.raw("The group " + groupName + " doesn't exist").color(Color.RED));
 				return;
 			}
+
+			ctx.sender().sendMessage(Message.join(Message.raw(groupName).color(Color.CYAN), Message.raw("'s Permissions:").color(Color.BLUE)));
+			for (final var perm : group.get().getPermissions().values()) {
+				final var message = perm.get() ? Message.raw(perm.getPerm()).color(Color.GREEN) : Message.raw(perm.getPerm()).color(Color.RED);
+				ctx.sender().sendMessage(message);
+			}
 		}
 	}
 
@@ -318,6 +341,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public SetPermCommand() {
 			super("setperm", "Set permission to group");
+			this.requirePermission("dystellar.admin");
 		}
 
 		protected void executeSync(CommandContext ctx) {
@@ -335,6 +359,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public UnsetPermCommand() {
 			super("unsetperm", "Remove permission node");
+			this.requirePermission("dystellar.admin");
 		}
 
 		protected void executeSync(CommandContext ctx) {
@@ -353,6 +378,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public SetPrefixCommand() {
 			super("setprefix", "Set group prefix");
+			this.requirePermission("dystellar.admin");
 		}
 
 		protected void executeSync(CommandContext ctx) {
@@ -371,6 +397,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 		public SetSuffixCommand() {
 			super("setsuffix", "Set group suffix");
+			this.requirePermission("dystellar.admin");
 		}
 
 		protected void executeSync(CommandContext ctx) {
