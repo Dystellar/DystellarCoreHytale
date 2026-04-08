@@ -4,7 +4,6 @@ package gg.dystellar.core.config;
  * Plugin base configuration
  */
 public class Setup {
-
 	public boolean debug_mode = false;
 	public String server_name = "lobby";
 	public boolean scoreboard = false;

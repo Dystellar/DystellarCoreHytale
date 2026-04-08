@@ -33,6 +33,7 @@ public class PunishmentsCommand extends AbstractTargetPlayerCommand {
 		p.sendMessage(Message.raw(p.getUsername() + "'s Punishments:").color(Color.YELLOW));
 		for (final var pun : user.punishments) {
 			p.sendMessage(Message.raw("---------------------------"));
+			p.sendMessage(Message.join(Message.raw("ID").color(DARK_AQUA), Message.raw(": " + pun.getId()).color(Color.WHITE)));
 			p.sendMessage(Message.join(Message.raw("Type").color(DARK_AQUA), Message.raw(": " + pun.getType()).color(Color.WHITE)));
 			p.sendMessage(Message.join(Message.raw("Creation Date").color(DARK_AQUA), Message.raw(": " + pun.getCreationDate().format(DateTimeFormatter.BASIC_ISO_DATE)).color(Color.WHITE)));
 			p.sendMessage(Message.join(Message.raw("Expiration Date").color(DARK_AQUA), Message.raw(": " + pun.getExpirationDate().map(d -> d.format(DateTimeFormatter.BASIC_ISO_DATE)).orElse("Never")).color(Color.WHITE)));
