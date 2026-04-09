@@ -1,7 +1,6 @@
 package gg.dystellar.core.commands;
 
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
@@ -43,7 +42,7 @@ public class BroadcastCommand extends CommandBase {
 			lang = DystellarCore.getInstance().getLang(user.language);
 		} else lang = DystellarCore.getInstance().getLang("en");
 
-		final var msg = Message.join(lang.broadcastFormat).param("message", message);
+		final var msg = lang.broadcastFormat.buildMessage().param("message", message);
 		Universe.get().getPlayers().forEach(p -> p.sendMessage(msg));
 	}
 }

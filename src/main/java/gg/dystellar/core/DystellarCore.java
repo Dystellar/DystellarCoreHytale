@@ -17,11 +17,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.Universe;
 
-import gg.dystellar.core.utils.Hooks;
-import gg.dystellar.core.common.PacketListener;
-import gg.dystellar.core.common.Suffix;
 import gg.dystellar.core.common.UserComponent;
-import gg.dystellar.core.common.inbox.Inbox;
 import gg.dystellar.core.config.Messages;
 import gg.dystellar.core.config.Setup;
 import gg.dystellar.core.listeners.*;
@@ -67,23 +63,10 @@ public final class DystellarCore extends JavaPlugin {
 	public DystellarCore(JavaPluginInit init) {
 		super(init);
 		INSTANCE = this;
-		Hooks.registerHooks();
 		loadConfig();
 
 		if (config.get().automated_messages)
 			startAutomatedMessages();
-
-		// Listeners start
-		new Inbox.SenderListener();
-		new PacketListener();
-		// Listeners end
-
-		// Commands start
-		new SetSpawnCommand();
-		new ReplyCommand();
-		new ToggleChatCommand(); new TogglePrivateMessagesCommand();
-		new FriendCommand(); new SuffixCommand();
-		new UnpunishCommand();
 	}
 
 	/**
@@ -113,6 +96,12 @@ public final class DystellarCore extends JavaPlugin {
 		this.getCommandRegistry().registerCommand(new NotesCommand());
 		this.getCommandRegistry().registerCommand(new PermsCommand());
 		this.getCommandRegistry().registerCommand(new PunishmentsCommand());
+		this.getCommandRegistry().registerCommand(new UnpunishCommand());
+		this.getCommandRegistry().registerCommand(new FriendCommand());
+		this.getCommandRegistry().registerCommand(new SuffixCommand());
+		this.getCommandRegistry().registerCommand(new ToggleChatCommand());
+		this.getCommandRegistry().registerCommand(new TogglePrivateMessagesCommand());
+		this.getCommandRegistry().registerCommand(new ReplyCommand());
 
 		// Register provider
 		PermissionsModule.get().addProvider(new CustomPermProvider());
@@ -168,7 +157,6 @@ public final class DystellarCore extends JavaPlugin {
 
 	private void initialize() {
 		UserComponent.init(this);
-		Suffix.initialize();
 	}
 
 	private void startAutomatedMessages() {

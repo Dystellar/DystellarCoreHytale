@@ -178,4 +178,5 @@ public final class Protocol {
 	public static final record BackendError(boolean ok, String error) {}
 	public static final record GroupPermission(String group_name, Permission permission) {}
 	public static final record GroupPermissionName(String group_name, String permission) {}
+	public static final record UnpunishData(String username, long punishment_id) {}
 }

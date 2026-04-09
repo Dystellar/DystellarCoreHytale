@@ -1,7 +1,10 @@
 package gg.dystellar.core.commands;
 
 import java.awt.Color;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
@@ -10,7 +13,9 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.universe.Universe;
 
+import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.messaging.Subchannel;
 import gg.dystellar.core.utils.Utils;
 
 /**
@@ -33,12 +38,27 @@ public class UnpunishCommand extends CommandBase {
 
 		if (p != null && p.isValid()) {
 			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
-			if (Utils.removeFirst(user.punishments, pun -> pun.getId() == id).isPresent())
-				ctx.sender().sendMessage(Message.raw("Punishment removed!").color(Color.GREEN));
-			else
-				ctx.sender().sendMessage(Message.raw("No such punishment exists with the provided id").color(Color.RED));
+			final var punishment = Utils.find(user.punishments, pun -> pun.getId() == id);
+			if (punishment.isPresent()) {
+				punishment.get().setExpirationDate(LocalDateTime.now(ZoneId.of("UTC")));
+				ctx.sender().sendMessage(Message.raw("Punishment set to expired!").color(Color.GREEN));
+			} else ctx.sender().sendMessage(Message.raw("No such punishment exists with the provided id").color(Color.RED));
 		} else {
-			// TODO
+			ctx.sender().sendMessage(Message.raw("Syncing...").color(Color.YELLOW));
+			Utils.sendPropagatedOutputStream(Subchannel.UNPUNISH, 38, out -> {
+				out.writePrefixedUTF8(name);
+				out.writeLong(id);
+			});
+			HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
+				try {
+					DystellarCore.getApi().unpunish(name, id)
+						.ifOk(_ -> ctx.sender().sendMessage(Message.raw("Punishment set to expired!").color(Color.GREEN)))
+						.ifErr(s -> ctx.sender().sendMessage(Message.raw("Failed: " + s).color(Color.RED)));
+				} catch (Exception e) {
+					e.printStackTrace();
+					ctx.sender().sendMessage(Message.raw("Exception thrown: " + e.getMessage()).color(Color.RED));
+				}
+			});
 		}
 	}
 }

@@ -16,7 +16,6 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.inbox.Inbox;
 import gg.dystellar.core.common.punishments.Punishment;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
@@ -47,7 +46,6 @@ public class UserComponent implements Component<EntityStore> {
 	public final String ip;
 	public Optional<String> email = Optional.empty();
     public final String name;
-    public final Inbox inbox;
     public final List<String> notes = new ArrayList<>();
     public long coins = 0;
     public boolean globalChatEnabled = true;
@@ -69,7 +67,6 @@ public class UserComponent implements Component<EntityStore> {
         this.uuid = id;
         this.ip = ip;
         this.name = name;
-		this.inbox = new Inbox(this);
     }
 
 	public void init(PlayerRef player) {

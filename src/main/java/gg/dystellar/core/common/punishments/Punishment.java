@@ -43,4 +43,5 @@ public final class Punishment {
     public String getReason() { return reason; }
     public LocalDateTime getCreationDate() { return creationDate; }
     public Optional<LocalDateTime> getExpirationDate() { return Optional.ofNullable(expirationDate); }
+    public void setExpirationDate(@Nullable LocalDateTime date) { this.expirationDate = date; }
 }

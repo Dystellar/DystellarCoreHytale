@@ -1,12 +1,11 @@
 package gg.dystellar.core.serialization;
 
-import java.util.Map;
-
 /**
  * Efficient inventory serialization, works like a charm, should be ported to hytale.
  */
 public class InventorySerialization {
 
+	/* TODO:
     public static String inventoryToString(ItemStack[] invInventory) {
         StringBuilder serialization = new StringBuilder(invInventory.length + ";");
         for (int i = 0; i < invInventory.length; i++) {
@@ -90,4 +89,5 @@ public class InventorySerialization {
         }
         return is;
     }
+	*/
 }

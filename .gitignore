@@ -6,3 +6,4 @@ target/
 *.iml
 .project
 bin/
+container_data/

@@ -146,6 +146,17 @@ public final class API {
 		return Optional.of(gson.fromJson(res.json, RawPunishment.class).toPunishment());
 	}
 
+	public Result<Void, String> unpunish(String username, long punishmentId) throws IOException, InterruptedException {
+		final var res = this.requestJson("/api/core/unpunish", "PUT", gson.toJson(new UnpunishData(username, punishmentId)));
+
+		if (res.status != 200) {
+			final var err = gson.fromJson(res.json, BackendError.class);
+			return Result.err(err.error());
+		}
+
+		return Result.ok(null);
+	}
+
 	public Optional<RawGroupsData> getGroupsData() throws IOException, InterruptedException {
 		final var res = this.getJson("/api/core/get_groups");
 

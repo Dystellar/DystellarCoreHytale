@@ -1,5 +1,7 @@
 package gg.dystellar.core.messaging;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -189,6 +191,20 @@ public class Handler {
 				if (user.group.isPresent() && user.group.get().getName().equals("groupName"))
 					user.group = Group.getDefaultGroup();
 			}
+		}
+	}
+
+	public static void handleUnpunish(String source, ByteBufferInputStream in) {
+		final var name = in.readPrefixedUTF8();
+		final var id = in.readLong();
+
+		final var p = Universe.get().getPlayer(name, NameMatching.EXACT_IGNORE_CASE);
+
+		if (p != null && p.isValid()) {
+			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var punishment = Utils.find(user.punishments, pun -> pun.getId() == id);
+			if (punishment.isPresent())
+				punishment.get().setExpirationDate(LocalDateTime.now(ZoneId.of("UTC")));
 		}
 	}
 
