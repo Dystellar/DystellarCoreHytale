@@ -159,7 +159,7 @@ public class UserComponent implements Component<EntityStore> {
 
 		String[] parts = perm.split("\\.");
 		StringBuilder lookup = new StringBuilder(perm);
-		lookup.delete(perm.length() - 1 - parts[parts.length - 1].length(), perm.length());
+		lookup.delete(perm.length() - parts[parts.length - 1].length(), perm.length());
 		lookup.append('*');
 
 		for (int i = parts.length - 2; i >= 0; --i) {
