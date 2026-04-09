@@ -9,9 +9,6 @@ import java.util.function.Supplier;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 
 /**
@@ -32,9 +29,11 @@ public final class Config<T> implements Supplier<T> {
 
 	private final Class<T> clazz;
 	private final Gson parser;
+	private final JavaPlugin plugin;
 	public final File file;
 
 	public Config(JavaPlugin plugin, String filename, Class<T> type, Gson parser) {
+		this.plugin = plugin;
 		this.file = new File(plugin.getDataDirectory().toFile(), filename);
 		this.clazz = type;
 		this.parser = parser;
@@ -61,8 +60,7 @@ public final class Config<T> implements Supplier<T> {
 	 * and will fail if there is no such constructor.
 	 */
 	public void load() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException, IOException {
-		if (!this.file.exists()) {
-			file.mkdirs();
+		if (!file.exists()) {
 			this.value = this.clazz.getConstructor().newInstance();
 
 			this.save();
@@ -79,6 +77,7 @@ public final class Config<T> implements Supplier<T> {
 	 */
 	public void save() throws IOException {
 		if (this.value != null) {
+			plugin.getDataDirectory().toFile().mkdirs();
 			FileWriter w = new FileWriter(this.file);
 
 			w.write(parser.toJson(this.value));

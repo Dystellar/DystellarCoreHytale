@@ -1,0 +1,4 @@
+services:
+  server1:
+    container_name: server1
+
