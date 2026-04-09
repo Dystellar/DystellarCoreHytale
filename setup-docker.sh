@@ -1,5 +1,7 @@
 #!/bin/sh
 
+mvn clean package
+
 mkdir -p container_data
 cd container_data
 if [ ! -d ./hytale-release ]; then
@@ -15,8 +17,8 @@ if [ ! -f ./hytale-release/auth.enc ]; then
 	cd hytale-release
 	echo "A temporary server will start, login using 'auth login browser/device', save it as Encrypted and then stop the server with 'stop'"
 	sleep 5
-	latest=$(ls *.zip | sort -t'-' -k1 | tail -1)
-	mkdir tmp
+	latest=$(ls *.zip | sort -V | tail -1)
+	mkdir -p tmp
 	unzip -o "$latest" -d tmp/ || exit 1
 	cd tmp/
 	chmod +x start.sh
@@ -32,4 +34,11 @@ if [ ! -f ./hytale-release/auth.enc ]; then
 	rm -rf tmp/
 fi
 cd ..
+jar=$(ls target/DystellarCoreHytale-*.jar | grep -v original | head -1)
+cp "$jar" container_data/hytale-release/DystellarCore.jar
+
+hytale_release=$(ls *.zip | sort -V | tail -1)
+
+export HYTALE_RELEASE_NAME="$hytale_release"
+
 docker compose up -d

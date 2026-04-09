@@ -1,4 +1,61 @@
+name: dystellar-core-test
 services:
+  backend:
+    container_name: backend
+    build:
+      context: ./containers/dystellar-backend
+      args:
+        PORT: 3000
+    networks:
+      - coretest
+  server:
+    build:
+      context: ./containers/hytale-server
+      args:
+        AUTH_ENCRYPT_PATH: "/var/lib/container_data/hytale-release/auth.enc"
+        JAR_PLUGIN_PATH: "/var/lib/container_data/hytale-release/DystellarCore.jar"
+        HYTALE_RELEASE_PATH: "/var/lib/container_data/hytale-release/$HYTALE_RELEASE_NAME"
+        BASEDIR: "/var/lib/container_data/server"
+        SERVER_NAME: "server"
+    env_file: .env
+    container_name: server
+    volumes:
+      - data:/var/lib/container_data
+    ports:
+      - 5520:5520
+    attach: false
+    depends_on:
+      - backend
+    networks:
+      - coretest
   server1:
+    build:
+      context: ./containers/hytale-server
+      args:
+        AUTH_ENCRYPT_PATH: "/var/lib/container_data/hytale-release/auth.enc"
+        JAR_PLUGIN_PATH: "/var/lib/container_data/hytale-release/DystellarCore.jar"
+        HYTALE_RELEASE_PATH: "/var/lib/container_data/hytale-release/$HYTALE_RELEASE_NAME"
+        BASEDIR: "/var/lib/container_data/server1"
+        SERVER_NAME: "server1"
+    env_file: .env
     container_name: server1
-
+    volumes:
+      - data:/var/lib/container_data
+    ports:
+      - 5521:5520
+    attach: false
+    depends_on:
+      - backend
+    networks:
+      - coretest
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./local/path
+networks:
+  coretest:
+    name: coretest
+    driver: bridge
