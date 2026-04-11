@@ -10,7 +10,6 @@ ARG RAM_ALLOC
 ARG API_KEY
 
 RUN apk update && apk upgrade && apk add --no-cache openjdk25-jdk unzip
-RUN unzip -o ${HYTALE_RELEASE_PATH} -d ${BASEDIR}
 
 ENV AUTH_ENCRYPT_PATH=${AUTH_ENCRYPT_PATH}
 ENV JAR_PLUGIN_PATH=${JAR_PLUGIN_PATH}

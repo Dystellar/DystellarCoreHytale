@@ -1,4 +1,3 @@
-name: dystellar-core-test
 services:
   backend:
     container_name: backend
@@ -27,7 +26,6 @@ services:
         BACKEND: "backend:3000"
         RAM_ALLOC: "1G"
         API_KEY: "testingkey"
-    env_file: .env
     container_name: server
     volumes:
       - data:/var/lib/container_data
@@ -50,7 +48,6 @@ services:
         BACKEND: "backend:3000"
         RAM_ALLOC: "1G"
         API_KEY: "testingkey"
-    env_file: .env
     container_name: server1
     volumes:
       - data:/var/lib/container_data
@@ -67,7 +64,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./local/path
+      device: container_data
 networks:
   coretest:
     name: coretest

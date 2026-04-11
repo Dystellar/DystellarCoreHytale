@@ -1,7 +1,12 @@
 #!/bin/sh
 
+mkdir -p "$BASEDIR"
+sleep 1
 cd "$BASEDIR"
 
+if [ ! -d Server/ ]; then
+	unzip -o "$HYTALE_RELEASE_PATH" -d .
+fi
 mkdir -p Server
 mkdir -p Server/mods
 cp "$JAR_PLUGIN_PATH" Server/mods/DystellarCore.jar

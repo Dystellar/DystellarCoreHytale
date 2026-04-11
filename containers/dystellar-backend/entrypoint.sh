@@ -1,5 +1,9 @@
 #!/bin/sh
 
+mkdir -p "$BACKEND_PATH"
+sleep 1
+cd "$BACKEND_PATH"
+
 if [ ! -f Cargo.toml ]; then
 	git clone https://github.com/TAlgorhythmic/dystellar-backend-rs .
 else

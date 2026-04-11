@@ -7,7 +7,7 @@ ARG CLIENT_SECRET
 ARG REDIRECT_URI
 ARG PRIVILEGED_AUTHORIZED_IP
 
-RUN apk update && apk upgrade && apk add --no-cache git cargo rust
+RUN apk update && apk upgrade && apk add --no-cache git cargo rust openssl
 
 COPY entrypoint.sh /usr/bin/entrypoint.sh
 
