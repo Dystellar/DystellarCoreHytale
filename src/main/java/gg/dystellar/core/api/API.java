@@ -52,10 +52,11 @@ public final class API {
 	public final WsClient wsClient;
 
 	public Response getJson(String path) throws IOException, InterruptedException {
-		final var request = HttpRequest.newBuilder(URI.create(this.url + '/' + path))
+		final var request = HttpRequest.newBuilder(URI.create(this.url + path))
 			.method("GET", BodyPublishers.noBody())
-			.header("Authorization", this.token)
+			.header("authorization", this.token)
 			.header("Content-Type", "application/json")
+			.header("X-Target-Host", DystellarCore.getInstance().config.get().host)
 			.build();
 		final HttpResponse<String> res = client.send(request, BodyHandlers.ofString());
 
@@ -70,8 +71,9 @@ public final class API {
 	public Response requestJson(String path, String method, String json) throws IOException, InterruptedException {
 		final var request = HttpRequest.newBuilder(URI.create(this.url + path))
 			.method(method, BodyPublishers.ofString(json))
-			.header("Authorization", this.token)
+			.header("authorization", this.token)
 			.header("Content-Type", "application/json")
+			.header("X-Target-Host", DystellarCore.getInstance().config.get().host)
 			.build();
 		final HttpResponse<String> res = client.send(request, BodyHandlers.ofString());
 

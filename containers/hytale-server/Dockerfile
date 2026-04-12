@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM eclipse-temurin:25-jdk
 
 ARG AUTH_ENCRYPT_PATH
 ARG JAR_PLUGIN_PATH
@@ -9,19 +9,21 @@ ARG BACKEND
 ARG RAM_ALLOC
 ARG API_KEY
 
-RUN apk update && apk upgrade && apk add --no-cache openjdk25-jdk unzip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-ENV AUTH_ENCRYPT_PATH=${AUTH_ENCRYPT_PATH}
-ENV JAR_PLUGIN_PATH=${JAR_PLUGIN_PATH}
-ENV HYTALE_RELEASE_PATH=${HYTALE_RELEASE_PATH}
-ENV BASEDIR=${BASEDIR}
-ENV SERVER_NAME=${SERVER_NAME}
-ENV BACKEND=${BACKEND}
-ENV RAM_ALLOC=${RAM_ALLOC}
-ENV API_KEY=${API_KEY}
+ENV AUTH_ENCRYPT_PATH=${AUTH_ENCRYPT_PATH} \
+    JAR_PLUGIN_PATH=${JAR_PLUGIN_PATH} \
+    HYTALE_RELEASE_PATH=${HYTALE_RELEASE_PATH} \
+    BASEDIR=${BASEDIR} \
+    SERVER_NAME=${SERVER_NAME} \
+    BACKEND=${BACKEND} \
+    RAM_ALLOC=${RAM_ALLOC} \
+    API_KEY=${API_KEY}
 
 COPY entrypoint.sh /usr/bin/entrypoint.sh
 
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT ["entrypoint.sh"]
 
 EXPOSE 5520

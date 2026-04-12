@@ -144,7 +144,7 @@ public class FriendCommand extends AbstractCommandCollection {
 		RemoveCommand() {
 			super("remove", "Friend remove command");
 			this.requirePermission("dystellar.friend.remove");
-			this.addAliases("delete", "remove", "del", "d", "rm");
+			this.addAliases("delete", "del", "d", "rm");
 		}
 
 		@Override

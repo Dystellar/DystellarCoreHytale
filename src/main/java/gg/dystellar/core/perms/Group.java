@@ -33,7 +33,7 @@ public class Group {
 		for (RawGroup g : rawGroups.groups)
 			groups.put(g.name, g.toGroup());
 
-		DEFAULT_GROUP = Optional.ofNullable(groups.get(rawGroups.default_group));
+		DEFAULT_GROUP = Optional.ofNullable(rawGroups.default_group != null ? groups.get(rawGroups.default_group) : null);
 		return true;
 	}
 

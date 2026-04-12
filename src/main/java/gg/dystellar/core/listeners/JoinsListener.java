@@ -7,6 +7,7 @@ import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
+import com.hypixel.hytale.server.core.io.netty.NettyUtil;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 
 import gg.dystellar.core.DystellarCore;
@@ -40,7 +41,9 @@ public final class JoinsListener {
 
 		CompletableFuture.supplyAsync(() -> {
 			try {
-				return DystellarCore.getApi().playerConnected(p.getUuid().toString(), p.getUsername(), p.getPacketHandler().getAuth().getReferralSource().host);
+				final var format = NettyUtil.getRemoteSocketAddress(p.getPacketHandler().getChannel()).toString();
+				final var ip = format.substring(1, format.indexOf(':'));
+				return DystellarCore.getApi().playerConnected(p.getUuid().toString(), p.getUsername(), ip);
 			} catch (Exception ex) {
 				e.getWorld().execute(() -> {
 					ex.printStackTrace();

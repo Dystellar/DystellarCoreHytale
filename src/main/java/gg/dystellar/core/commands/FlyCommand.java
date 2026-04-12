@@ -5,8 +5,10 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.SavedMovementStates;
 import com.hypixel.hytale.protocol.packets.player.SetMovementStates;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractTargetPlayerCommand;
+import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -68,14 +70,18 @@ public class FlyCommand extends AbstractPlayerCommand {
 		return targetFly;
 	}
 
-	private static class FlyOtherCommand extends AbstractTargetPlayerCommand {
+	private static class FlyOtherCommand extends CommandBase {
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "Target player", ArgTypes.PLAYER_REF);
+
 		FlyOtherCommand() {
-			super("fly", "Toggle fly mode for someone else");
+			super("Toggle fly mode for someone else");
 			this.requirePermission("dystellar.fly.other");
 		}
 
 		@Override
-		protected void execute(CommandContext ctx, Ref<EntityStore> ref, Ref<EntityStore> arg2, PlayerRef target, World w, Store<EntityStore> store) {
+		protected void executeSync(CommandContext ctx) {
+			final var target = ctx.get(targetArg);
+			final var ref = target.getReference();
 			final var langEn = DystellarCore.getInstance().lang_en.get();
 			if (!ctx.sender().hasPermission("dystellar.fly.other")) {
 				ctx.sender().sendMessage(langEn.noPermission.buildMessage());

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-mvn clean package
+mvn package
 
 mkdir -p container_data
 mkdir -p container_data/hytale-release
@@ -40,4 +40,4 @@ cp "$jar" container_data/hytale-release/DystellarCore.jar
 
 export HYTALE_RELEASE_NAME="release.zip"
 
-docker compose up -d
+docker compose up -d --build

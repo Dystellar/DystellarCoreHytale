@@ -29,7 +29,8 @@ public final class WsClient {
 
 		this.client = httpClient.newWebSocketBuilder()
 			.header("Authorization", this.token)
-			.buildAsync(URI.create(this.url + "?name" + name), this.new WsListener())
+			.header("X-Target-Host", DystellarCore.getInstance().config.get().host)
+			.buildAsync(URI.create(this.url + "?name=" + name), this.new WsListener())
 			.get();
 	}
 

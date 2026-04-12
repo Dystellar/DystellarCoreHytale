@@ -9,7 +9,7 @@ services:
         CLIENT_ID: "unused"
         CLIENT_SECRET: "unused"
         REDIRECT_URI: "http://backend:3000/api/microsoft/callback"
-        PRIVILEGED_AUTHORIZED_IP: "backend"
+        PRIVILEGED_AUTHORIZED_IP: "backend:3000"
     networks:
       - coretest
     volumes:
@@ -29,11 +29,14 @@ services:
     container_name: server
     volumes:
       - data:/var/lib/container_data
+      - /etc/machine-id:/etc/machine-id:ro
     ports:
-      - 5520:5520
+      - "5520:5520/udp"
     attach: false
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+        restart: true
     networks:
       - coretest
   server1:
@@ -51,11 +54,14 @@ services:
     container_name: server1
     volumes:
       - data:/var/lib/container_data
+      - /etc/machine-id:/etc/machine-id:ro
     ports:
-      - 5521:5520
+      - "5521:5520/udp"
     attach: false
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+        restart: true
     networks:
       - coretest
 volumes:
