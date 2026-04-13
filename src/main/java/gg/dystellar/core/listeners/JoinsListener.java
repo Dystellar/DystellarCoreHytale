@@ -11,7 +11,7 @@ import com.hypixel.hytale.server.core.io.netty.NettyUtil;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.common.punishments.Punishment;
 
 
@@ -22,8 +22,8 @@ public final class JoinsListener {
 	}
 
 	private static void onLeave(PlayerDisconnectEvent e) {
-		final var holder = e.getPlayerRef().getHolder();
-		final var user = holder.getComponent(UserComponent.getComponentType());
+		final var p = e.getPlayerRef();
+		final var user = User.users.remove(p.getUuid());
 		HytaleServer.SCHEDULED_EXECUTOR.execute(() -> {
 			try {
 				DystellarCore.getApi().saveUser(user);
@@ -37,7 +37,6 @@ public final class JoinsListener {
 
 	private static void onConnect(PlayerConnectEvent e) {
 		final var p = e.getPlayerRef();
-		final var holder = e.getHolder();
 
 		CompletableFuture.supplyAsync(() -> {
 			try {
@@ -55,7 +54,7 @@ public final class JoinsListener {
 			e.getWorld().execute(() -> {
 				user.init(p);
 
-				holder.addComponent(UserComponent.getComponentType(), user);
+				User.users.put(p.getUuid(), user);
 				final var now = LocalDateTime.now();
 				for (Punishment pun : user.punishments) {
 					if (!pun.allowJoinMinigames() && !DystellarCore.getInstance().getSetup().allow_banned_players && (!pun.getExpirationDate().isPresent() || pun.getExpirationDate().get().isBefore(now))) {

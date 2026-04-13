@@ -15,10 +15,13 @@ services:
     volumes:
       - data:/app
   server:
+    stdin_open: true
+    tty: true
     build:
       context: ./containers/hytale-server
       args:
-        AUTH_ENCRYPT_PATH: "/var/lib/container_data/hytale-release/auth.enc"
+        SESSION_TOKEN: "$SESSION_TOKEN"
+        IDENTITY_TOKEN: "$IDENTITY_TOKEN"
         JAR_PLUGIN_PATH: "/var/lib/container_data/hytale-release/DystellarCore.jar"
         HYTALE_RELEASE_PATH: "/var/lib/container_data/hytale-release/$HYTALE_RELEASE_NAME"
         BASEDIR: "/var/lib/container_data/server"
@@ -40,10 +43,13 @@ services:
     networks:
       - coretest
   server1:
+    stdin_open: true
+    tty: true
     build:
       context: ./containers/hytale-server
       args:
-        AUTH_ENCRYPT_PATH: "/var/lib/container_data/hytale-release/auth.enc"
+        SESSION_TOKEN: "$SESSION_TOKEN1"
+        IDENTITY_TOKEN: "$IDENTITY_TOKEN1"
         JAR_PLUGIN_PATH: "/var/lib/container_data/hytale-release/DystellarCore.jar"
         HYTALE_RELEASE_PATH: "/var/lib/container_data/hytale-release/$HYTALE_RELEASE_NAME"
         BASEDIR: "/var/lib/container_data/server1"

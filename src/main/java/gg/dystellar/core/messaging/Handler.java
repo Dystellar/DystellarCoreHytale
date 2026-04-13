@@ -2,7 +2,6 @@ package gg.dystellar.core.messaging;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -14,13 +13,12 @@ import java.util.concurrent.TimeUnit;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.Options;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.api.comms.Receiver;
 import gg.dystellar.core.api.comms.Channel.ByteBufferInputStream;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
 import gg.dystellar.core.utils.Pair;
@@ -76,11 +74,12 @@ public class Handler {
 
 	public static void handleFriendRemove(String s, ByteBufferInputStream in) {
 		final var senderUuid = in.readPrefixedUTF8();
-		final var receiverUuid = in.readPrefixedUTF8();
-		final var receiver = Universe.get().getPlayer(UUID.fromString(receiverUuid));
+		final var receiverUuid = UUID.fromString(in.readPrefixedUTF8());
+		final var receiver = Universe.get().getPlayer(receiverUuid);
+		final var opt = User.getUser(receiverUuid);
 
-		if (receiver != null && receiver.isValid()) {
-			final var user = receiver.getHolder().getComponent(UserComponent.getComponentType());
+		if (receiver != null && opt.isPresent()) {
+			final var user = opt.get();
 			final var found = Utils.find(user.friends, map -> map.uuid().toString().equals(senderUuid));
 			if (found.isPresent()) {
 				final var lang = DystellarCore.getInstance().getLang(user.language);
@@ -128,7 +127,7 @@ public class Handler {
 			DystellarCore.getLog().atWarning().log("Received a user group update with group " + groupName + " that doesn't exist");
 			return;
 		}
-		final var user = target.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(target).get();
 		user.group = group;
 	}
 
@@ -184,10 +183,7 @@ public class Handler {
 		if (Group.getDefaultGroup().isPresent() && Group.getDefaultGroup().get().getName().equals(groupName))
 			Group.setDefaultGroup(null);
 		else {
-			for (PlayerRef p : Universe.get().getPlayers()) {
-				final var user = p.getHolder().getComponent(UserComponent.getComponentType());
-				if (!p.isValid() || user == null) continue;
-
+			for (final var user : User.users.values()) {
 				if (user.group.isPresent() && user.group.get().getName().equals("groupName"))
 					user.group = Group.getDefaultGroup();
 			}
@@ -200,8 +196,8 @@ public class Handler {
 
 		final var p = Universe.get().getPlayer(name, NameMatching.EXACT_IGNORE_CASE);
 
-		if (p != null && p.isValid()) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		if (p != null) {
+			final var user = User.getUser(p).get();
 			final var punishment = Utils.find(user.punishments, pun -> pun.getId() == id);
 			if (punishment.isPresent())
 				punishment.get().setExpirationDate(LocalDateTime.now(ZoneId.of("UTC")));

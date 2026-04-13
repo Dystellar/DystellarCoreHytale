@@ -16,7 +16,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 
 // TODO: Test this
 
@@ -45,7 +45,7 @@ public class FlyCommand extends AbstractPlayerCommand {
 		final var move = ref.getStore().getComponent(ref, MovementStatesComponent.getComponentType());
 		final var mngr = ref.getStore().getComponent(ref, MovementManager.getComponentType());
 
-		final var user = playerRef.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(playerRef).get();
 		if (user.isInGame) {
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 			playerRef.sendMessage(lang.commandDenyIngame.buildMessage());
@@ -92,7 +92,7 @@ public class FlyCommand extends AbstractPlayerCommand {
 			if (res == null)
 				return;
 
-			final var user = target.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(target).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 			target.sendMessage(res ? lang.flyModeEnabledByAdmin.buildMessage() : lang.flyModeDisabledByAdmin.buildMessage());
 			ctx.sendMessage(res ? langEn.adminFlyModEnabledOther.buildMessage() : langEn.adminFlyModDisabledOther.buildMessage());

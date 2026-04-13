@@ -11,8 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import gg.dystellar.core.common.Suffix;
-import gg.dystellar.core.common.UserComponent;
-import gg.dystellar.core.common.UserComponent.UserMapping;
+import gg.dystellar.core.common.User;
+import gg.dystellar.core.common.User.UserMapping;
 import gg.dystellar.core.common.punishments.Punishment;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
@@ -126,8 +126,8 @@ public final class Protocol {
 		public Permission[] perms;
 		public String group;
 
-		public UserComponent toUserComponent(String address) {
-			var user = new UserComponent(UUID.fromString(uuid), address, name);
+		public User toUser(String address) {
+			var user = new User(UUID.fromString(uuid), address, name);
 			user.email = Optional.ofNullable(email);
 			user.globalChatEnabled = chat;
 			user.privateMessagesMode = pms;
@@ -147,7 +147,7 @@ public final class Protocol {
 			return user;
 		}
 
-		public static RawUser fromUserComponent(UserComponent user) {
+		public static RawUser fromUser(User user) {
 			final var raw = new RawUser();
 			raw.uuid = user.uuid.toString();
 			raw.name = user.name;
@@ -176,7 +176,7 @@ public final class Protocol {
 	public static final record UserGroupByName(String username, String group) {}
 	public static final record UuidPair(UUID sender, UUID receiver) {}
 	public static final record BackendError(boolean ok, String error) {}
-	public static final record GroupPermission(String group_name, Permission permission) {}
+	public static final record GroupPermission(String group_name, Permission perm) {}
 	public static final record GroupPermissionName(String group_name, String permission) {}
 	public static final record UnpunishData(String username, long punishment_id) {}
 }

@@ -11,8 +11,8 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
-import gg.dystellar.core.common.UserComponent.UserMapping;
+import gg.dystellar.core.common.User;
+import gg.dystellar.core.common.User.UserMapping;
 import gg.dystellar.core.utils.Utils;
 
 /**
@@ -31,7 +31,7 @@ public class IgnoreCommand extends AbstractPlayerCommand {
 	@Override
 	protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
 		final var target = ctx.get(targetArg);
-		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(p).get();
 		final var lang = DystellarCore.getInstance().getLang(user.language);
 
 		if (Utils.find(user.ignoreList, m -> m.uuid().equals(target.getUuid())).isPresent()) {

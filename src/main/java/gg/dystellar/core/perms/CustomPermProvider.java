@@ -7,10 +7,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.hypixel.hytale.server.core.permissions.provider.PermissionProvider;
-import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 
 /**
  * PermissionProvider hook for Hytale
@@ -54,9 +53,9 @@ public class CustomPermProvider implements PermissionProvider {
 
 	@Override
 	public Set<String> getGroupsForUser(UUID uuid) {
-		final var player = Universe.get().getPlayer(uuid);
-		if (player != null && player.isValid()) {
-			final var user = player.getHolder().getComponent(UserComponent.getComponentType());
+		final var opt = User.getUser(uuid);
+		if (opt.isPresent()) {
+			final var user = opt.get();
 
 			return user.group.map(g -> Set.of(g.getName())).orElse(Set.of());
 		}
@@ -71,9 +70,9 @@ public class CustomPermProvider implements PermissionProvider {
 
 	@Override
 	public Set<String> getUserPermissions(UUID uuid) {
-		final var player = Universe.get().getPlayer(uuid);
-		if (player != null && player.isValid()) {
-			final var user = player.getHolder().getComponent(UserComponent.getComponentType());
+		final var opt = User.getUser(uuid);
+		if (opt.isPresent()) {
+			final var user = opt.get();
 			final var group = user.group;
 			final Set<String> result = new HashSet<>(user.perms.size() + group.map(g -> g.getPermissions().size()).orElse(0));
 

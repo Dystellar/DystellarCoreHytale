@@ -17,7 +17,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.Universe;
 
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.config.Messages;
 import gg.dystellar.core.config.Setup;
 import gg.dystellar.core.listeners.*;
@@ -74,8 +74,6 @@ public final class DystellarCore extends JavaPlugin {
 	 */
 	@Override
 	protected void setup() {
-		initialize();
-
 		// Listeners
 		JoinsListener.register(this);
 		FreezeCommand.register(this);
@@ -155,10 +153,6 @@ public final class DystellarCore extends JavaPlugin {
 		return this.config.get();
 	}
 
-	private void initialize() {
-		UserComponent.init(this);
-	}
-
 	private void startAutomatedMessages() {
 		final byte[] b = {0, 0};
 
@@ -171,14 +165,10 @@ public final class DystellarCore extends JavaPlugin {
 				b[1] = 0;
 
 			try {
-				Universe.get().getPlayers().forEach(p -> {
-					if (p.isValid()) {
-						final var user = p.getHolder().getComponent(UserComponent.getComponentType());
-
-						switch (user.language) {
-							case "es" -> p.sendMessage(lang_es.get().automatedMessages[b[1]].buildMessage());
-							default -> p.sendMessage(lang_en.get().automatedMessages[b[0]].buildMessage());
-						}
+				User.users.values().forEach(user -> {
+					switch (user.language) {
+						case "es" -> user.player.sendMessage(lang_es.get().automatedMessages[b[1]].buildMessage());
+						default -> user.player.sendMessage(lang_en.get().automatedMessages[b[0]].buildMessage());
 					}
 				});
 			} catch (Throwable e) {

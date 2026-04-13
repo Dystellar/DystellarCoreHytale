@@ -14,7 +14,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.messaging.Subchannel;
 import gg.dystellar.core.utils.Utils;
 
@@ -36,8 +36,8 @@ public class UnpunishCommand extends CommandBase {
 		final var id = ctx.get(idArg);
 		final var p = Universe.get().getPlayer(name, NameMatching.EXACT_IGNORE_CASE);
 
-		if (p != null && p.isValid()) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		if (p != null) {
+			final var user = User.getUser(p).get();
 			final var punishment = Utils.find(user.punishments, pun -> pun.getId() == id);
 			if (punishment.isPresent()) {
 				punishment.get().setExpirationDate(LocalDateTime.now(ZoneId.of("UTC")));

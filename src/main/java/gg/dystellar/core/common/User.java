@@ -2,18 +2,15 @@ package gg.dystellar.core.common;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.hypixel.hytale.component.Component;
-import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.punishments.Punishment;
@@ -21,16 +18,15 @@ import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
 import gg.dystellar.core.utils.Utils;
 
-public class UserComponent implements Component<EntityStore> {
+public class User {
+	public static final Map<UUID, User> users = new ConcurrentHashMap<>();
 
-	private static ComponentType<EntityStore, UserComponent> COMPONENT_TYPE;
-
-	public static void init(JavaPlugin plugin) {
-		COMPONENT_TYPE = plugin.getEntityStoreRegistry().registerComponent(UserComponent.class, () -> new UserComponent(null, null, null));
+	public static Optional<User> getUser(UUID uuid) {
+		return Optional.ofNullable(users.get(uuid));
 	}
 
-	public static ComponentType<EntityStore, UserComponent> getComponentType() {
-	    return COMPONENT_TYPE;
+	public static Optional<User> getUser(PlayerRef p) {
+		return getUser(p.getUuid());
 	}
 
     public static final byte PMS_ENABLED = 0;
@@ -63,7 +59,7 @@ public class UserComponent implements Component<EntityStore> {
 	public transient boolean isInGame = false;
 	public transient boolean isInRanked = false;
 
-    public UserComponent(UUID id, String ip, String name) {
+    public User(UUID id, String ip, String name) {
         this.uuid = id;
         this.ip = ip;
         this.name = name;
@@ -71,12 +67,6 @@ public class UserComponent implements Component<EntityStore> {
 
 	public void init(PlayerRef player) {
 		this.player = player;
-	}
-
-	@Override
-	public Component<EntityStore> clone() {
-		System.out.println("UserComponent was cloned (resource loss)");
-		return new UserComponent(uuid, ip, name);
 	}
 
 	public boolean isChatAllowed() {

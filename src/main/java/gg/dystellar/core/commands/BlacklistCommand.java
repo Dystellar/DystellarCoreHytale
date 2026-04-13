@@ -14,7 +14,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncC
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 
 // TODO: Test this
 
@@ -47,7 +47,7 @@ public class BlacklistCommand extends AbstractAsyncCommand {
 			);
 
 			punishment.ifPresentOrElse(p -> {
-				UserComponent user = player.getHolder().getComponent(UserComponent.getComponentType());
+				User user = User.getUser(player).get();
 				if (user != null)
 					user.punish(p);
 			}, () -> sender.sendMessage(

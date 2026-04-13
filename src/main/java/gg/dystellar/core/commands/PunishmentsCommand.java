@@ -13,7 +13,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 
 /**
  * Command that lets you see your or other people's punishments.
@@ -28,7 +28,7 @@ public class PunishmentsCommand extends AbstractTargetPlayerCommand {
 
 	@Override
 	protected void execute(CommandContext ctx, Ref<EntityStore> r, Ref<EntityStore> r2, PlayerRef p, World w, Store<EntityStore> store) {
-		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(p).get();
 
 		p.sendMessage(Message.raw(p.getUsername() + "'s Punishments:").color(Color.YELLOW));
 		for (final var pun : user.punishments) {

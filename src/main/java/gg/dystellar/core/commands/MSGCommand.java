@@ -11,7 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.utils.Utils;
 
 /**
@@ -30,20 +30,20 @@ public class MSGCommand extends AbstractPlayerCommand {
 	@Override
 	protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
 		final var target = ctx.get(targetArg);
-		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(p).get();
 		final var lang = DystellarCore.getInstance().getLang(user.language);
 
-		if (user.privateMessagesMode == UserComponent.PMS_DISABLED ||
-			(user.privateMessagesMode == UserComponent.PMS_ENABLED_FRIENDS_ONLY &&
+		if (user.privateMessagesMode == User.PMS_DISABLED ||
+			(user.privateMessagesMode == User.PMS_ENABLED_FRIENDS_ONLY &&
 				Utils.find(user.friends, map -> map.name().equalsIgnoreCase(target.getUsername())).isEmpty())
 		) {
 			p.sendMessage(lang.cantSendPmsDisabled.buildMessage());
 			return;
 		}
 
-		final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
-		if (targetUser.privateMessagesMode == UserComponent.PMS_DISABLED ||
-			(targetUser.privateMessagesMode == UserComponent.PMS_ENABLED_FRIENDS_ONLY &&
+		final var targetUser = User.getUser(target).get();
+		if (targetUser.privateMessagesMode == User.PMS_DISABLED ||
+			(targetUser.privateMessagesMode == User.PMS_ENABLED_FRIENDS_ONLY &&
 				Utils.find(targetUser.friends, map -> map.uuid().equals(p.getUuid())).isEmpty())
 		) {
 			p.sendMessage(lang.errorPlayerHasPmsDisabled.buildMessage());

@@ -13,7 +13,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 
 /**
  * This command on itself doesn't do anything, it just lets you annotate something useful about a player,
@@ -30,7 +30,7 @@ public class NoteCommand extends AbstractTargetPlayerCommand {
 	@Override
 	protected void execute(CommandContext ctx, Ref<EntityStore> ref, Ref<EntityStore> ref2, PlayerRef p, World w, Store<EntityStore> store) {
 		final var note = ctx.get(noteArg);
-		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(p).get();
 		user.notes.add(note);
 		ctx.sender().sendMessage(Message.raw("Note added!").color(new Color(0x00FF00)));
 	}

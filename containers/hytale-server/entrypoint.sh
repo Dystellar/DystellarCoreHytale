@@ -10,18 +10,7 @@ fi
 mkdir -p Server
 mkdir -p Server/mods
 cp "$JAR_PLUGIN_PATH" Server/mods/DystellarCore.jar
-mkdir Server/mods/gg.dystellar_Core
-
-if [ ! -f Server/config.json ]; then
-	cat > Server/config.json << EOF
-{
-  "AuthCredentialStore": {
-    "Type": "Encrypted",
-    "Path": "auth.enc"
-  }
-}
-EOF
-fi
+mkdir -p Server/mods/gg.dystellar_Core
 
 cat > Server/mods/gg.dystellar_Core/setup.json << EOF
 {
@@ -42,6 +31,5 @@ cat > Server/mods/gg.dystellar_Core/setup.json << EOF
 }
 EOF
 cd Server
-cp ${AUTH_ENCRYPT_PATH} auth.enc
 
-exec java -Xmx$RAM_ALLOC -jar HytaleServer.jar --assets ../Assets.zip
+exec java -Xmx$RAM_ALLOC -jar HytaleServer.jar --assets ../Assets.zip --session-token "$SESSION_TOKEN" --identity-token "$IDENTITY_TOKEN"

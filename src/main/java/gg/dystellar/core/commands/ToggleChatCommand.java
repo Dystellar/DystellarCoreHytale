@@ -9,7 +9,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 
 /**
  * This command lets you enable/disable the global chat.
@@ -24,7 +24,7 @@ public class ToggleChatCommand extends AbstractPlayerCommand {
 
 	@Override
 	protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> r, PlayerRef p, World w) {
-		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(p).get();
 		final var lang = DystellarCore.getInstance().getLang(user.language);
 
 		user.globalChatEnabled = !user.globalChatEnabled;

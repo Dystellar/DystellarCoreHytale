@@ -24,8 +24,8 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
-import gg.dystellar.core.common.UserComponent.UserMapping;
+import gg.dystellar.core.common.User;
+import gg.dystellar.core.common.User.UserMapping;
 import gg.dystellar.core.messaging.Handler;
 import gg.dystellar.core.messaging.Subchannel;
 import gg.dystellar.core.utils.Triple;
@@ -81,7 +81,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var target = ctx.get(targetArg);
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 			final var cooldown = cooldowns.get(p.getUuid());
@@ -101,7 +101,7 @@ public class FriendCommand extends AbstractCommandCollection {
 				p.sendMessage(lang.playerAlreadyOnFriendsList.buildMessage());
 				return;
 			}
-			final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+			final var targetUser = User.getUser(target).get();
 			if (!targetUser.friendRequests) {
 				p.sendMessage(lang.targetRequestsDisabled.buildMessage());
 				return;
@@ -149,7 +149,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 			final var targetName = ctx.get(targetArg);
 			final var mapping = Utils.removeFirst(user.friends, map -> map.name().equalsIgnoreCase(targetName));
@@ -161,7 +161,7 @@ public class FriendCommand extends AbstractCommandCollection {
 			p.sendMessage(lang.friendRemovedSender.buildMessage().param("player", mapping.get().name()));
 			final var target = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
 			if (target != null && target.isValid()) {
-				final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+				final var targetUser = User.getUser(target).get();
 				final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
 				target.sendMessage(targetLang.friendRemovedReceiver.buildMessage().param("player", p.getUsername()));
 			} else {
@@ -192,7 +192,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 			final var targetName = ctx.get(targetArg);
 			final var target = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
@@ -223,7 +223,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 
 			p.sendMessage(lang.listFriendsTitle.buildMessage());
@@ -242,7 +242,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 			final var target = ctx.get(targetArg);
 
@@ -256,7 +256,7 @@ public class FriendCommand extends AbstractCommandCollection {
 			}
 			entry.get().third.cancel(true);
 
-			final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+			final var targetUser = User.getUser(target).get();
 			final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
 
 			targetUser.friends.add(new UserMapping(p.getUuid(), p.getUsername()));
@@ -279,7 +279,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 			final var target = ctx.get(targetArg);
 
@@ -293,7 +293,7 @@ public class FriendCommand extends AbstractCommandCollection {
 			}
 			entry.get().third.cancel(true);
 
-			final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
+			final var targetUser = User.getUser(target).get();
 			final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
 
 			targetUser.friends.add(new UserMapping(p.getUuid(), p.getUsername()));
@@ -314,7 +314,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 
 			user.friendRequests = !user.friendRequests;

@@ -10,13 +10,13 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
 
 public final class PermissionTests {
 
-	private UserComponent user;
+	private User user;
 
     private void setPerms(String... pairs) {
         user.perms.clear();
@@ -29,8 +29,8 @@ public final class PermissionTests {
  
     @BeforeEach
     void setUp() {
-        // Construct a bare UserComponent with no group
-        user = new UserComponent(null, null, null);
+        // Construct a bare User with no group
+        user = new User(null, null, null);
         user.group = Optional.empty();
     }
  

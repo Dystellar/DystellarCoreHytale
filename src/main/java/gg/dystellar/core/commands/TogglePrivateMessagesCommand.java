@@ -9,7 +9,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 
 /**
  * This lets you toggle private messages mode.
@@ -24,14 +24,14 @@ public class TogglePrivateMessagesCommand extends AbstractPlayerCommand {
 
 	@Override
 	protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> r, PlayerRef p, World w) {
-	    final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+	    final var user = User.getUser(p).get();
 		final var lang = DystellarCore.getInstance().getLang(user.language);
 
 		user.togglePms();
 		switch (user.privateMessagesMode) {
-			case UserComponent.PMS_ENABLED: p.sendMessage(lang.pmsEnabled.buildMessage()); break;
-			case UserComponent.PMS_ENABLED_FRIENDS_ONLY: p.sendMessage(lang.pmsEnabledFriendsOnly.buildMessage()); break;
-			case UserComponent.PMS_DISABLED: p.sendMessage(lang.pmsDisabled.buildMessage()); break;
+			case User.PMS_ENABLED: p.sendMessage(lang.pmsEnabled.buildMessage()); break;
+			case User.PMS_ENABLED_FRIENDS_ONLY: p.sendMessage(lang.pmsEnabledFriendsOnly.buildMessage()); break;
+			case User.PMS_DISABLED: p.sendMessage(lang.pmsDisabled.buildMessage()); break;
 		}
 	}
 }

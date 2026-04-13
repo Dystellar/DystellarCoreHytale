@@ -12,7 +12,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.utils.Utils;
 
 /**
@@ -40,7 +40,7 @@ public class IgnoreListCommand extends AbstractCommandCollection {
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
 			final var name = ctx.get(playerArg);
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 
 			if (Utils.removeFirst(user.ignoreList, m -> m.name().equalsIgnoreCase(name)).isPresent())
@@ -58,7 +58,7 @@ public class IgnoreListCommand extends AbstractCommandCollection {
 
 		@Override
 		protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 
 			p.sendMessage(lang.blockedPlayersListTitle.buildMessage());

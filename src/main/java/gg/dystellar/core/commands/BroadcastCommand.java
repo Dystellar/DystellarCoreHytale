@@ -11,7 +11,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.config.Messages;
 
 // TODO: Test this
@@ -38,7 +38,7 @@ public class BroadcastCommand extends CommandBase {
 		if (ctx.sender() instanceof Player player) {
 			final Ref<EntityStore> ref = player.getReference();
 			final var p = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+			final var user = User.getUser(p).get();
 			lang = DystellarCore.getInstance().getLang(user.language);
 		} else lang = DystellarCore.getInstance().getLang("en");
 

@@ -6,13 +6,12 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
-import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.utils.Utils;
 
 /**
@@ -30,7 +29,7 @@ public class ReplyCommand extends AbstractPlayerCommand {
 
 	@Override
 	protected void execute(CommandContext ctx, Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef p, World w) {
-		final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(p).get();
 		final var target = user.lastMessagedPlayer;
 		final var lang = DystellarCore.getInstance().getLang(user.language);
 
@@ -39,17 +38,17 @@ public class ReplyCommand extends AbstractPlayerCommand {
 			return;
 		}
 
-		if (user.privateMessagesMode == UserComponent.PMS_DISABLED ||
-			(user.privateMessagesMode == UserComponent.PMS_ENABLED_FRIENDS_ONLY &&
+		if (user.privateMessagesMode == User.PMS_DISABLED ||
+			(user.privateMessagesMode == User.PMS_ENABLED_FRIENDS_ONLY &&
 				Utils.find(user.friends, map -> map.name().equalsIgnoreCase(target.getUsername())).isEmpty())
 		) {
 			p.sendMessage(lang.cantSendPmsDisabled.buildMessage());
 			return;
 		}
 
-		final var targetUser = target.getHolder().getComponent(UserComponent.getComponentType());
-		if (targetUser.privateMessagesMode == UserComponent.PMS_DISABLED ||
-			(targetUser.privateMessagesMode == UserComponent.PMS_ENABLED_FRIENDS_ONLY &&
+		final var targetUser = User.getUser(target).get();
+		if (targetUser.privateMessagesMode == User.PMS_DISABLED ||
+			(targetUser.privateMessagesMode == User.PMS_ENABLED_FRIENDS_ONLY &&
 				Utils.find(targetUser.friends, map -> map.uuid().equals(p.getUuid())).isEmpty())
 		) {
 			p.sendMessage(lang.errorPlayerHasPmsDisabled.buildMessage());

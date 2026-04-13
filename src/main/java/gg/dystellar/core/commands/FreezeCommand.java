@@ -29,7 +29,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.utils.Triple;
 
 // TODO: Test this
@@ -64,7 +64,7 @@ public class FreezeCommand extends AbstractTargetPlayerCommand {
 		final var pos = comp.getPosition().clone();
 		final var rot = comp.getRotation().clone();
 		final var removed = frozenPlayers.remove(target.getUuid());
-		final var user = target.getHolder().getComponent(UserComponent.getComponentType());
+		final var user = User.getUser(target).get();
 		final var lang = DystellarCore.getInstance().getLang(user.language);
 
 		if (removed == null) {

@@ -7,10 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.hypixel.hytale.server.core.universe.Universe;
-
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.serialization.Protocol.RawGroup;
 
 /**
@@ -40,8 +38,7 @@ public class Group {
 	public static void setDefaultGroup(Group group) {
 		final var newOptional = Optional.ofNullable(group);
 		final var old = DEFAULT_GROUP;
-		for (final var p : Universe.get().getPlayers()) {
-			final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+		for (final var user : User.users.values()) {
 			if (user != null && user.group.equals(old))
 				user.group = newOptional;
 		}

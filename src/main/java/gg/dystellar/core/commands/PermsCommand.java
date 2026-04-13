@@ -15,7 +15,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
 import gg.dystellar.core.DystellarCore;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.messaging.Subchannel;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
@@ -94,7 +94,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 			final var target = Universe.get().getPlayerByUsername(username, NameMatching.EXACT_IGNORE_CASE);
 
 			if (target != null) {
-				final var user = target.getHolder().getComponent(UserComponent.getComponentType());
+				final var user = User.getUser(target).get();
 				user.group = group;
 				ctx.sender().sendMessage(Message.raw("Group updated!").color(Color.GREEN));
 			} else {
@@ -288,7 +288,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 				Group.setDefaultGroup(null);
 			else {
 				for (PlayerRef p : Universe.get().getPlayers()) {
-					final var user = p.getHolder().getComponent(UserComponent.getComponentType());
+					final var user = User.getUser(p).get();
 					if (!p.isValid() || user == null) continue;
 
 					if (user.group.isPresent() && user.group.get().getName().equals("groupName"))
@@ -356,8 +356,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 
 			var perm = ctx.get(permArg);
 			var value = true;
-			if (!perm.matches("^!?(\\w+\\.)+\\w+$")) {
-				ctx.sender().sendMessage(Message.raw("Wrong permission node " + perm + ", regex is ^!?(\\w+\\.)+\\w+$").color(Color.RED));
+			if (!perm.matches("^!?(\\w+\\.)*(?:\\w+|\\*)$")) {
+				ctx.sender().sendMessage(Message.raw("Wrong permission node " + perm + ", regex is ^!?(\\w+\\.)*(?:\\w+|\\*)$").color(Color.RED));
 				return;
 			}
 

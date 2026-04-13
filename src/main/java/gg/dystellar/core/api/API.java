@@ -2,7 +2,7 @@ package gg.dystellar.core.api;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.api.comms.WsClient;
-import gg.dystellar.core.common.UserComponent;
+import gg.dystellar.core.common.User;
 import gg.dystellar.core.common.punishments.Punishment;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
@@ -90,22 +90,22 @@ public final class API {
 			throw new IOException("Backend service didn't respond as expected");
 	}
 
-    public Optional<UserComponent> getPlayer(UUID uuid) throws IOException, InterruptedException {
+    public Optional<User> getPlayer(UUID uuid) throws IOException, InterruptedException {
 		final var res = this.getJson("/api/core/player_data?uuid=" + uuid.toString());
 		
 		if (res.status != 200)
 			return Optional.empty();
 
-		return Optional.of(gson.fromJson(res.json, UserComponent.class));
+		return Optional.of(gson.fromJson(res.json, User.class));
     }
 
-	public UserComponent playerConnected(String uuid, String name, String address) throws IOException, InterruptedException {
+	public User playerConnected(String uuid, String name, String address) throws IOException, InterruptedException {
 		final var res = this.getJson("/api/core/user_connected?uuid=" + uuid + "&name=" + name + "&address=" + address);
 
 		if (res.status != 200)
 			throw new IOException("Failed fetch user on connection request");
 
-		return gson.fromJson(res.json, RawUser.class).toUserComponent(address);
+		return gson.fromJson(res.json, RawUser.class).toUser(address);
 	}
 
 	public Result<Void, String> playerFriendRemove(UUID sender, UUID receiver) throws IOException, InterruptedException {
@@ -119,8 +119,8 @@ public final class API {
 		return Result.ok(null);
 	}
 
-	public void saveUser(UserComponent user) throws IOException, InterruptedException {
-		final var res = requestJson("/api/core/user_save", "PUT", gson.toJson(RawUser.fromUserComponent(user)));
+	public void saveUser(User user) throws IOException, InterruptedException {
+		final var res = requestJson("/api/core/user_save", "PUT", gson.toJson(RawUser.fromUser(user)));
 
 		if (res.status != 200)
 			throw new IOException("Failed to save player. Json: " + res.json);
