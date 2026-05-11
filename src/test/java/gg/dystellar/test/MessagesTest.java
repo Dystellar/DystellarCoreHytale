@@ -356,4 +356,18 @@ class MessagesTest {
 		assertEquals("Hello a{s} my name is bob", parse(result.buildMessage("a{s}", "bob")));
 		assertEquals("Hello parammmmm1something{s} my name is bob", parse(result.buildMessage("parammmmm1something{s}", "bob", "failed")));
 	}
+
+	@Test
+	void namedParams() {
+		final var result = messages.compileMsg("Hello {param1} my name is {name}");
+		assertEquals("Hello {param1} my name is bob", parse(result.buildMessageNamedParams("unknownparam", "jacob", "name", "bob")));
+		assertEquals("Hello {param1} my name is {name}", parse(result.buildMessageNamedParams("unknownparam", "jacob", "name1", "bob")));
+		assertEquals("Hello bob my name is jacob", parse(result.buildMessageNamedParams("name", "jacob", "param1", "bob")));
+		assertEquals("Hello bob my name is jacob", parse(result.buildMessageNamedParams("name", "jacob", "param1", "bob", "odd")));
+		assertEquals("Hello {param1} my name is jacob", parse(result.buildMessageNamedParams("name", "jacob", "param1")));
+		assertEquals("Hello {param1} my name is {name}", parse(result.buildMessageNamedParams()));
+		assertEquals("Hello  my name is bob", parse(result.buildMessageNamedParams("param1", "", "name", "bob")));
+		assertEquals("Hello first my name is {name}", parse(result.buildMessageNamedParams("param1", "first", "param1", "second")));
+		assertEquals("Hello {nested} my name is bob", parse(result.buildMessageNamedParams("param1", "{nested}", "name", "bob")));
+	}
 }

@@ -385,5 +385,44 @@ public final class Messages {
 
 			return message;
 		}
+
+		public Message buildMessageNamedParams(String... args) {
+			final var message = Message.empty();
+
+			int argsParsed = 0;
+			for (int i = 0; i < parts.size(); ++i) {
+				final var part = parts.get(i);
+				final var parsed = new StringBuilder(part.first);
+				int offset = 0;
+
+				while (argsParsed < args.length && argsParsed < params.size() && params.get(argsParsed).first == i) {
+					final var param = params.get(argsParsed);
+					final var pos = param.second + offset;
+
+					final var paramName = parsed.substring(pos + 1, pos + param.third - 1);
+					int argsCounter = 0;
+					for (; argsCounter + 1 < args.length; argsCounter += 2) {
+						final var name = args[argsCounter];
+						if (name.equals(paramName)) {
+							parsed.replace(pos, pos + param.third, args[argsCounter + 1]);
+							offset += args[argsCounter + 1].length() - param.third;
+							break;
+						}
+					}
+
+					++argsParsed;
+				}
+
+				final var child = Message.raw(parsed.toString())
+					.color(part.second.hex_color)
+					.bold(part.second.bold)
+					.italic(part.second.italic)
+					.monospace(part.second.monospace);
+
+				message.insert(child);
+			}
+
+			return message;
+		}
 	}
 }

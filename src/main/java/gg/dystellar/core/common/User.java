@@ -4,16 +4,19 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import gg.dystellar.core.DystellarCore;
 import gg.dystellar.core.common.punishments.Punishment;
+import gg.dystellar.core.config.Messages.CompiledMessage;
 import gg.dystellar.core.perms.Group;
 import gg.dystellar.core.perms.Permission;
 import gg.dystellar.core.utils.Utils;
@@ -33,7 +36,7 @@ public class User {
     public static final byte PMS_ENABLED_FRIENDS_ONLY = 1;
     public static final byte PMS_DISABLED = 2;
 
-	public PlayerRef player;
+	public volatile PlayerRef player;
     public final UUID uuid;
     public Suffix suffix = Suffix.NONE;
     public final List<Punishment> punishments = new ArrayList<>();
@@ -98,7 +101,15 @@ public class User {
 		}
 		if (!DystellarCore.getInstance().getSetup().allow_banned_players && !punishment.allowJoinMinigames()) {
 			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-				player.getPacketHandler().disconnect("You have been banned");
+				Message msg = Message.empty();
+				msg.insertAll(
+						Arrays.stream(lang.punishMessage)
+						.flatMap(c -> Stream.of(
+								c.buildMessageNamedParams("title", punishment.getTitle(), "reason", punishment.getReason(), "expiration", Utils.getTimeFormat(punishment.getExpirationDate().orElse(null))),
+								Message.raw("\n")))
+						.limit(lang.punishMessage.length * 2 - 1)
+						.toArray(Message[]::new));
+				player.getPacketHandler().disconnect(msg);
 			}, 3, TimeUnit.SECONDS);
 		}
     }
