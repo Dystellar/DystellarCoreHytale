@@ -95,9 +95,6 @@ if [ "$SESSION_TOKEN1" = "null" ] || [ -z "$SESSION_TOKEN1" ]; then
 	exit 1
 fi
 
-echo "session: $SESSION"
-echo "session 1: $SESSION1"
-
 cd ../..
 jar=$(ls target/DystellarCoreHytale-*.jar | grep -v original | head -1)
 cp "$jar" container_data/hytale-release/DystellarCore.jar
