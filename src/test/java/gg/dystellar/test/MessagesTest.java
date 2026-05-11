@@ -4,8 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.hypixel.hytale.server.core.Message;
 
 import gg.dystellar.core.config.Messages;
 import gg.dystellar.core.utils.Triple;
@@ -35,6 +40,13 @@ class MessagesTest {
 
 	private Triple<Integer, Integer, Integer> paramAt(Messages.CompiledMessage msg, int index) {
 		return msg.params.get(index);
+	}
+
+	private String parse(final Message msg) {
+		return msg.getChildren().stream()
+			.map(Message::getRawText)
+			.filter(Objects::nonNull)
+			.collect(Collectors.joining());
 	}
 
 	// -------------------------------------------------------------------------
@@ -244,10 +256,10 @@ class MessagesTest {
 
 	@Test
 	void simpleUnclosedParam_noProcess() {
-		final var result = messages.compileMsg("Hello my name is{ {name}");
-		assertEquals("Hello my name is{ {name}", textAt(result, 0));
-		assertEquals(18, paramAt(result, 0).second);
-		assertEquals(6, paramAt(result, 0).third);
+		final var result = messages.compileMsg("Hello my name is{ {name}{");
+		assertEquals("Hello my name is{ {name}{", textAt(result, 0));
+		assertEquals(16, paramAt(result, 0).second);
+		assertEquals(8, paramAt(result, 0).third);
 		assertEquals(1, result.params.size());
 	}
 
@@ -255,8 +267,8 @@ class MessagesTest {
 	void simpleUnclosedMultipleParam_noProcess() {
 		final var result = messages.compileMsg("Hello{ my name is{{ {name}");
 		assertEquals("Hello{ my name is{{ {name}", textAt(result, 0));
-		assertEquals(20, paramAt(result, 0).second);
-		assertEquals(6, paramAt(result, 0).third);
+		assertEquals(5, paramAt(result, 0).second);
+		assertEquals(21, paramAt(result, 0).third);
 		assertEquals(1, result.params.size());
 	}
 
@@ -271,13 +283,13 @@ class MessagesTest {
 
 	@Test
 	void multipleParam_noProcess() {
-		final var result = messages.compileMsg("Hello my name is {name xd}");
+		final var result = messages.compileMsg("Hello {param1} my name is {name}");
 		assertEquals("Hello {param1} my name is {name}", textAt(result, 0));
+		assertEquals(2, result.params.size());
 		assertEquals(6, paramAt(result, 0).second);
 		assertEquals(8, paramAt(result, 0).third);
-		assertEquals(26, paramAt(result, 0).second);
-		assertEquals(6, paramAt(result, 0).third);
-		assertEquals(2, result.params.size());
+		assertEquals(26, paramAt(result, 1).second);
+		assertEquals(6, paramAt(result, 1).third);
 	}
 
 	// -------------------------------------------------------------------------
@@ -288,60 +300,60 @@ class MessagesTest {
 	void emptyParam() {
 		final var result = messages.compileMsg("Hello my name is {}");
 		final var noArgs = result.buildMessage();
-		final var textNoArgs = noArgs.getRawText();
-		assertEquals(textNoArgs, "Hello my name is {}");
-		final var text = result.buildMessage("algorhythmic").getRawText();
-		assertEquals(text, "Hello my name is algorhythmic");
-		final var textMultiple = result.buildMessage("algorhythmic", "somethingelse").getRawText();
-		assertEquals(textMultiple, "Hello my name is algorhythmic");
-		assertEquals("Hello my name is ", result.buildMessage("").getRawText());
+		final var textNoArgs = parse(noArgs);
+		assertEquals("Hello my name is {}", textNoArgs);
+		final var text = parse(result.buildMessage("algorhythmic"));
+		assertEquals("Hello my name is algorhythmic", text);
+		final var textMultiple = parse(result.buildMessage("algorhythmic", "somethingelse"));
+		assertEquals("Hello my name is algorhythmic", textMultiple);
+		assertEquals("Hello my name is ", parse(result.buildMessage("")));
 	}
 
 	@Test
 	void filledParam() {
 		final var result = messages.compileMsg("Hello my name is {name}");
-		assertEquals("Hello my name is {name}", result.buildMessage().getRawText());
-		assertEquals("Hello my name is algorhythmic", result.buildMessage("algorhythmic").getRawText());
-		assertEquals("Hello my name is algorhythmic", result.buildMessage("algorhythmic", "unused").getRawText());
+		assertEquals("Hello my name is {name}", parse(result.buildMessage()));
+		assertEquals("Hello my name is algorhythmic", parse(result.buildMessage("algorhythmic")));
+		assertEquals("Hello my name is algorhythmic", parse(result.buildMessage("algorhythmic", "unused")));
 		final var spaces = messages.compileMsg("Hello my name is {my name}");
-		assertEquals("Hello my name is {my name}", spaces.buildMessage().getRawText());
-		assertEquals("Hello my name is algorhythmic", spaces.buildMessage("algorhythmic").getRawText());
-		assertEquals("Hello my name is algorhythmic", spaces.buildMessage("algorhythmic", "unused").getRawText());
+		assertEquals("Hello my name is {my name}", parse(spaces.buildMessage()));
+		assertEquals("Hello my name is algorhythmic", parse(spaces.buildMessage("algorhythmic")));
+		assertEquals("Hello my name is algorhythmic", parse(spaces.buildMessage("algorhythmic", "unused")));
 	}
 
 	@Test
 	void unclosedParam() {
 		final var result = messages.compileMsg("Hello my name is{ {name}");
-		assertEquals("Hello my name is{ {name}", result.buildMessage().getRawText());
-		assertEquals("Hello my name is{ bob", result.buildMessage("bob").getRawText());
+		assertEquals("Hello my name is{ {name}", parse(result.buildMessage()));
+		assertEquals("Hello my name isbob", parse(result.buildMessage("bob")));
 	}
 
 	@Test
 	void unclosedMultipleParam() {
 		final var result = messages.compileMsg("Hello{ my name is{{ {name}");
-		assertEquals("Hello{ my name is{{ bob", result.buildMessage("bob", "wrong", "wrong2").getRawText());
+		assertEquals("Hellobob", parse(result.buildMessage("bob", "wrong", "wrong2")));
 	}
 
 	@Test
 	void invalidClosersParam() {
 		final var result = messages.compileMsg("Hello} my name is {name}}");
-		assertEquals("Hello} my name is bob}", result.buildMessage("bob").getRawText());
+		assertEquals("Hello} my name is bob}", parse(result.buildMessage("bob")));
 	}
 
 	@Test
 	void multipleParam() {
 		final var result = messages.compileMsg("Hello {param1} my name is {name}");
-		assertEquals("Hello {param1} my name is {name}", result.buildMessage().getRawText());
-		assertEquals("Hello jacob my name is {name}", result.buildMessage("jacob").getRawText());
-		assertEquals("Hello jacob my name is bob", result.buildMessage("jacob", "bob").getRawText());
-		assertEquals("Hello jacob my name is bob", result.buildMessage("jacob", "bob", "ignored").getRawText());
+		assertEquals("Hello {param1} my name is {name}", parse(result.buildMessage()));
+		assertEquals("Hello jacob my name is {name}", parse(result.buildMessage("jacob")));
+		assertEquals("Hello jacob my name is bob", parse(result.buildMessage("jacob", "bob")));
+		assertEquals("Hello jacob my name is bob", parse(result.buildMessage("jacob", "bob", "ignored")));
 	}
 
 	@Test
 	void fakeParam() {
 		final var result = messages.compileMsg("Hello {param1} my name is {name}");
-		assertEquals("Hello {s} my name is bob", result.buildMessage("{s}", "bob"));
-		assertEquals("Hello a{s} my name is bob", result.buildMessage("a{s}", "bob"));
-		assertEquals("Hello parammmmm1something{s} my name is bob", result.buildMessage("parammmmm1something{s}", "bob", "failed"));
+		assertEquals("Hello {s} my name is bob", parse(result.buildMessage("{s}", "bob")));
+		assertEquals("Hello a{s} my name is bob", parse(result.buildMessage("a{s}", "bob")));
+		assertEquals("Hello parammmmm1something{s} my name is bob", parse(result.buildMessage("parammmmm1something{s}", "bob", "failed")));
 	}
 }

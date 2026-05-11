@@ -3,7 +3,6 @@ package gg.dystellar.core.config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import com.hypixel.hytale.server.core.Message;
 
@@ -14,7 +13,7 @@ import gg.dystellar.core.utils.Utils;
 /**
  * Plugin messages, these are just values because gson will dump values from json.
  */
-public class Messages {
+public final class Messages {
 	private final static ColorDeclaration DEFAULT_COLOR = new ColorDeclaration("Default", "#FFFFFF");
 	
 	private ColorDeclaration[] color_declarations = {
@@ -142,13 +141,27 @@ public class Messages {
 	private String error_no_reply_cache = "<Red>You don't have anyone to reply to.";
 	private String error_player_has_pms_disabled = "<Red>This player has disabled their private messages.";
 
+	private void scanParams(final String scan, final CompiledMessage compiled, int[] paramIdxPtr) {
+		while ((paramIdxPtr[0] = scan.indexOf('{', paramIdxPtr[0])) != -1) {
+			final var paramEndIdx = scan.indexOf('}', paramIdxPtr[0] + 1);
+			if (paramEndIdx != -1) {
+				compiled.params.add(new Triple<>(compiled.parts.size(), paramIdxPtr[0], (paramEndIdx + 1) - paramIdxPtr[0]));
+				paramIdxPtr[0] = paramEndIdx + 1;
+			} else ++paramIdxPtr[0];
+		}
+	}
+
 	public CompiledMessage compileMsg(String msg) {
 		final var compiled = new CompiledMessage();
 		int idx = msg.indexOf('<');
 		ColorDeclaration col = DEFAULT_COLOR;
 
-		if (!msg.isEmpty() && !msg.startsWith("<"))
-			compiled.parts.add(new Pair<>(idx == -1 ? msg : msg.substring(0, idx), col));
+		int[] paramIdx = {0};
+		if (!msg.isEmpty() && !msg.startsWith("<")) {
+			final var part = idx == -1 ? msg : msg.substring(0, idx);
+			scanParams(part, compiled, paramIdx);
+			compiled.parts.add(new Pair<>(part, col));
+		}
 
 		while (idx != -1) {
 			var end = msg.indexOf('>', idx++);
@@ -158,14 +171,7 @@ public class Messages {
 			col = Utils.findArr(color_declarations, c -> c.name.equals(msg.substring(idxf, end))).orElse(DEFAULT_COLOR);
 			final var to = msg.indexOf('<', end);
 			final var part = to == -1 ? msg.substring(end + 1) : msg.substring(end + 1, to);
-			int paramIdx = 0;
-			while ((paramIdx = part.indexOf('{', paramIdx)) != -1) {
-				final var paramEndIdx = part.indexOf('}', paramIdx + 1);
-				if (paramEndIdx != -1) {
-					compiled.params.add(new Triple<>(compiled.parts.size(), paramIdx, (paramEndIdx + 1) - paramIdx));
-					paramIdx = paramEndIdx + 1;
-				} else ++paramIdx;
-			}
+			scanParams(part, compiled, paramIdx);
 			compiled.parts.add(new Pair<>(part, col));
 			idx = to;
 		}
