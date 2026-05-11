@@ -30,7 +30,8 @@ public class IgnoreListCommand extends AbstractCommandCollection {
     }
 
 	private final static class RemoveCommand extends AbstractPlayerCommand {
-		private final RequiredArg<String> playerArg = this.withRequiredArg("player", "The player to remove", ArgTypes.STRING);
+		private final RequiredArg<String> playerArg = this.withRequiredArg("player", "The player to remove", ArgTypes.STRING)
+			.suggest(CommandUtils::ignorelistSuggestor);
 
 		public RemoveCommand() {
 			super("remove", "Remove blocked player");

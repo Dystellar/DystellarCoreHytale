@@ -18,7 +18,8 @@ import gg.dystellar.core.utils.Utils;
  * Command to send a private message to another person. Should definitely be implemented in the proxy, not here.
  */
 public class MSGCommand extends AbstractPlayerCommand {
-	private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to send the message to", ArgTypes.PLAYER_REF);
+	private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to send the message to", ArgTypes.PLAYER_REF)
+		.suggest(CommandUtils::playerSuggestor);
 	private final RequiredArg<String> messageArg = this.withRequiredArg("message", "The message to send", ArgTypes.STRING);
 
     public MSGCommand() {

@@ -21,9 +21,11 @@ import gg.dystellar.core.common.User;
  */
 public class MuteCommand extends AbstractAsyncCommand {
 
-	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF);
+	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF)
+		.suggest(CommandUtils::playerSuggestor);
 	private final RequiredArg<String> reasonArg = this.withRequiredArg("reason", "Why punishing this player", ArgTypes.STRING);
-	private final RequiredArg<String> timeArg = this.withRequiredArg("time", "Duration of the punishment e.g. 30m, 30d, 2y", ArgTypes.STRING);
+	private final RequiredArg<String> timeArg = this.withRequiredArg("time", "Duration of the punishment e.g. 30m, 30d, 2y", ArgTypes.STRING)
+		.suggest((_, _, _, res) -> res.suggest("1m").suggest("10m").suggest("30m").suggest("1h").suggest("2h").suggest("1d").suggest("30d").suggest("60d").suggest("120d").suggest("1y").suggest("2y"));
 
     public MuteCommand() {
 		super("mute", "Dystellar's custom mute command");

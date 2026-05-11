@@ -20,7 +20,8 @@ import gg.dystellar.core.utils.Utils;
  */
 public class IgnoreCommand extends AbstractPlayerCommand {
 
-	private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player you want to block", ArgTypes.PLAYER_REF);
+	private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player you want to block", ArgTypes.PLAYER_REF)
+		.suggest(CommandUtils::playerSuggestor);
 
     public IgnoreCommand() {
 		super("ignore", "Ignore a player");

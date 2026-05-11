@@ -25,7 +25,8 @@ import gg.dystellar.core.common.User;
  */
 public class BanCommand extends AbstractAsyncCommand {
 
-	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF);
+	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF)
+		.suggest(CommandUtils::playerSuggestor);
 	private final RequiredArg<String> reasonArg = this.withRequiredArg("reason", "Why punishing this player", ArgTypes.STRING);
 	private final OptionalArg<String> timeArg = this.withOptionalArg("time", "Duration of the punishment e.g. 30m, 30d, 2y", ArgTypes.STRING);
 	private final FlagArg ipbanArg = this.withFlagArg("ipban", "If the punishment also applies to the player's IP address");

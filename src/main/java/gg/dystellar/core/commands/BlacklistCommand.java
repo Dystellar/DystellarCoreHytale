@@ -24,7 +24,8 @@ import gg.dystellar.core.common.User;
  */
 public class BlacklistCommand extends AbstractAsyncCommand {
 
-	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF);
+	private final RequiredArg<PlayerRef> playerArg = this.withRequiredArg("player", "The player to receive the punishment", ArgTypes.PLAYER_REF)
+		.suggest(CommandUtils::playerSuggestor);
 	private final RequiredArg<String> reasonArg = this.withRequiredArg("reason", "Why punishing this player", ArgTypes.STRING);
 
     public BlacklistCommand() {

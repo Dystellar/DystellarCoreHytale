@@ -37,7 +37,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class SetDefaultCommand extends CommandBase {
-		private final RequiredArg<String> groupArg = this.withRequiredArg("group", "The group to set the default as", ArgTypes.STRING);
+		private final RequiredArg<String> groupArg = this.withRequiredArg("group", "The group to set the default as", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 
 		SetDefaultCommand() {
 			super("setdefault", "Set default group network-wide");
@@ -72,8 +73,10 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class SetGroupCommand extends CommandBase {
-		private final RequiredArg<String> userArg = this.withRequiredArg("user", "The user to set the group to", ArgTypes.STRING);
-		private final RequiredArg<String> groupArg = this.withRequiredArg("group", "The group to set", ArgTypes.STRING);
+		private final RequiredArg<String> userArg = this.withRequiredArg("user", "The user to set the group to", ArgTypes.STRING)
+			.suggest(CommandUtils::playerSuggestor);
+		private final RequiredArg<String> groupArg = this.withRequiredArg("group", "The group to set", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 
 		SetGroupCommand() {
 			super("setgroup", "Set a group to a user");
@@ -131,8 +134,10 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class CopyPermsCommand extends CommandBase {
-		private final RequiredArg<String> sourceArg = this.withRequiredArg("source", "Source group", ArgTypes.STRING);
-		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "Target group", ArgTypes.STRING);
+		private final RequiredArg<String> sourceArg = this.withRequiredArg("source", "Source group", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
+		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "Target group", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 
 		CopyPermsCommand() {
 			super("copyperms", "Delete all permissions on target, and set all permissions from source");
@@ -174,8 +179,10 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class SetAllCommand extends CommandBase {
-		private final RequiredArg<String> sourceArg = this.withRequiredArg("source", "Source group", ArgTypes.STRING);
-		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "Target group", ArgTypes.STRING);
+		private final RequiredArg<String> sourceArg = this.withRequiredArg("source", "Source group", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
+		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "Target group", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 
 		SetAllCommand() {
 			super("setall", "Set all permissions from source");
@@ -268,7 +275,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class DeleteCommand extends CommandBase {
-		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 
 		public DeleteCommand() {
 			super("delete", "Delete group");
@@ -314,7 +322,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class ListPermsCommand extends CommandBase {
-		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 
 		public ListPermsCommand() {
 			super("listperms", "List permissions for a group");
@@ -338,7 +347,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class SetPermCommand extends CommandBase {
-		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 		private final RequiredArg<String> permArg = this.withRequiredArg("[!]permission", "Permission to set", ArgTypes.STRING);
 
 		public SetPermCommand() {
@@ -387,7 +397,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class UnsetPermCommand extends CommandBase {
-		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 		private final RequiredArg<String> permArg = this.withRequiredArg("permission", "Permission to unset", ArgTypes.STRING);
 
 		public UnsetPermCommand() {
@@ -425,7 +436,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class SetPrefixCommand extends CommandBase {
-		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 		private final RequiredArg<String> prefixArg = this.withRequiredArg("prefix", "Group's new prefix", ArgTypes.STRING);
 
 		public SetPrefixCommand() {
@@ -463,7 +475,8 @@ public final class PermsCommand extends AbstractCommandCollection {
 	}
 
 	private static final class SetSuffixCommand extends CommandBase {
-		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING);
+		private final RequiredArg<String> nameArg = this.withRequiredArg("name", "Group name", ArgTypes.STRING)
+			.suggest(CommandUtils::groupSuggestor);
 		private final RequiredArg<String> suffixArg = this.withRequiredArg("suffix", "Group's new suffix", ArgTypes.STRING);
 
 		public SetSuffixCommand() {

@@ -15,7 +15,6 @@ import gg.dystellar.core.common.User;
  * Lets you see the notes that the staff put on you, or lets you see someone else's notes if you're staff
  */
 public class NotesCommand extends AbstractTargetPlayerCommand {
-
     public NotesCommand() {
 		super("notes", "List a player's notes");
 		this.requirePermission("dystellar.notes");

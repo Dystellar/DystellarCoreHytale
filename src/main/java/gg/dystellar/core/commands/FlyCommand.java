@@ -29,7 +29,6 @@ public class FlyCommand extends AbstractPlayerCommand {
     public FlyCommand() {
 		super("fly", "Fly command for the privileged");
 		this.requirePermission("dystellar.fly");
-
 		this.addUsageVariant(new FlyOtherCommand());
     }
 
@@ -71,7 +70,8 @@ public class FlyCommand extends AbstractPlayerCommand {
 	}
 
 	private static class FlyOtherCommand extends CommandBase {
-		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "Target player", ArgTypes.PLAYER_REF);
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "Target player", ArgTypes.PLAYER_REF)
+			.suggest(CommandUtils::playerSuggestor);
 
 		FlyOtherCommand() {
 			super("Toggle fly mode for someone else");

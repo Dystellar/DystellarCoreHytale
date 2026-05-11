@@ -71,7 +71,8 @@ public class FriendCommand extends AbstractCommandCollection {
     }
 
 	private static final class AddCommand extends AbstractPlayerCommand {
-		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player that receives the request", ArgTypes.PLAYER_REF);
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player that receives the request", ArgTypes.PLAYER_REF)
+			.suggest(CommandUtils::playerSuggestor);
 
 		AddCommand() {
 			super("add", "Friend add command");
@@ -139,7 +140,8 @@ public class FriendCommand extends AbstractCommandCollection {
 
 	// TODO: Test all variables here
 	private static final class RemoveCommand extends AbstractPlayerCommand {
-		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "The player to remove", ArgTypes.STRING);
+		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "The player to remove", ArgTypes.STRING)
+			.suggest(CommandUtils::friendSuggestor);
 
 		RemoveCommand() {
 			super("remove", "Friend remove command");
@@ -182,7 +184,8 @@ public class FriendCommand extends AbstractCommandCollection {
 	}
 
 	private static final class FindCommand extends AbstractPlayerCommand {
-		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "The player to find", ArgTypes.STRING);
+		private final RequiredArg<String> targetArg = this.withRequiredArg("target", "The player to find", ArgTypes.STRING)
+			.suggest(CommandUtils::friendSuggestor);
 
 		FindCommand() {
 			super("find", "Friend locate command");
@@ -233,7 +236,8 @@ public class FriendCommand extends AbstractCommandCollection {
 	}
 
 	private static final class AcceptCommand extends AbstractPlayerCommand {
-		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to accept", ArgTypes.PLAYER_REF);
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to accept", ArgTypes.PLAYER_REF)
+			.suggest(CommandUtils::playerSuggestor);
 
 		AcceptCommand() {
 			super("accept", "Friend accept command");
@@ -270,7 +274,8 @@ public class FriendCommand extends AbstractCommandCollection {
 	}
 
 	private static final class RejectCommand extends AbstractPlayerCommand {
-		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to accept", ArgTypes.PLAYER_REF);
+		private final RequiredArg<PlayerRef> targetArg = this.withRequiredArg("target", "The player to reject", ArgTypes.PLAYER_REF)
+			.suggest(CommandUtils::playerSuggestor);
 
 		RejectCommand() {
 			super("reject", "Friend reject command");

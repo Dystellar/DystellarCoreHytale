@@ -22,7 +22,8 @@ import gg.dystellar.core.utils.Utils;
  * This command lets admins remove punishments from a player.
  */
 public class UnpunishCommand extends CommandBase {
-	private final RequiredArg<String> nameArg = this.withRequiredArg("player", "The player to unpunish", ArgTypes.STRING);
+	private final RequiredArg<String> nameArg = this.withRequiredArg("player", "The player to unpunish", ArgTypes.STRING)
+		.suggest(CommandUtils::playerSuggestor);
 	private final RequiredArg<Integer> idArg = this.withRequiredArg("id", "Punishment id, see with /punishments <player>", ArgTypes.INTEGER);
 
     public UnpunishCommand() {
