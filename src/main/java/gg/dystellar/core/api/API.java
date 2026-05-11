@@ -108,7 +108,7 @@ public final class API {
 		return gson.fromJson(res.json, RawUser.class).toUser(address);
 	}
 
-	public Result<Void, String> playerFriendRemove(UUID sender, UUID receiver) throws IOException, InterruptedException {
+	public Result<Boolean, String> playerFriendRemove(UUID sender, UUID receiver) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/user_friend_remove", "PUT", gson.toJson(new UuidPair(sender, receiver)));
 
 		if (res.status != 200) {
@@ -116,7 +116,7 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
 	public void saveUser(User user) throws IOException, InterruptedException {
@@ -148,7 +148,7 @@ public final class API {
 		return Optional.of(gson.fromJson(res.json, RawPunishment.class).toPunishment());
 	}
 
-	public Result<Void, String> unpunish(String username, long punishmentId) throws IOException, InterruptedException {
+	public Result<Boolean, String> unpunish(String username, long punishmentId) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/unpunish", "PUT", gson.toJson(new UnpunishData(username, punishmentId)));
 
 		if (res.status != 200) {
@@ -156,7 +156,7 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
 	public Optional<RawGroupsData> getGroupsData() throws IOException, InterruptedException {
@@ -177,7 +177,7 @@ public final class API {
 		return Optional.of(gson.fromJson(res.json, RawGroup.class));
 	}
 
-	public Result<Void, String> setDefaultGroup(String name) throws IOException, InterruptedException {
+	public Result<Boolean, String> setDefaultGroup(String name) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/set_group_default", "PUT", this.gson.toJson(new SimpleName(name)));
 
 		if (res.status != 200) {
@@ -185,10 +185,10 @@ public final class API {
 			return Result.err(err.error());
 		}
 		
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
-	public Result<Void, String> setGroupToUser(String group, UUID uuid) throws IOException, InterruptedException {
+	public Result<Boolean, String> setGroupToUser(String group, UUID uuid) throws IOException, InterruptedException {
 		final var data = new UserGroup(uuid, group);
 		final var res = this.requestJson("/api/core/set_user_group", "PUT", this.gson.toJson(data));
 
@@ -197,10 +197,10 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
-	public Result<Void, String> setGroupToUserByName(String group, String username) throws IOException, InterruptedException {
+	public Result<Boolean, String> setGroupToUserByName(String group, String username) throws IOException, InterruptedException {
 		final var data = new UserGroupByName(username, group);
 		final var res = this.requestJson("/api/core/set_user_group", "PUT", this.gson.toJson(data));
 
@@ -209,10 +209,10 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
-	public Result<Void, String> updateGroup(Group group) throws IOException, InterruptedException {
+	public Result<Boolean, String> updateGroup(Group group) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/update_group", "POST", gson.toJson(RawGroup.fromGroup(group)));
 
 		if (res.status != 200) {
@@ -220,10 +220,10 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
-	public Result<Void, String> removePermsAndUpdateGroup(Group group) throws IOException, InterruptedException {
+	public Result<Boolean, String> removePermsAndUpdateGroup(Group group) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/delete_perms_and_update_group", "PUT", gson.toJson(RawGroup.fromGroup(group)));
 
 		if (res.status != 200) {
@@ -231,10 +231,10 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
-	public Result<Void, String> addPermToGroup(String name, Permission perm) throws IOException, InterruptedException {
+	public Result<Boolean, String> addPermToGroup(String name, Permission perm) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/add_perm_to_group", "PUT", gson.toJson(new GroupPermission(name, perm)));
 
 		if (res.status != 200) {
@@ -242,10 +242,10 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
-	public Result<Void, String> removePermFromGroup(String name, String perm) throws IOException, InterruptedException {
+	public Result<Boolean, String> removePermFromGroup(String name, String perm) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/add_perm_to_group", "DELETE", gson.toJson(new GroupPermissionName(name, perm)));
 
 		if (res.status != 200) {
@@ -253,10 +253,10 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
-	public Result<Void, String> deleteGroup(String name) throws IOException, InterruptedException {
+	public Result<Boolean, String> deleteGroup(String name) throws IOException, InterruptedException {
 		final var res = this.requestJson("/api/core/delete_group", "DELETE", gson.toJson(new SimpleName(name)));
 
 		if (res.status != 200) {
@@ -264,7 +264,7 @@ public final class API {
 			return Result.err(err.error());
 		}
 
-		return Result.ok(null);
+		return Result.ok(true);
 	}
 
 	public static final class Response {

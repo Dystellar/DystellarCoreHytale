@@ -96,8 +96,11 @@ public class User {
 
 			player.sendMessage(out);
 		}
-		if (!DystellarCore.getInstance().getSetup().allow_banned_players && !punishment.allowJoinMinigames())
-			player.getPacketHandler().disconnect("You have been banned");
+		if (!DystellarCore.getInstance().getSetup().allow_banned_players && !punishment.allowJoinMinigames()) {
+			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+				player.getPacketHandler().disconnect("You have been banned");
+			}, 3, TimeUnit.SECONDS);
+		}
     }
 
     public void togglePms() {

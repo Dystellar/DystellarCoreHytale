@@ -17,18 +17,18 @@ services:
   server:
     stdin_open: true
     tty: true
+    environment:
+      SESSION_TOKEN: "$SESSION_TOKEN"
+      IDENTITY_TOKEN: "$IDENTITY_TOKEN"
+      HYTALE_RELEASE_PATH: "/var/lib/container_data/hytale-release/$HYTALE_RELEASE_NAME"
+      JAR_PLUGIN_PATH: "/var/lib/container_data/hytale-release/DystellarCore.jar"
+      BASEDIR: "/var/lib/container_data/server"
+      SERVER_NAME: "server"
+      BACKEND: "backend:3000"
+      RAM_ALLOC: "1G"
+      API_KEY: "testingkey"
     build:
       context: ./containers/hytale-server
-      args:
-        SESSION_TOKEN: "$SESSION_TOKEN"
-        IDENTITY_TOKEN: "$IDENTITY_TOKEN"
-        JAR_PLUGIN_PATH: "/var/lib/container_data/hytale-release/DystellarCore.jar"
-        HYTALE_RELEASE_PATH: "/var/lib/container_data/hytale-release/$HYTALE_RELEASE_NAME"
-        BASEDIR: "/var/lib/container_data/server"
-        SERVER_NAME: "server"
-        BACKEND: "backend:3000"
-        RAM_ALLOC: "1G"
-        API_KEY: "testingkey"
     container_name: server
     volumes:
       - data:/var/lib/container_data
@@ -45,18 +45,18 @@ services:
   server1:
     stdin_open: true
     tty: true
+    environment:
+      SESSION_TOKEN: "$SESSION_TOKEN1"
+      IDENTITY_TOKEN: "$IDENTITY_TOKEN1"
+      JAR_PLUGIN_PATH: "/var/lib/container_data/hytale-release/DystellarCore.jar"
+      HYTALE_RELEASE_PATH: "/var/lib/container_data/hytale-release/$HYTALE_RELEASE_NAME"
+      BASEDIR: "/var/lib/container_data/server1"
+      SERVER_NAME: "server1"
+      BACKEND: "backend:3000"
+      RAM_ALLOC: "1G"
+      API_KEY: "testingkey"
     build:
       context: ./containers/hytale-server
-      args:
-        SESSION_TOKEN: "$SESSION_TOKEN1"
-        IDENTITY_TOKEN: "$IDENTITY_TOKEN1"
-        JAR_PLUGIN_PATH: "/var/lib/container_data/hytale-release/DystellarCore.jar"
-        HYTALE_RELEASE_PATH: "/var/lib/container_data/hytale-release/$HYTALE_RELEASE_NAME"
-        BASEDIR: "/var/lib/container_data/server1"
-        SERVER_NAME: "server1"
-        BACKEND: "backend:3000"
-        RAM_ALLOC: "1G"
-        API_KEY: "testingkey"
     container_name: server1
     volumes:
       - data:/var/lib/container_data

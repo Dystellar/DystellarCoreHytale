@@ -38,6 +38,7 @@ if [ ! -f ./refresh_token ]; then
 			-d "device_code=$DEVICE_CODE" || exit 1)
 
 		REFRESH_TOKEN=$(echo "$TOKEN" | jq -r '.refresh_token')
+		ACCESS_TOKEN=$(echo "$TOKEN" | jq -r '.access_token')
 
 		if [ "$REFRESH_TOKEN" != "null" ] && [ -n "$REFRESH_TOKEN" ]; then
 			echo "$REFRESH_TOKEN" > ./refresh_token
@@ -47,43 +48,55 @@ if [ ! -f ./refresh_token ]; then
 	done
 else
 	REFRESH_TOKEN=$(cat ./refresh_token)
+	AUTH=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
+		-H "Content-Type: application/x-www-form-urlencoded" \
+		-d "client_id=hytale-server" \
+		-d "grant_type=refresh_token" \
+		-d "refresh_token=$REFRESH_TOKEN" || exit 1)
+	REFRESH_TOKEN=$(echo "$AUTH" | jq -r '.refresh_token')
+	ACCESS_TOKEN=$(echo "$AUTH" | jq -r '.access_token')
+	if [ "$REFRESH_TOKEN" != "null" ] && [ -n "$REFRESH_TOKEN" ]; then
+		echo "$REFRESH_TOKEN" > ./refresh_token
+		echo "Token refreshed"
+	fi
 fi
 
-AUTH=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	-d "client_id=hytale-server" \
-	-d "grant_type=refresh_token" \
-	-d "refresh_token=$REFRESH_TOKEN" || exit 1)
-NEW_REFRESH=$(echo "$AUTH" | jq -r '.refresh_token')
-ACCESS_TOKEN=$(echo "$AUTH" | jq -r '.access_token')
-PROFILE_UUID=$((curl -s "https://account-data.hytale.com/my-account/get-profiles" \
-	-H "Authorization: Bearer $ACCESS_TOKEN" | jq -r '.profiles[0].uuid') || exit 1)
-SESSION=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
-	-H "Authorization: Bearer $ACCESS_TOKEN" \
-	-H "Content-Type: application/json" \
-	-d "{\"uuid\": \"$PROFILE_UUID\"}" || exit 1)
-export SESSION_TOKEN=$(echo "$SESSION" | jq -r '.sessionToken')
-export IDENTITY_TOKEN=$(echo "$SESSION" | jq -r '.identityToken')
+if [ ! -f ./session_token ]; then
+	PROFILE_UUID=$((curl -s "https://account-data.hytale.com/my-account/get-profiles" \
+		-H "Authorization: Bearer $ACCESS_TOKEN" | jq -r '.profiles[0].uuid') || exit 1)
+	SESSION=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
+		-H "Authorization: Bearer $ACCESS_TOKEN" \
+		-H "Content-Type: application/json" \
+		-d "{\"uuid\": \"$PROFILE_UUID\"}" || exit 1)
+	export SESSION_TOKEN=$(echo "$SESSION" | jq -r '.sessionToken')
+	export IDENTITY_TOKEN=$(echo "$SESSION" | jq -r '.identityToken')
+else
+	OLD_SESSION=$(cat ./session_token)
+	SESSION=$(curl -s -X POST "https://sessions.hytale.com/game-session/refresh" \
+		-H "Authorization: Bearer $OLD_SESSION" || exit 1)
 
-AUTH1=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	-d "client_id=hytale-server" \
-	-d "grant_type=refresh_token" \
-	-d "refresh_token=$NEW_REFRESH" || exit 1)
-NEW_REFRESH1=$(echo "$AUTH1" | jq -r '.refresh_token')
-ACCESS_TOKEN1=$(echo "$AUTH1" | jq -r '.access_token')
-PROFILE_UUID1=$((curl -s "https://account-data.hytale.com/my-account/get-profiles" \
-	-H "Authorization: Bearer $ACCESS_TOKEN1" | jq -r '.profiles[0].uuid') || exit 1)
-SESSION1=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
-	-H "Authorization: Bearer $ACCESS_TOKEN1" \
-	-H "Content-Type: application/json" \
-	-d "{\"uuid\": \"$PROFILE_UUID1\"}" || exit 1)
+	export SESSION_TOKEN=$(echo "$SESSION" | jq -r '.sessionToken')
+	export IDENTITY_TOKEN=$(echo "$SESSION" | jq -r '.identityToken')
+fi
+
+if [ "$SESSION_TOKEN" != "null" ] && [ -n "$SESSION_TOKEN" ]; then
+	echo "$SESSION_TOKEN" > ./session_token
+else
+	echo "Invalid session token: $SESSION"
+	exit 1
+fi
+
+SESSION1=$(curl -s -X POST "https://sessions.hytale.com/game-session/refresh" \
+	-H "Authorization: Bearer $SESSION_TOKEN" || exit 1)
 export SESSION_TOKEN1=$(echo "$SESSION1" | jq -r '.sessionToken')
 export IDENTITY_TOKEN1=$(echo "$SESSION1" | jq -r '.identityToken')
-
-if [ "$NEW_REFRESH1" != "null" ] && [ -n "$NEW_REFRESH1" ]; then
-	echo "$NEW_REFRESH1" > ./refresh_token
+if [ "$SESSION_TOKEN1" = "null" ] || [ -z "$SESSION_TOKEN1" ]; then
+	echo "Failed to get session token 2: $SESSION1"
+	exit 1
 fi
+
+echo "session: $SESSION"
+echo "session 1: $SESSION1"
 
 cd ../..
 jar=$(ls target/DystellarCoreHytale-*.jar | grep -v original | head -1)
@@ -91,4 +104,4 @@ cp "$jar" container_data/hytale-release/DystellarCore.jar
 
 export HYTALE_RELEASE_NAME="release.zip"
 
-docker compose up
+docker compose up -d
