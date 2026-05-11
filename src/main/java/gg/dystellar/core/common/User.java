@@ -96,19 +96,8 @@ public class User {
 
 			player.sendMessage(out);
 		}
-		if (!DystellarCore.getInstance().getSetup().allow_banned_players && !punishment.allowJoinMinigames()) {
-			final var ref = player.getReference();
-			if (ref.isValid()) {
-				final var world = ref.getStore().getComponent(ref, Player.getComponentType()).getWorld();
-				HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-					world.execute(() -> {
-						player.getPacketHandler().disconnect("You have been banned");
-					});
-				}, 3, TimeUnit.SECONDS);
-			} else {
-				player.getPacketHandler().disconnect("You have been banned");
-			}
-		}
+		if (!DystellarCore.getInstance().getSetup().allow_banned_players && !punishment.allowJoinMinigames())
+			player.getPacketHandler().disconnect("You have been banned");
     }
 
     public void togglePms() {
