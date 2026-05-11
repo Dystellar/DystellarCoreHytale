@@ -56,14 +56,14 @@ public class MSGCommand extends AbstractPlayerCommand {
 		}
 
 		if (targetUser.isInRanked && targetUser.dnd) {
-			p.sendMessage(lang.playerInDndMode.buildMessage().param("player", target.getUsername()));
+			p.sendMessage(lang.playerInDndMode.buildMessage(target.getUsername()));
 			return;
 		}
 
 		final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
 		final var message = ctx.get(messageArg);
-		target.sendMessage(targetLang.msgReceiveFormat.buildMessage().param("sender", p.getUsername()).param("message", message));
-		p.sendMessage(lang.msgSendFormat.buildMessage().param("receiver", target.getUsername()).param("message", message));
+		target.sendMessage(targetLang.msgReceiveFormat.buildMessage(p.getUsername(), message));
+		p.sendMessage(lang.msgSendFormat.buildMessage(target.getUsername(), message));
 
 		user.lastMessagedPlayer = target;
 		targetUser.lastMessagedPlayer = p;

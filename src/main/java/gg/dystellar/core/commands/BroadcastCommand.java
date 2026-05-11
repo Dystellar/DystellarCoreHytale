@@ -42,7 +42,7 @@ public class BroadcastCommand extends CommandBase {
 			lang = DystellarCore.getInstance().getLang(user.language);
 		} else lang = DystellarCore.getInstance().getLang("en");
 
-		final var msg = lang.broadcastFormat.buildMessage().param("message", message);
+		final var msg = lang.broadcastFormat.buildMessage(message);
 		Universe.get().getPlayers().forEach(p -> p.sendMessage(msg));
 	}
 }

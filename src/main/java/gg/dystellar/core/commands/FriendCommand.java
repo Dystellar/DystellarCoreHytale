@@ -87,7 +87,7 @@ public class FriendCommand extends AbstractCommandCollection {
 			final var cooldown = cooldowns.get(p.getUuid());
 
 			if (cooldown != null) {
-				p.sendMessage(lang.mCooldown.buildMessage().param("seconds", cooldown.getEpochSecond() - Instant.now().getEpochSecond()));
+				p.sendMessage(lang.mCooldown.buildMessage(String.valueOf(cooldown.getEpochSecond() - Instant.now().getEpochSecond())));
 				return;
 			} else if (p.getUsername().equalsIgnoreCase(target.getUsername())) {
 				p.sendMessage(lang.errorFriendAddYourself.buildMessage());
@@ -115,7 +115,7 @@ public class FriendCommand extends AbstractCommandCollection {
 				final var entry = Utils.find(listPendings, pair -> pair.first.getUsername().equalsIgnoreCase(target.getUsername()));
 
 				if (entry.isPresent()) {
-					p.sendMessage(lang.mCooldown.buildMessage().param("seconds", entry.get().second.getEpochSecond() - Instant.now().getEpochSecond()));
+					p.sendMessage(lang.mCooldown.buildMessage(String.valueOf(entry.get().second.getEpochSecond() - Instant.now().getEpochSecond())));
 					return;
 				}
 			} else {
@@ -132,8 +132,8 @@ public class FriendCommand extends AbstractCommandCollection {
 			listPendings.add(new Triple<>(target, Instant.now().plusSeconds(30L), future));
 
 			p.sendMessage(lang.friendRequestSent.buildMessage());
-			target.sendMessage(targetLang.friendRequestReceived.buildMessage().param("player", p.getUsername()));
-			target.sendMessage(targetLang.commandHint.buildMessage().param("command", "/f accept " + p.getUsername()));
+			target.sendMessage(targetLang.friendRequestReceived.buildMessage(p.getUsername()));
+			target.sendMessage(targetLang.commandHint.buildMessage("/f accept " + p.getUsername()));
 		}
 	}
 
@@ -158,12 +158,12 @@ public class FriendCommand extends AbstractCommandCollection {
 				return;
 			}
 
-			p.sendMessage(lang.friendRemovedSender.buildMessage().param("player", mapping.get().name()));
+			p.sendMessage(lang.friendRemovedSender.buildMessage(mapping.get().name()));
 			final var target = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
 			if (target != null && target.isValid()) {
 				final var targetUser = User.getUser(target).get();
 				final var targetLang = DystellarCore.getInstance().getLang(targetUser.language);
-				target.sendMessage(targetLang.friendRemovedReceiver.buildMessage().param("player", p.getUsername()));
+				target.sendMessage(targetLang.friendRemovedReceiver.buildMessage(p.getUsername()));
 			} else {
 				Utils.sendPropagatedOutputStream(Subchannel.FRIEND_REMOVE, 70, out -> {
 					out.writePrefixedUTF8(p.getUuid().toString());
@@ -202,9 +202,9 @@ public class FriendCommand extends AbstractCommandCollection {
 			else {
 				int id = Handler.createMessageSession((source, payload) -> {
 					final var realName = payload.readPrefixedUTF8();
-					p.sendMessage(lang.findFound.buildMessage().param("player", realName).param("server", source));
+					p.sendMessage(lang.findFound.buildMessage(realName, source));
 				}, () -> {
-					p.sendMessage(lang.findNotFound.buildMessage().param("player", targetName));
+					p.sendMessage(lang.findNotFound.buildMessage(targetName));
 				});
 				Utils.sendPropagatedOutputStream(Subchannel.DEMAND_FIND_PLAYER, 26, out -> {
 					out.writePrefixedUTF8(targetName);
@@ -228,7 +228,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 			p.sendMessage(lang.listFriendsTitle.buildMessage());
 			for (UserMapping map : user.friends)
-				p.sendMessage(lang.listFriendsEntry.buildMessage().param("player", map.name()));
+				p.sendMessage(lang.listFriendsEntry.buildMessage(map.name()));
 		}
 	}
 
@@ -261,7 +261,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 			targetUser.friends.add(new UserMapping(p.getUuid(), p.getUsername()));
 			user.friends.add(new UserMapping(target.getUuid(), target.getUsername()));
-			target.sendMessage(targetLang.friendRequestAcceptedSender.buildMessage().param("player", p.getUsername()));
+			target.sendMessage(targetLang.friendRequestAcceptedSender.buildMessage(p.getUsername()));
 			p.sendMessage(lang.friendRequestAcceptedReceiver.buildMessage());
 
 			if (pend.isEmpty())
@@ -298,7 +298,7 @@ public class FriendCommand extends AbstractCommandCollection {
 
 			targetUser.friends.add(new UserMapping(p.getUuid(), p.getUsername()));
 			user.friends.add(new UserMapping(target.getUuid(), target.getUsername()));
-			target.sendMessage(targetLang.friendRequestAcceptedSender.buildMessage().param("player", p.getUsername()));
+			target.sendMessage(targetLang.friendRequestAcceptedSender.buildMessage(p.getUsername()));
 			p.sendMessage(lang.friendRequestAcceptedReceiver.buildMessage());
 
 			if (pend.isEmpty())

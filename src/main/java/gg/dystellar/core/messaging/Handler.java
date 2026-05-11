@@ -85,7 +85,7 @@ public class Handler {
 				final var lang = DystellarCore.getInstance().getLang(user.language);
 				user.friends.removeIf(map -> map.uuid().equals(found.get().uuid()));
 
-				receiver.sendMessage(lang.friendRemovedReceiver.buildMessage().param("player", found.get().name()));
+				receiver.sendMessage(lang.friendRemovedReceiver.buildMessage(found.get().name()));
 			}
 		}
 	}

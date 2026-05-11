@@ -40,6 +40,6 @@ public class IgnoreCommand extends AbstractPlayerCommand {
 		}
 
 		user.ignoreList.add(new UserMapping(target.getUuid(), target.getUsername()));
-		p.sendMessage(lang.playerBlocked.buildMessage().param("player", target.getUsername()));
+		p.sendMessage(lang.playerBlocked.buildMessage(target.getUsername()));
 	}
 }

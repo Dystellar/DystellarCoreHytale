@@ -44,7 +44,7 @@ public class IgnoreListCommand extends AbstractCommandCollection {
 			final var lang = DystellarCore.getInstance().getLang(user.language);
 
 			if (Utils.removeFirst(user.ignoreList, m -> m.name().equalsIgnoreCase(name)).isPresent())
-				p.sendMessage(lang.blacklistPlayerRemoved.buildMessage().param("player", name));
+				p.sendMessage(lang.blacklistPlayerRemoved.buildMessage(name));
 			else
 				p.sendMessage(lang.errorPlayerNotOnBlocklist.buildMessage());
 		}
@@ -63,7 +63,7 @@ public class IgnoreListCommand extends AbstractCommandCollection {
 
 			p.sendMessage(lang.blockedPlayersListTitle.buildMessage());
 			for (final var map : user.ignoreList)
-				p.sendMessage(lang.blockedPlayersListEntry.buildMessage().param("player", map.name()));
+				p.sendMessage(lang.blockedPlayersListEntry.buildMessage(map.name()));
 		}
 	}
 }

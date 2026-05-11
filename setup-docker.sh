@@ -91,4 +91,4 @@ cp "$jar" container_data/hytale-release/DystellarCore.jar
 
 export HYTALE_RELEASE_NAME="release.zip"
 
-docker compose up -d --build
+docker compose up

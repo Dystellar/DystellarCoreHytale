@@ -89,10 +89,10 @@ public class User {
         this.punishments.add(punishment);
 		final var lang = DystellarCore.getInstance().getLang(language);
 		for (final var msg : lang.punishMessage) {
-			final var out = msg.buildMessage()
-				.param("title", punishment.getTitle())
-				.param("reason", punishment.getReason())
-				.param("expiration", Utils.getTimeFormat(punishment.getExpirationDate().orElse(null)));
+			final var out = msg.buildMessage(
+					punishment.getTitle(),
+					punishment.getReason(),
+					Utils.getTimeFormat(punishment.getExpirationDate().orElse(null)));
 
 			player.sendMessage(out);
 		}
