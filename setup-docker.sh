@@ -76,7 +76,20 @@ else
 		-H "Authorization: Bearer $OLD_SESSION" || exit 1)
 
 	export SESSION_TOKEN=$(echo "$SESSION" | jq -r '.sessionToken')
-	export IDENTITY_TOKEN=$(echo "$SESSION" | jq -r '.identityToken')
+	if [ "$SESSION_TOKEN" = "null" ] || [ -z "$SESSION_TOKEN" ]; then
+		echo "Session token expired. Generating a new one..."
+		PROFILE_UUID=$((curl -s "https://account-data.hytale.com/my-account/get-profiles" \
+			-H "Authorization: Bearer $ACCESS_TOKEN" | jq -r '.profiles[0].uuid') || exit 1)
+		SESSION=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
+			-H "Authorization: Bearer $ACCESS_TOKEN" \
+			-H "Content-Type: application/json" \
+			-d "{\"uuid\": \"$PROFILE_UUID\"}" || exit 1)
+		export SESSION_TOKEN=$(echo "$SESSION" | jq -r '.sessionToken')
+		export IDENTITY_TOKEN=$(echo "$SESSION" | jq -r '.identityToken')
+	else
+		export SESSION_TOKEN=$(echo "$SESSION" | jq -r '.sessionToken')
+		export IDENTITY_TOKEN=$(echo "$SESSION" | jq -r '.identityToken')
+	fi
 fi
 
 if [ "$SESSION_TOKEN" != "null" ] && [ -n "$SESSION_TOKEN" ]; then
