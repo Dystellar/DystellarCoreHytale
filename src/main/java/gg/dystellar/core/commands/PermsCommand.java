@@ -40,7 +40,7 @@ public final class PermsCommand extends AbstractCommandCollection {
 		private final RequiredArg<String> groupArg = this.withRequiredArg("group", "The group to set the default as", ArgTypes.STRING);
 
 		SetDefaultCommand() {
-			super("setdafult", "Set default group network-wide");
+			super("setdefault", "Set default group network-wide");
 			this.requirePermission("dystellar.admin");
 		}
 

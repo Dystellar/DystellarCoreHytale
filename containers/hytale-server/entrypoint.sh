@@ -4,12 +4,13 @@ mkdir -p "$BASEDIR"
 sleep 1
 cd "$BASEDIR"
 
-if [ ! -d Server/ ]; then
+if [ ! -f Server/HytaleServer.jar ]; then
 	unzip -o "$HYTALE_RELEASE_PATH" -d .
 fi
 mkdir -p Server
 mkdir -p Server/mods
 cp "$JAR_PLUGIN_PATH" Server/mods/DystellarCore.jar
+chmod 644 Server/mods/DystellarCore.jar
 mkdir -p Server/mods/gg.dystellar_Core
 
 cat > Server/mods/gg.dystellar_Core/setup.json << EOF

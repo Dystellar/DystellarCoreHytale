@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.hypixel.hytale.server.core.Message;
 
 import gg.dystellar.core.utils.Pair;
+import gg.dystellar.core.utils.Triple;
 import gg.dystellar.core.utils.Utils;
 
 /**
@@ -141,30 +142,32 @@ public class Messages {
 	private String error_no_reply_cache = "<Red>You don't have anyone to reply to.";
 	private String error_player_has_pms_disabled = "<Red>This player has disabled their private messages.";
 
-	private CompiledMessage compileMsg(String msg) {
-		StringBuilder builder = new StringBuilder(msg);
+	public CompiledMessage compileMsg(String msg) {
 		final var compiled = new CompiledMessage();
-		int idx = 0;
-		int from = 0;
-		Optional<ColorDeclaration> opt = Optional.empty();
+		int idx = msg.indexOf('<');
+		ColorDeclaration col = DEFAULT_COLOR;
 
-		while ((idx = builder.indexOf("<", from)) != -1) {
-			if (idx > 0) {
-				final var col = opt.orElse(DEFAULT_COLOR);
+		if (!msg.isEmpty() && !msg.startsWith("<"))
+			compiled.parts.add(new Pair<>(idx == -1 ? msg : msg.substring(0, idx), col));
 
-				compiled.parts.add(new Pair<>(builder.substring(from, idx), col));
-			}
-			from = idx + 1;
-			int end = builder.indexOf(">", from);
+		while (idx != -1) {
+			var end = msg.indexOf('>', idx++);
 			if (end == -1)
 				break;
-
-			String key = builder.substring(from, end);
-			opt = Utils.findArr(this.color_declarations, declaration -> declaration.name == key);
-		}
-		if (idx > 0) {
-			final var col = opt.orElse(DEFAULT_COLOR);
-			compiled.parts.add(new Pair<>(builder.substring(from, idx), col));
+			final var idxf = idx;
+			col = Utils.findArr(color_declarations, c -> c.name.equals(msg.substring(idxf, end))).orElse(DEFAULT_COLOR);
+			final var to = msg.indexOf('<', end);
+			final var part = to == -1 ? msg.substring(end + 1) : msg.substring(end + 1, to);
+			int paramIdx = 0;
+			while ((paramIdx = part.indexOf('{', paramIdx)) != -1) {
+				final var paramEndIdx = part.indexOf('}', paramIdx + 1);
+				if (paramEndIdx != -1) {
+					compiled.params.add(new Triple<>(compiled.parts.size(), paramIdx, (paramEndIdx + 1) - paramIdx));
+					paramIdx = paramEndIdx + 1;
+				} else ++paramIdx;
+			}
+			compiled.parts.add(new Pair<>(part, col));
+			idx = to;
 		}
 
 		return compiled;
@@ -322,13 +325,13 @@ public class Messages {
 	public transient CompiledMessage errorNoReplyCache;
 	public transient CompiledMessage errorPlayerHasPmsDisabled;
 
-	private static class ColorDeclaration {
-		private String name;
-		private String hex_color;
-		private boolean bold = false;
-		private boolean italic = false;
-		private boolean monospace = false;
-		private boolean underlined = false; // TODO: Not available...yet?
+	public static class ColorDeclaration {
+		public String name;
+		public String hex_color;
+		public boolean bold = false;
+		public boolean italic = false;
+		public boolean monospace = false;
+		public boolean underlined = false; // TODO: Not available...yet?
 
 		public ColorDeclaration(final String name, final String hexColor) {
 			this.name = name;
@@ -346,13 +349,26 @@ public class Messages {
 	}
 
 	public static class CompiledMessage {
-		List<Pair<String, ColorDeclaration>> parts = new ArrayList<>();
+		public List<Pair<String, ColorDeclaration>> parts = new ArrayList<>();
+		public List<Triple<Integer, Integer, Integer>> params = new ArrayList<>();
 
-		public Message buildMessage() {
+		public Message buildMessage(String... args) {
 			final var message = Message.empty();
 
-			for (final var part : this.parts) {
-				final var child = Message.raw(part.first)
+			int argsParsed = 0;
+			for (int i = 0; i < parts.size(); ++i) {
+				final var part = parts.get(i);
+				final var parsed = new StringBuilder(part.first);
+				int offset = 0;
+
+				for (; argsParsed < args.length && argsParsed < params.size() && params.get(argsParsed).first == i; ++argsParsed) {
+					final var param = params.get(argsParsed);
+					final var pos = param.second + offset;
+					parsed.replace(pos, pos + param.third, args[argsParsed]);
+					offset = offset + (args[argsParsed].length() - param.third);
+				}
+
+				final var child = Message.raw(parsed.toString())
 					.color(part.second.hex_color)
 					.bold(part.second.bold)
 					.italic(part.second.italic)
